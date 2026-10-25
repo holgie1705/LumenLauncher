@@ -85,7 +85,7 @@ fun HomeScreen(vm: HomeViewModel) {
     var menu by remember { mutableStateOf<MenuSpec?>(null) }
     var settingsOpen by remember { mutableStateOf(false) }
     var weatherOpen by remember { mutableStateOf(false) }
-    androidx.compose.runtime.SideEffect { focusStyleGlobal = prefs.focusStyle; tileAlphaGlobal = listOf(1f, 0.75f, 0.5f, 0.3f)[prefs.tileGlass.coerceIn(0, 3)] }
+    androidx.compose.runtime.SideEffect { iconPackGlobal = prefs.iconPack; focusStyleGlobal = prefs.focusStyle; tileAlphaGlobal = listOf(1f, 0.75f, 0.5f, 0.3f)[prefs.tileGlass.coerceIn(0, 3)] }
     var radioOpen by remember { mutableStateOf(false) }
     var webOpen by remember { mutableStateOf<WebWidget?>(null) }
     var placeOpen by remember { mutableStateOf(false) }

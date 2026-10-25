@@ -125,6 +125,7 @@ data class Prefs(
     val blur: Int = 0,           // 0..3
     val focusStyle: Int = 0,     // 0 Rahmen, 1 Leuchten, 2 Anheben
     val miniOverlay: Boolean = true, // kleine Uhr + Wetter oben links in anderen Apps
+    val iconPack: String = "",       // Paketname des gewählten Icon-Packs, leer = App-Icons
     val tileGlass: Int = 0,      // 0..3 -> Kacheln 100/75/50/30 % deckend
     val accent: Int = 1,         // Index in ACCENTS, 0 = automatisch (wechselt mit der App), 1 = festes Blau
     val font: String = "ui",
@@ -165,7 +166,7 @@ data class Prefs(
 val Prefs.scaleF: Float get() = listOf(0.85f, 1f, 1.2f)[scale.coerceIn(0, 2)]
 
 fun Prefs.toJson(): JSONObject = JSONObject().apply {
-    put("lookV", 2); put("focus", focusStyle); put("glass", tileGlass); put("mini", miniOverlay)
+    put("lookV", 2); put("focus", focusStyle); put("glass", tileGlass); put("iconPack", iconPack); put("mini", miniOverlay)
     put("look", look.name); put("tile", tile.name); put("layout", layout.name)
     put("clock", clockStyle); put("timeFmt", timeFormat); put("weather", weather)
     put("wName", weatherName); put("wLat", weatherLat); put("wLon", weatherLon)
@@ -234,6 +235,7 @@ fun prefsFromJson(o: JSONObject): Prefs {
         look = if (o.optInt("lookV", 0) < 2) d.look else runCatching { Look.valueOf(o.getString("look")) }.getOrDefault(d.look),
         focusStyle = o.optInt("focus", d.focusStyle).coerceIn(0, 2),
         tileGlass = o.optInt("glass", d.tileGlass).coerceIn(0, 3),
+        iconPack = o.optString("iconPack", ""),
         miniOverlay = o.optBoolean("mini", d.miniOverlay),
         tile = runCatching { TileStyle.valueOf(o.getString("tile")) }.getOrDefault(d.tile),
         layout = runCatching { Layout.valueOf(o.getString("layout")) }.getOrDefault(d.layout),

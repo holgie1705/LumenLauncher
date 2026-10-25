@@ -268,6 +268,14 @@ fun SettingsDialog(
                                 item { SettingLine(t("Text zur App (Titel & Info)", "App text (title & info)"), listOf(t("Aus", "Off"), t("Klein", "Small"), t("Groß", "Large"))[prefs.heroMode]) { vm.update { it.copy(heroMode = (it.heroMode + 1) % 3) } } }
                                 item { SettingLine(t("Position der Kacheln", "Tile position"), if (prefs.rowsPos == 0) t("Oben", "Top") else t("Unten", "Bottom")) { vm.update { it.copy(rowsPos = 1 - it.rowsPos) } } }
                                 item { SettingLine(t("Position der Kopfzeile", "Top bar position"), if (prefs.barPos == 0) t("Oben", "Top") else t("Unten", "Bottom")) { vm.update { it.copy(barPos = 1 - it.barPos) } } }
+                        item { SettingLine(t("Icon-Pack", "Icon pack"), vm.iconPacks().firstOrNull { it.first == prefs.iconPack }?.second ?: t("Standard", "Default")) {
+                            val packs = vm.iconPacks()
+                            sub = MenuSpec(
+                                t("Icon-Pack", "Icon pack"),
+                                listOf(MenuItemSpec(t("Standard (App-Icons)", "Default (app icons)")) { vm.setIconPack(""); sub = null }) +
+                                    (if (packs.isEmpty()) listOf(MenuItemSpec(t("Keine Icon-Packs installiert", "No icon packs installed")) { sub = null }) else packs.map { p -> MenuItemSpec(p.second) { vm.setIconPack(p.first); sub = null } }),
+                            )
+                        } }
                         item { SettingLine(t("Uhr & Wetter in Apps", "Clock & weather in apps"), onOff(prefs.miniOverlay)) { vm.update { it.copy(miniOverlay = !it.miniOverlay) } } }
                         item { SettingLine(t("Kachel-Transparenz", "Tile transparency"), listOf("0 %", "25 %", "50 %", "70 %")[prefs.tileGlass.coerceIn(0, 3)]) { vm.update { it.copy(tileGlass = (it.tileGlass + 1) % 4) } } }
                         item { SettingLine(t("Fokus-Stil der Kacheln", "Tile focus style"), listOf(t("Rahmen (ruhig)", "Frame (calm)"), t("Leuchten", "Glow"), t("Anheben", "Lift"))[prefs.focusStyle.coerceIn(0, 2)]) { vm.update { it.copy(focusStyle = (it.focusStyle + 1) % 3) } } }

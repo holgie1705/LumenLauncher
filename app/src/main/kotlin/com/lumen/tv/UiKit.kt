@@ -36,6 +36,8 @@ import androidx.tv.material3.Text
 
 /** Fokus-Stil der Kacheln (0 Rahmen, 1 Leuchten, 2 Anheben); wird vom Startbildschirm gesetzt. */
 var focusStyleGlobal by androidx.compose.runtime.mutableIntStateOf(0)
+/** Gewähltes Icon-Pack (Paketname, leer = keins). */
+var iconPackGlobal by androidx.compose.runtime.mutableStateOf("")
 /** Deckkraft der App-Kacheln (1 = voll, kleiner = durchsichtiger). */
 var tileAlphaGlobal by androidx.compose.runtime.mutableFloatStateOf(1f)
 

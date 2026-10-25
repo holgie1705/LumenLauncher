@@ -20,6 +20,7 @@ Lumen aims to be a full alternative to launchers like Projectivy, CleanMyTV or F
 **Wallpapers and themes**
 - Pictures, GIFs and videos from a local folder, rotating automatically
 - Built-in wallpaper gallery (Bing daily image, Wikimedia Commons, NASA, picsum.photos)
+- Icon pack support (ADW/Nova/Apex format, `appfilter.xml`)
 - Looks: Pure, OLED, Aurora, Glass; accent color; modern fonts (Outfit, Plus Jakarta Sans, Manrope, Sora, Bai Jamjuree) or your own fonts
 - Save and share your look as a theme file
 

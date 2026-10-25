@@ -69,13 +69,126 @@ class AppRepo(private val ctx: Context) {
 
     fun launchIntent(pkg: String): Intent? = pm.getLeanbackLaunchIntentForPackage(pkg) ?: pm.getLaunchIntentForPackage(pkg)
 
-    suspend fun art(app: TvApp): Art {
-        cache.get(app.pkg)?.let { return it }
+    // ---------- Icon-Packs (Standard der Launcher-Welt: ADW/Nova/Apex, appfilter.xml) ----------
+    private val packActions = listOf(
+        "org.adw.launcher.THEMES", "com.novalauncher.THEME", "com.anddoes.launcher.THEME",
+        "com.fede.launcher.THEME_ICONPACK", "com.gau.go.launcherex.theme",
+    )
+
+    /** Installierte Icon-Packs als (Paketname, Name). */
+    fun iconPacks(): List<Pair<String, String>> {
+        val seen = LinkedHashMap<String, String>()
+        for (a in packActions) {
+            runCatching {
+                pm.queryIntentActivities(Intent(a), 0).forEach {
+                    val p = it.activityInfo.packageName
+                    if (p != ctx.packageName) seen.putIfAbsent(p, it.loadLabel(pm).toString())
+                }
+            }
+        }
+        return seen.map { it.key to it.value }.sortedBy { it.second.lowercase() }
+    }
+
+    private var packLoaded = ""
+    private var packMap: Map<String, String> = emptyMap()   // "pkg/activity" -> Drawable-Name
+    private var packByPkg: Map<String, String> = emptyMap() // "pkg" -> Drawable-Name (erster Treffer)
+    private var packBacks: List<String> = emptyList()
+    private var packMask: String? = null
+    private var packUpon: String? = null
+    private var packScale = 1f
+
+    private fun loadPack(pack: String) {
+        if (pack == packLoaded) return
+        packLoaded = pack
+        packMap = emptyMap(); packByPkg = emptyMap(); packBacks = emptyList(); packMask = null; packUpon = null; packScale = 1f
+        if (pack.isEmpty()) return
+        runCatching {
+            val res = pm.getResourcesForApplication(pack)
+            val parser: org.xmlpull.v1.XmlPullParser = run {
+                val id = res.getIdentifier("appfilter", "xml", pack)
+                if (id != 0) res.getXml(id)
+                else org.xmlpull.v1.XmlPullParserFactory.newInstance().newPullParser().also {
+                    it.setInput(res.assets.open("appfilter.xml"), null)
+                }
+            }
+            val full = HashMap<String, String>()
+            val byPkg = HashMap<String, String>()
+            val backs = ArrayList<String>()
+            var mask: String? = null
+            var upon: String? = null
+            var scale = 1f
+            var ev = parser.eventType
+            while (ev != org.xmlpull.v1.XmlPullParser.END_DOCUMENT) {
+                if (ev == org.xmlpull.v1.XmlPullParser.START_TAG) {
+                    when (parser.name) {
+                        "iconback" -> for (i in 0 until parser.attributeCount) if (parser.getAttributeName(i).startsWith("img")) backs += parser.getAttributeValue(i)
+                        "iconmask" -> mask = parser.getAttributeValue(null, "img1")
+                        "iconupon" -> upon = parser.getAttributeValue(null, "img1")
+                        "scale" -> scale = parser.getAttributeValue(null, "factor")?.toFloatOrNull() ?: 1f
+                    }
+                }
+                if (ev == org.xmlpull.v1.XmlPullParser.START_TAG && parser.name == "item") {
+                    val comp = parser.getAttributeValue(null, "component")
+                    val dr = parser.getAttributeValue(null, "drawable")
+                    val m = comp?.let { Regex("ComponentInfo\\{([^/}]+)/([^}]+)\\}").find(it) }
+                    if (m != null && dr != null) {
+                        val (p, act) = m.destructured
+                        val cls = if (act.startsWith(".")) p + act else act
+                        full["$p/$cls"] = dr
+                        byPkg.putIfAbsent(p, dr)
+                    }
+                }
+                ev = parser.next()
+            }
+            packMap = full; packByPkg = byPkg
+            packBacks = backs; packMask = mask; packUpon = upon; packScale = scale.coerceIn(0.3f, 1.2f)
+        }
+    }
+
+    private fun packIcon(app: TvApp, pack: String): Bitmap? {
+        if (pack.isEmpty()) return null
+        loadPack(pack)
+        val name = packMap[app.component.packageName + "/" + app.component.className] ?: packByPkg[app.pkg]
+        return runCatching {
+            val res = pm.getResourcesForApplication(pack)
+            fun bmp(n: String?): Bitmap? {
+                if (n.isNullOrEmpty()) return null
+                val id = res.getIdentifier(n, "drawable", pack).takeIf { it != 0 } ?: res.getIdentifier(n, "mipmap", pack)
+                return if (id == 0) null else androidx.core.content.res.ResourcesCompat.getDrawable(res, id, null)?.toBitmap(128, 128)
+            }
+            bmp(name) ?: themedFallback(app, bmp(packBacks.getOrNull(Math.floorMod(app.pkg.hashCode(), packBacks.size.coerceAtLeast(1)))), bmp(packMask), bmp(packUpon))
+        }.getOrNull()
+    }
+
+    /** Apps ohne Eintrag im Pack: Original-Icon verkleinern, auf den Pack-Hintergrund setzen, mit der Maske zuschneiden. */
+    private fun themedFallback(app: TvApp, back: Bitmap?, mask: Bitmap?, upon: Bitmap?): Bitmap? {
+        if (back == null && mask == null && upon == null) return null
+        val orig = runCatching { pm.getActivityIcon(app.component).toBitmap(128, 128) }.getOrNull() ?: return null
+        val out = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888)
+        val c = android.graphics.Canvas(out)
+        val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG or android.graphics.Paint.FILTER_BITMAP_FLAG)
+        back?.let { c.drawBitmap(it, 0f, 0f, p) }
+        val s = (128 * packScale).toInt().coerceAtLeast(16)
+        val o = (128 - s) / 2
+        c.drawBitmap(orig, null, android.graphics.Rect(o, o, o + s, o + s), p)
+        if (mask != null) {
+            val mp = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+            mp.xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.DST_OUT)
+            c.drawBitmap(mask, 0f, 0f, mp)
+        }
+        upon?.let { c.drawBitmap(it, 0f, 0f, p) }
+        return out
+    }
+
+    suspend fun art(app: TvApp, pack: String = ""): Art {
+        val key = "$pack|${app.pkg}"
+        cache.get(key)?.let { return it }
         return withContext(Dispatchers.Default) {
-            val banner: Bitmap? = runCatching {
+            val themed = packIcon(app, pack)
+            val banner: Bitmap? = if (themed != null) null else runCatching {
                 (pm.getActivityBanner(app.component) ?: pm.getApplicationBanner(app.pkg))?.toBitmap(384, 216)
             }.getOrNull()
-            val icon: Bitmap = runCatching { pm.getActivityIcon(app.component).toBitmap(128, 128) }
+            val icon: Bitmap = themed ?: runCatching { pm.getActivityIcon(app.component).toBitmap(128, 128) }
                 .getOrNull() ?: Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888)
             val cached = accentPrefs.getInt(app.pkg, 0)
             val argb = if (cached != 0) cached else {
@@ -85,7 +198,7 @@ class AppRepo(private val ctx: Context) {
                 }
             }
             val art = Art(banner?.asImageBitmap(), icon.asImageBitmap(), Color(argb), (banner?.byteCount ?: 0) + icon.byteCount)
-            cache.put(app.pkg, art)
+            cache.put(key, art)
             art
         }
     }

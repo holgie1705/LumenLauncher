@@ -51,7 +51,7 @@ fun AppTile(
     app: TvApp, style: TileStyle, scale: Float, vm: HomeViewModel, modifier: Modifier,
     onFocus: () -> Unit, onClick: () -> Unit, onLong: () -> Unit,
 ) {
-    val art by produceState<Art?>(null, app.pkg) { value = vm.art(app) }
+    val art by produceState<Art?>(null, app.pkg, iconPackGlobal) { value = vm.art(app, iconPackGlobal) }
     val (wd, ht) = tileDims(style, scale)
     val iconOnly = style == TileStyle.ICON || style == TileStyle.ROUND
     val accent = art?.accent ?: DefaultAccent

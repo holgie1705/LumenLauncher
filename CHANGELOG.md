@@ -184,3 +184,9 @@ Die Bilder gehören ihren Urhebern (Lizenz steht unter der Vorschau) – nur fü
 
 ## v1.41
 - Mini-Uhr in Apps kleiner (Uhr 17 sp, Wetter 13 sp).
+
+## v1.42
+- Neu: Icon-Packs (Einstellungen → Aussehen → Icon-Pack). Unterstützt installierte Packs im ADW/Nova/Apex-Format (appfilter.xml). Mit Pack werden statt Bannern die Pack-Icons gezeigt; Apps ohne Eintrag behalten ihr Original.
+
+## v1.43
+- Icon-Packs: Apps ohne Eintrag im Pack werden automatisch angepasst (Hintergrund, Skalierung, Maske, Overlay aus dem Pack).

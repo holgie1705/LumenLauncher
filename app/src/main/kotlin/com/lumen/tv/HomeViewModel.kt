@@ -179,8 +179,10 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun reloadWallpapers() { wallTick.value++ }
-    suspend fun art(a: TvApp): Art = repo.art(a)
-    suspend fun accent(a: TvApp): Color = repo.art(a).accent
+    suspend fun art(a: TvApp, pack: String = ""): Art = repo.art(a, pack)
+    suspend fun accent(a: TvApp): Color = repo.art(a, iconPackGlobal).accent
+    fun iconPacks(): List<Pair<String, String>> = repo.iconPacks()
+    fun setIconPack(pkg: String) = store.update { it.copy(iconPack = pkg) }
 
     // ---------- Starten ----------
     private fun launch(a: TvApp) { repo.bump(a.pkg); _usage.value = repo.usage(); repo.start(a.intent) }

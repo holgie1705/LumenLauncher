@@ -11,8 +11,8 @@ android {
         applicationId = "com.lumen.tv"
         minSdk = 26
         targetSdk = 34
-        versionCode = 51
-        versionName = "1.41"
+        versionCode = 53
+        versionName = "1.43"
     }
     buildTypes {
         release {
