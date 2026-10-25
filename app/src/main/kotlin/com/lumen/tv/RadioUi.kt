@@ -60,14 +60,15 @@ private fun stationColor(name: String): Color {
 
 /** Kachel eines gespeicherten Senders: Logo (falls vorhanden) auf Farbverlauf, ♪-Anzeige bei laufender Wiedergabe. */
 @Composable
-fun RadioTile(s: Station, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit, onLong: () -> Unit) {
+fun RadioTile(s: Station, style: TileStyle, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit, onLong: () -> Unit) {
     val ctx = LocalContext.current
     val now by Radio.now.collectAsState()
     val playing by Radio.playing.collectAsState()
     val active = now?.uuid == s.uuid
     val base = stationColor(s.name)
-    FocusCard((192 * scale).dp, (108 * scale).dp, base, modifier, onFocus, onClick, onLong) {
-        Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(base, base.copy(alpha = 0.45f), Color(0xFF111319))))) {
+    val (wd, ht) = wideDims(style, scale)
+    FocusCard(wd, ht, base, modifier, onFocus, onClick, onLong) {
+        Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(base.copy(alpha = tileAlphaGlobal), base.copy(alpha = 0.45f * tileAlphaGlobal), Color(0xFF111319).copy(alpha = tileAlphaGlobal))))) {
             StationLogo(s, Modifier.align(Alignment.Center).size((64 * scale).dp), (28 * scale).sp)
             Text(
                 s.name, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis,
@@ -84,8 +85,9 @@ fun RadioTile(s: Station, scale: Float, modifier: Modifier, onFocus: () -> Unit,
 
 /** Erste Kachel der Radio-Reihe: öffnet die Sendersuche. */
 @Composable
-fun RadioAddTile(scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
-    FocusCard((192 * scale).dp, (108 * scale).dp, DefaultAccent, modifier, onFocus, onClick) {
+fun RadioAddTile(style: TileStyle, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
+    val (wd, ht) = wideDims(style, scale)
+    FocusCard(wd, ht, DefaultAccent, modifier, onFocus, onClick) {
         Column(Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             PanelIcon(Ico.RADIO, Modifier.size((34 * scale).dp))
             Text(t("Sender suchen", "Find stations"), fontSize = 13.sp, color = Color.White, textAlign = TextAlign.Center, maxLines = 1)

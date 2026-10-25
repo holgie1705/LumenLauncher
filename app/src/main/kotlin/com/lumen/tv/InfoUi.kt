@@ -43,7 +43,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.tv.material3.Text
 import kotlinx.coroutines.delay
 
-const val APP_VERSION = "1.43"
+const val APP_VERSION = "1.57"
 private const val TELEGRAM_URL = "https://t.me/HOLGeH"
 private const val MAIL = "holgie4711@proton.me"
 private const val COFFEE_URL = "https://buymeacoffee.com/holgie"

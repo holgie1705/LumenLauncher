@@ -171,6 +171,23 @@ fun SettingsDialog(
         if (note.isNotEmpty()) { android.widget.Toast.makeText(ctx, note, android.widget.Toast.LENGTH_LONG).show(); note = "" }
     }
 
+    val roleLauncher = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()) { }
+    /** Lumen offiziell als Standard-Launcher eintragen lassen (Android-Rolle „Home“), damit die Wahl dauerhaft bleibt. */
+    fun requestHomeRole() {
+        val done = runCatching {
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                val rm = ctx.getSystemService(android.app.role.RoleManager::class.java)
+                when {
+                    rm == null || !rm.isRoleAvailable(android.app.role.RoleManager.ROLE_HOME) -> false
+                    rm.isRoleHeld(android.app.role.RoleManager.ROLE_HOME) -> { note = t("Lumen ist bereits Standard-Launcher.", "Lumen is already the default launcher."); true }
+                    else -> { roleLauncher.launch(rm.createRequestRoleIntent(android.app.role.RoleManager.ROLE_HOME)); true }
+                }
+            } else false
+        }.getOrDefault(false)
+        if (!done) openSettingsPage(ctx, Settings.ACTION_HOME_SETTINGS)?.let { note = it }
+    }
+
+    val epgLauncher = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { vm.refresh() }
     fun openSystem(action: String) {
         openSettingsPage(ctx, action)?.let { note = it }
     }
@@ -284,6 +301,10 @@ fun SettingsDialog(
                         item { SettingLine(t("Kachel-Stil", "Tile style"), prefs.tile.label) { vm.update { it.copy(tile = it.tile.next()) } } }
                         item { SettingLine(t("Kachel-Größe", "Tile size"), listOf(t("Klein", "Small"), t("Normal", "Normal"), t("Groß", "Large"))[prefs.scale]) { vm.update { it.copy(scale = (it.scale + 1) % 3) } } }
                         item { SettingLine("Layout", prefs.layout.label) { vm.update { it.copy(layout = it.layout.next()) } } }
+                        if (prefs.layout == Layout.FREE) {
+                            item { Hint(t("Frei: zeigt deine Favoriten (sonst die erste App-Reihe). Lange auf eine Kachel drücken → „Frei verschieben“.", "Free: shows your favorites (otherwise the first app row). Long-press a tile → “Move freely”.")) }
+                            item { SettingLine(t("Freie Anordnung zurücksetzen", "Reset free arrangement"), "") { vm.freeReset(); note = t("Zurückgesetzt.", "Reset.") } }
+                        }
                         item { SettingLine(t("Uhr-Stil", "Clock style"), listOf(t("Digital", "Digital"), "Minimal", t("Analog", "Analog"))[prefs.clockStyle]) { vm.update { it.copy(clockStyle = (it.clockStyle + 1) % 3) } } }
                         item { SettingLine(t("Zeitformat", "Time format"), listOf(t("24 Stunden", "24 hours"), "System", t("12 Stunden (AM/PM)", "12 hours (AM/PM)"))[prefs.timeFormat]) { vm.update { it.copy(timeFormat = (it.timeFormat + 1) % 3) } } }
                         item { SettingLine(t("Wetter", "Weather"), listOf(t("Aus", "Off"), t("Kompakt", "Compact"), t("Mit Vorschau", "With forecast"))[prefs.weather]) { vm.update { it.copy(weather = (it.weather + 1) % 3) } } }
@@ -350,6 +371,14 @@ fun SettingsDialog(
                             }
                         }
                         item { Hint(t("Favoriten und eigene Reihen legst du per langem Druck auf eine App an.", "Create favorites and your own rows by long-pressing an app.")) }
+                        item {
+                            val granted = androidx.core.content.ContextCompat.checkSelfPermission(ctx, "android.permission.READ_TV_LISTINGS") == android.content.pm.PackageManager.PERMISSION_GRANTED
+                            SettingLine(t("Weiter ansehen: Zugriff erlauben", "Continue watching: allow access"), if (granted) t("erteilt", "granted") else t("anfragen", "request")) {
+                                if (granted) { vm.refresh(); note = t("Zugriff ist schon erteilt – Liste wird neu geladen.", "Access already granted – reloading the list.") }
+                                else runCatching { epgLauncher.launch("android.permission.READ_TV_LISTINGS") }.onFailure { note = t("Anfrage nicht möglich. Per ADB: pm grant com.lumen.tv android.permission.READ_TV_LISTINGS", "Request not possible. Via ADB: pm grant com.lumen.tv android.permission.READ_TV_LISTINGS") }
+                            }
+                        }
+                        item { Hint(t("„Weiter ansehen“ zeigt nur etwas, wenn Android TV Einträge dafür freigibt. Auf manchen Boxen darf nur der System-Launcher diese Liste lesen, dann bleibt die Reihe leer und wird ausgeblendet.", "“Continue watching” only shows something if Android TV shares entries. On some boxes only the system launcher may read this list; then the row stays empty and is hidden.")) }
                             }
                             "remote" -> {
                         itemsIndexed(prefs.shortcuts) { _, s ->
@@ -383,6 +412,7 @@ fun SettingsDialog(
                                     apps.sortedBy { it.label.lowercase() }.map { a -> MenuItemSpec(a.label) { vm.setAutostart(a.pkg); sub = null } },
                             )
                         } }
+                        item { SettingLine(t("Als Standard-Launcher festlegen", "Set as default launcher"), "") { requestHomeRole() } }
                         item { SettingLine(t("Stock-Launcher überschreiben", "Override stock launcher"), onOff(overrideOn)) { vm.setOverride(!overrideOn) } }
                         item { SettingLine(t("Bedienungshilfe „Lumen Home-Taste“", "Accessibility service “Lumen Home-Taste”"), if (a11y) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_ACCESSIBILITY_SETTINGS) } }
                         item { SettingLine(t("Zugriff auf laufende Medien (Reihe „Läuft gerade“)", "Access to playing media (row “Now playing”)"), if (notif) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS) } }

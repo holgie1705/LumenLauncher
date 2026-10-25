@@ -102,9 +102,15 @@ fun AppTile(
     }
 }
 
+/** Größe für Kacheln mit Querformat-Bild (Weiter ansehen, Läuft gerade): folgt dem gewählten Kachel-Stil. */
+fun wideDims(style: TileStyle, scale: Float): Pair<Dp, Dp> = tileDims(
+    if (style == TileStyle.ICON || style == TileStyle.ROUND || style == TileStyle.POSTER) TileStyle.COMPACT else style, scale,
+)
+
 @Composable
-fun InputTile(input: InputSource, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
-    FocusCard((176 * scale).dp, (72 * scale).dp, DefaultAccent, modifier, onFocus, onClick) {
+fun InputTile(input: InputSource, style: TileStyle, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
+    val (wd, ht) = wideDims(style, scale)
+    FocusCard(wd, ht, DefaultAccent, modifier, onFocus, onClick) {
         Box(Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.Center) {
             Text(input.label, fontSize = 16.sp, color = Color.White, maxLines = 2, textAlign = TextAlign.Center, overflow = TextOverflow.Ellipsis)
         }
@@ -112,18 +118,20 @@ fun InputTile(input: InputSource, scale: Float, modifier: Modifier, onFocus: () 
 }
 
 @Composable
-fun WatchTile(item: WatchItem, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
+fun WatchTile(item: WatchItem, style: TileStyle, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
     val ctx = LocalContext.current
-    FocusCard((192 * scale).dp, (108 * scale).dp, DefaultAccent, modifier, onFocus, onClick) {
+    val (wd, ht) = wideDims(style, scale)
+    FocusCard(wd, ht, DefaultAccent, modifier, onFocus, onClick) {
         AsyncImage(
             model = ImageRequest.Builder(ctx).data(item.art).size(384, 216).crossfade(true).build(),
             contentDescription = item.title,
             contentScale = ContentScale.Crop,
+            alpha = tileAlphaGlobal,
             modifier = Modifier.fillMaxSize(),
         )
         Box(
             Modifier.fillMaxSize().background(
-                Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent, Color.Black.copy(alpha = 0.8f)))
+                Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent, Color.Black.copy(alpha = 0.8f * tileAlphaGlobal)))
             )
         )
         Text(
@@ -140,8 +148,9 @@ fun WatchTile(item: WatchItem, scale: Float, modifier: Modifier, onFocus: () -> 
 }
 
 @Composable
-fun NowTile(item: NowItem, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit, onLong: () -> Unit) {
-    FocusCard((192 * scale).dp, (108 * scale).dp, DefaultAccent, modifier, onFocus, onClick, onLong) {
+fun NowTile(item: NowItem, style: TileStyle, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit, onLong: () -> Unit) {
+    val (wd, ht) = wideDims(style, scale)
+    FocusCard(wd, ht, DefaultAccent, modifier, onFocus, onClick, onLong) {
         Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.SpaceBetween) {
             Text(if (item.playing) t("Läuft", "Playing") else t("Pausiert", "Paused"), fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f))
             Column {

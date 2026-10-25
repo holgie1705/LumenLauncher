@@ -47,7 +47,7 @@ fun FocusCard(
     w: Dp, h: Dp, glow: Color, modifier: Modifier = Modifier,
     onFocus: () -> Unit, onClick: () -> Unit, onLong: (() -> Unit)? = null,
     shape: Shape = RoundedCornerShape(16.dp),
-    bg: Float = 1f,
+    bg: Float = tileAlphaGlobal,
     content: @Composable BoxScope.() -> Unit,
 ) {
     Surface(

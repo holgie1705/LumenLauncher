@@ -79,6 +79,7 @@ fun HomeScreen(vm: HomeViewModel) {
     val status = vm.status.collectAsStateWithLifecycle()
     val sleepUntil = vm.sleepUntil.collectAsStateWithLifecycle()
     val weather = vm.weather.collectAsStateWithLifecycle()
+    val inputPlay = vm.inputPlay.collectAsStateWithLifecycle()
 
     // Fokus-Info als State-Objekt: nur Hero und Ambient lesen es -> Layouts rekomponieren beim Navigieren nicht.
     val hero = remember { mutableStateOf<HeroInfo?>(null) }
@@ -124,6 +125,8 @@ fun HomeScreen(vm: HomeViewModel) {
     /** Verschiebe-Modus: Links/Rechts schiebt die Kachel, OK oder Zurück beendet. */
     var moving by remember { mutableStateOf<Pair<String, String>?>(null) }
     var movingSince by remember { mutableLongStateOf(0L) }
+    var freeMoving by remember { mutableStateOf<String?>(null) }   // Layout "Frei": Kachel wird gerade verschoben
+    val fcx = remember { FreeCtx() }
     var swallowOk by remember { mutableStateOf(false) }   // OK-Taste nach dem Bestätigen noch bis zum Loslassen verschlucken
     fun startMove(rowId: String, pkg: String) {
         closeMenu(); moving = rowId to pkg; movingSince = SystemClock.elapsedRealtime()
@@ -139,6 +142,10 @@ fun HomeScreen(vm: HomeViewModel) {
     fun appMenu(app: TvApp, row: AppRowUi): MenuSpec {
         val items = mutableListOf<MenuItemSpec>()
         items += MenuItemSpec(t("Öffnen", "Open")) { closeMenu(); vm.open(app) }
+        if (prefs.layout == Layout.FREE) {
+            items += MenuItemSpec(t("Frei verschieben (Pfeiltasten)", "Move freely (arrow keys)")) { closeMenu(); freeMoving = app.pkg; movingSince = SystemClock.elapsedRealtime() }
+            items += MenuItemSpec(t("Position zurücksetzen", "Reset position")) { vm.freeReset(app.pkg); closeMenu() }
+        }
         val isFav = prefs.rows.firstOrNull { it.id == "favs" }?.pkgs?.contains(app.pkg) == true
         items += if (isFav) MenuItemSpec(t("Aus Favoriten entfernen", "Remove from favorites")) { vm.removeFromRow("favs", app.pkg); closeMenu() }
         else MenuItemSpec(t("Zu Favoriten hinzufügen", "Add to favorites")) { vm.addToRow("favs", app.pkg); closeMenu() }
@@ -215,6 +222,26 @@ fun HomeScreen(vm: HomeViewModel) {
                     Key.DirectionUp, Key.DirectionDown -> true
                     else -> false
                 }
+            } else if (freeMoving != null) {
+                val k = e.key
+                val ready = SystemClock.elapsedRealtime() - movingSince > 500
+                val pk = freeMoving!!
+                when (k) {
+                    Key.DirectionLeft, Key.DirectionRight, Key.DirectionUp, Key.DirectionDown -> {
+                        if (e.type == KeyEventType.KeyDown) {
+                            val st = 14
+                            val dx = if (k == Key.DirectionLeft) -st else if (k == Key.DirectionRight) st else 0
+                            val dy = if (k == Key.DirectionUp) -st else if (k == Key.DirectionDown) st else 0
+                            vm.freeNudge(pk, dx, dy, fcx.defaults[pk] ?: (0 to 0), fcx.maxX, fcx.maxY)
+                        }
+                        true
+                    }
+                    Key.DirectionCenter, Key.Enter, Key.NumPadEnter, Key.Back -> {
+                        if (e.type == KeyEventType.KeyDown && ready) { freeMoving = null; if (okKey) swallowOk = true }
+                        true
+                    }
+                    else -> false
+                }
             } else if (idle) { idle = false; true } else false
         }
     ) {
@@ -240,11 +267,11 @@ fun HomeScreen(vm: HomeViewModel) {
             if (!barBottom) bar()
             when (prefs.layout) {
                 Layout.SHELVES -> if (prefs.rowsPos == 1) {
-                    Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.BottomStart) {
-                        Column(Modifier.fillMaxWidth()) {
-                            Hero(hero, vm, prefs.heroMode, false, Modifier.padding(horizontal = 14.dp))
-                            ShelfLayout(state.rows, lc, firstFocus, Modifier.weight(1f, fill = false))
-                        }
+                    Box(Modifier.weight(1f).fillMaxWidth()) {
+                        ShelfLayout(
+                            state.rows, lc, firstFocus, Modifier.fillMaxSize(),
+                            bottomAnchor = true, heroMode = prefs.heroMode,
+                        ) { m -> Hero(hero, vm, prefs.heroMode, false, m) }
                     }
                 } else {
                     Spacer(Modifier.weight(0.1f))
@@ -255,6 +282,7 @@ fun HomeScreen(vm: HomeViewModel) {
                     Hero(hero, vm, prefs.heroMode, true, Modifier.padding(horizontal = 14.dp, vertical = 4.dp))
                     GridLayout(state.rows, lc, firstFocus, Modifier.weight(1f))
                 }
+                Layout.FREE -> FreeLayout(state.rows, lc, prefs.freePos, fcx, firstFocus, freeMoving, Modifier.weight(1f))
                 Layout.SIDEBAR -> {
                     Hero(hero, vm, prefs.heroMode, true, Modifier.padding(horizontal = 14.dp, vertical = 4.dp))
                     SidebarLayout(state.rows, lc, firstFocus, Modifier.weight(1f))
@@ -283,6 +311,13 @@ fun HomeScreen(vm: HomeViewModel) {
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 14.dp)
                 .background(Color.White, RoundedCornerShape(20.dp)).padding(horizontal = 18.dp, vertical = 8.dp),
         )
+        if (freeMoving != null) Text(
+            "◀ ▲ ▼ ▶  " + t("Mit den Pfeiltasten verschieben · OK = fertig", "Move with arrow keys · OK = done"),
+            fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.Black,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 14.dp)
+                .background(Color.White, RoundedCornerShape(20.dp)).padding(horizontal = 18.dp, vertical = 8.dp),
+        )
+        inputPlay.value?.let { InputPlayerDialog(it) { vm.closeInput() } }
         webOpen?.let { WebFullDialog(it) { webOpen = null } }
         if (radioOpen) RadioSearchDialog(vm, prefs) { radioOpen = false }
         if (weatherOpen) WeatherDialog(prefs, weather.value, onPlace = { weatherOpen = false; placeOpen = true }) { weatherOpen = false }
@@ -299,7 +334,7 @@ private fun TopBar(
 ) {
     val now by produceState(System.currentTimeMillis()) { while (true) { value = System.currentTimeMillis(); delay(30_000) } }
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = SIDE_PAD),
+        Modifier.fillMaxWidth().padding(start = 6.dp, end = SIDE_PAD),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top,
     ) {
@@ -330,7 +365,7 @@ private fun Hero(hero: State<HeroInfo?>, vm: HomeViewModel, mode: Int, compact: 
     AnimatedContent(
         targetState = hero.value,
         modifier = modifier.heightIn(min = if (small) 48.dp else if (compact) 64.dp else 92.dp),
-        transitionSpec = { (fadeIn(tween(350)) + slideInVertically(tween(350)) { it / 8 }) togetherWith fadeOut(tween(150)) },
+        transitionSpec = { (fadeIn(tween(220, delayMillis = 130)) + slideInVertically(tween(220, delayMillis = 130)) { it / 8 }) togetherWith fadeOut(tween(120)) },  // erst alter Name raus, dann neuer rein: nie zwei Namen übereinander
         label = "hero",
     ) { h ->
         Column {

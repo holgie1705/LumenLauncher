@@ -41,6 +41,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -90,8 +91,8 @@ private fun LiveWeb(w: WebWidget, interactive: Boolean, modifier: Modifier) {
 @Composable
 fun WebTile(w: WebWidget, width: androidx.compose.ui.unit.Dp, height: androidx.compose.ui.unit.Dp, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit, onLong: () -> Unit) {
     FocusCard(width, height, DefaultAccent, modifier, onFocus, onClick, onLong) {
-        Box(Modifier.fillMaxSize().background(Color(0xFF14161C))) {
-            LiveWeb(w, false, Modifier.fillMaxSize())
+        Box(Modifier.fillMaxSize().background(Color(0xFF14161C).copy(alpha = tileAlphaGlobal))) {
+            LiveWeb(w, false, Modifier.fillMaxSize().graphicsLayer { alpha = tileAlphaGlobal })
             Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent, Color.Black.copy(alpha = 0.75f)))))
             Text(
                 w.name, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis,

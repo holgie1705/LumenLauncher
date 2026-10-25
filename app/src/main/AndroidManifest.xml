@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA" />
+    <!-- Neuere Android-TV-Versionen: "Weiter ansehen" anderer Apps lesen (per Laufzeit-Dialog oder adb shell pm grant erteilbar) -->
+    <uses-permission android:name="android.permission.READ_TV_LISTINGS" />
     <!-- VPN-Dot -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

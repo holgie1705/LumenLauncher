@@ -190,3 +190,46 @@ Die Bilder gehören ihren Urhebern (Lizenz steht unter der Vorschau) – nur fü
 
 ## v1.43
 - Icon-Packs: Apps ohne Eintrag im Pack werden automatisch angepasst (Hintergrund, Skalierung, Maske, Overlay aus dem Pack).
+
+## v1.44
+- Neu: Einstellungen → System → „Als Standard-Launcher festlegen“ (Android-Home-Rolle bzw. Home-Einstellungen), damit die Wahl dauerhaft bleibt.
+
+## v1.45
+- Uhr/Wetter im Home weiter links (Kopfzeile links 26 → 6 dp, Statusleiste rechts unverändert).
+
+## v1.46
+- Neues Layout „Frei“ (Einstellungen → Aussehen → Layout): Favoriten frei auf dem Bildschirm platzieren (lang drücken → „Frei verschieben“, Pfeiltasten, OK). Zurücksetzen pro Kachel oder komplett.
+
+## v1.47
+- Hinweis in „Reihen“: „Weiter ansehen“ braucht freigegebene Einträge (READ_EPG_DATA ist Systemberechtigung, per ADB nicht erteilbar).
+
+## v1.48
+- „Weiter ansehen“: neue Berechtigung READ_TV_LISTINGS (neuere Android-TV-Versionen, erteilbar). Einstellungen → Reihen → „Weiter ansehen: Zugriff erlauben".
+
+## v1.49
+- „Weiter ansehen“ und „Läuft gerade“ folgen jetzt dem gewählten Kachel-Stil (Größe).
+
+## v1.50
+- Kacheln unten: Die erste Reihe sitzt ganz unten, weitere Reihen liegen darunter und erscheinen beim Nachuntenklicken (statt dass die Reihen darüber die erste nach oben schieben).
+
+## v1.51
+- Kacheln unten: Beim Hoch-/Runterklicken sitzt die fokussierte Reihe wieder ganz unten.
+
+## v1.52
+- Kachel-Transparenz und Kachel-Stil (Größe) gelten jetzt für alle Reihen: Weiter ansehen, Läuft gerade, Radio, Web-Widgets, Eingänge.
+
+## v1.53
+- Eingänge (HDMI usw.) öffnen direkt in Lumen per TvView (Zurück schließt), statt über einen ggf. nicht vorhandenen anderen Player. Statusmeldung bei „Kein Signal“.
+
+## v1.54
+- Kacheln unten: Reihenwechsel schiebt die Liste jetzt per Berechnung statt per Item-Offset, sodass auch nach unten gescrollt wird.
+
+## v1.55
+- Kacheln unten: Zwischen der fokussierten Reihe und der Reihe darüber ist jetzt Platz für den Text zur App (kein Überlappen mehr).
+
+## v1.56
+- Kacheln unten: Änderung aus 1.55 zurückgenommen (kein Extra-Abstand, Text zur App bleibt fest an seiner Stelle wie in 1.54).
+
+## v1.57
+- Kacheln unten neu: Text zur App steht fest, die fokussierte Reihe sitzt immer direkt darunter, Reihen darüber verschwinden oben (kein Überlappen mehr).
+- App-Name wechselt sauber: alter Name blendet erst aus, dann der neue ein.

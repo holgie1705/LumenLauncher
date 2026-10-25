@@ -9,7 +9,7 @@ Lumen aims to be a full alternative to launchers like Projectivy, CleanMyTV or F
 ## Features
 
 **Home screen**
-- Rows (apps, favorites, now playing, radio, web widgets), grid or sidebar layout
+- Rows (apps, favorites, now playing, radio, web widgets), grid or sidebar layout, or a free layout where you place your favorites anywhere on the screen
 - Tile styles: banner, wide, compact, icons, round, poster, card
 - Adjustable tile transparency so the wallpaper shines through
 - Clock (digital, minimal, analog) and weather (Open-Meteo, no key needed), position of header and tiles selectable
@@ -97,7 +97,7 @@ Undo with `adb shell cmd package install-existing <package>`. Some firmwares blo
 | FOREGROUND_SERVICE (+ media playback, special use) | radio playback in the background |
 | POST_NOTIFICATIONS | radio notification |
 | REQUEST_DELETE_PACKAGES | uninstall apps from the long-press menu |
-| READ_EPG_DATA | "Continue watching" rows from TV providers |
+| READ_TV_LISTINGS, READ_EPG_DATA | "Continue watching" rows from other apps (READ_TV_LISTINGS can be granted at runtime or with `adb shell pm grant com.lumen.tv android.permission.READ_TV_LISTINGS`) |
 | Accessibility service (user-enabled) | home key, shortcuts, standby, parental controls, mini clock, restart click in the power menu |
 | Notification access (optional) | "Now playing" row |
 
@@ -141,6 +141,7 @@ Kotlin 2.0, Jetpack Compose for TV (`androidx.tv:tv-material`), Media3 ExoPlayer
 
 - Tested on one device only; other boxes may behave differently (home key handling, power menu, overlay).
 - The power-menu restart click depends on the texts of your firmware's menu.
+- "Continue watching" needs `READ_TV_LISTINGS` (grant it under Settings → Rows). Only entries the source apps mark as searchable are returned; on older firmwares the old system-only permission applies and the row stays empty.
 - The mini clock may be covered by apps that draw over everything in fullscreen.
 - Release builds use R8 minification; if something breaks, please open an issue with details.
 

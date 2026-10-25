@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
@@ -30,6 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.border
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -37,6 +40,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Border
@@ -64,17 +68,17 @@ private fun AppCell(a: TvApp, row: AppRowUi, c: LayoutCtx, mod: Modifier) = AppT
 
 @Composable
 private fun InputCell(s: InputSource, c: LayoutCtx, mod: Modifier) = InputTile(
-    s, c.scale, mod, onFocus = { c.onHero(HeroInfo(s.id, s.label, t("Eingang", "Input"))) }, onClick = { c.vm.openInput(s) },
+    s, c.style, c.scale, mod, onFocus = { c.onHero(HeroInfo(s.id, s.label, t("Eingang", "Input"))) }, onClick = { c.vm.openInput(s) },
 )
 
 @Composable
 private fun WatchCell(w: WatchItem, row: WatchRowUi, i: Int, c: LayoutCtx, mod: Modifier) = WatchTile(
-    w, c.scale, mod, onFocus = { c.onHero(HeroInfo("w:${row.id}:$i", w.title, row.title)) }, onClick = { c.vm.openWatch(w) },
+    w, c.style, c.scale, mod, onFocus = { c.onHero(HeroInfo("w:${row.id}:$i", w.title, row.title)) }, onClick = { c.vm.openWatch(w) },
 )
 
 @Composable
 private fun NowCell(n: NowItem, c: LayoutCtx, mod: Modifier) = NowTile(
-    n, c.scale, mod,
+    n, c.style, c.scale, mod,
     onFocus = { c.onHero(HeroInfo("n:${n.pkg}", n.title, n.subtitle)) },
     onClick = { c.vm.toggleNow(n) },
     onLong = { c.vm.openPkg(n.pkg) },
@@ -84,7 +88,7 @@ private fun NowCell(n: NowItem, c: LayoutCtx, mod: Modifier) = NowTile(
 private fun RadioCell(s: Station, c: LayoutCtx, mod: Modifier) {
     val ctx = androidx.compose.ui.platform.LocalContext.current
     RadioTile(
-        s, c.scale, mod,
+        s, c.style, c.scale, mod,
         onFocus = { c.onHero(HeroInfo("r:${s.uuid}", s.name, t("Radio · OK zum Abspielen, lang drücken für Optionen", "Radio · OK to play, long-press for options"))) },
         onClick = { Radio.toggle(ctx, s) },
         onLong = { c.onStationMenu(s) },
@@ -101,7 +105,7 @@ private fun WebCell(w: WebWidget, c: LayoutCtx, mod: Modifier) = WebTile(
 
 @Composable
 private fun RadioAddCell(c: LayoutCtx, mod: Modifier) = RadioAddTile(
-    c.scale, mod,
+    c.style, c.scale, mod,
     onFocus = { c.onHero(HeroInfo("r:add", t("Radiosender suchen", "Find radio stations"), t("Tausende Sender, z. B. SWR3, SR1 – OK zum Suchen", "Thousands of stations – OK to search"))) },
     onClick = { c.onRadioSearch() },
 )
@@ -136,10 +140,57 @@ private fun LazyGridScope.gridItems(row: RowUi, c: LayoutCtx, first: FocusReques
 
 // ---------------------------------------------------------------- Layout 1: Reihen
 @Composable
-fun ShelfLayout(rows: List<RowUi>, c: LayoutCtx, firstFocus: FocusRequester?, modifier: Modifier) {
-    LazyColumn(modifier, contentPadding = PaddingValues(bottom = 24.dp)) {
+fun ShelfLayout(
+    rows: List<RowUi>, c: LayoutCtx, firstFocus: FocusRequester?, modifier: Modifier,
+    bottomAnchor: Boolean = false, heroMode: Int = 0, hero: @Composable (Modifier) -> Unit = {},
+) {
+    var cur by remember { mutableIntStateOf(0) }
+    if (bottomAnchor) {
+        // Fester Aufbau wie bei Google TV: Der Text zur App steht an einer festen Stelle, die fokussierte Reihe
+        // sitzt immer direkt darunter. Reihen darüber verschwinden oben aus dem Bild (abgeschnitten), sodass nichts überlappt.
+        androidx.compose.foundation.layout.BoxWithConstraints(modifier) {
+            val th = tileDims(c.style, c.scale).second
+            val labelExtra = if (c.style == TileStyle.ICON || c.style == TileStyle.ROUND) 28.dp else 0.dp
+            fun rowH(r: RowUi?): Dp = (if (r is WebRowUi) th * 2.4f else th) + labelExtra + 70.dp
+            val listH = rowH(rows.firstOrNull()).coerceAtMost(maxHeight)
+            Column(Modifier.fillMaxSize()) {
+                androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+                hero(Modifier.padding(start = 14.dp, end = 14.dp))
+                ShelfList(
+                    rows, c, firstFocus, Modifier.fillMaxWidth().height(listH),
+                    PaddingValues(bottom = listH),
+                    cur = cur, onCur = { cur = it },
+                    pinTop = true,
+                )
+            }
+        }
+    } else ShelfList(rows, c, firstFocus, modifier, PaddingValues(bottom = 24.dp), cur = cur, onCur = { cur = it })
+}
+
+@Composable
+private fun ShelfList(
+    rows: List<RowUi>, c: LayoutCtx, firstFocus: FocusRequester?, modifier: Modifier, padding: PaddingValues,
+    cur: Int, onCur: (Int) -> Unit,
+    pinTop: Boolean = false,
+) {
+    val state = androidx.compose.foundation.lazy.rememberLazyListState()
+    if (pinTop) {
+        androidx.compose.runtime.LaunchedEffect(cur, rows.size) {
+            if (rows.getOrNull(cur) == null) return@LaunchedEffect
+            // Fokussierte Reihe oben im Reihenbereich festhalten; ist sie höher als der Bereich (Web-Widgets), ihre Unterkante unten.
+            if (state.layoutInfo.visibleItemsInfo.none { it.index == cur }) state.scrollToItem(cur)
+            val info = state.layoutInfo
+            val item = info.visibleItemsInfo.firstOrNull { it.index == cur } ?: return@LaunchedEffect
+            val view = info.viewportSize.height
+            val yNow = (item.offset - info.viewportStartOffset).toFloat()
+            val yTarget = if (item.size <= view) 0f else (view - item.size).toFloat()
+            val delta = yNow - yTarget
+            if (kotlin.math.abs(delta) > 1f) state.animateScrollBy(delta)
+        }
+    }
+    LazyColumn(modifier, state = state, contentPadding = padding) {
         itemsIndexed(rows, key = { _, r -> r.id }) { idx, row ->
-            Column {
+            Column(Modifier.onFocusChanged { if (it.hasFocus) onCur(idx) }) {
                 Text(
                     row.title, fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
                     color = Color.White.copy(alpha = 0.92f), modifier = Modifier.padding(start = SIDE_PAD, top = 10.dp),
@@ -169,6 +220,52 @@ fun GridLayout(rows: List<RowUi>, c: LayoutCtx, firstFocus: FocusRequester?, mod
                 Text(row.title, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Color.White.copy(alpha = 0.7f))
             }
             gridItems(row, c, if (ri == 0) firstFocus else null)
+        }
+    }
+}
+
+// ---------------------------------------------------------------- Layout 4: Frei
+/** Merkt sich Standardpositionen und Grenzen der freien Fläche, damit das Verschieben (in HomeScreen) sie kennt. */
+class FreeCtx {
+    val defaults = HashMap<String, Pair<Int, Int>>()
+    var maxX = 0
+    var maxY = 0
+}
+
+@Composable
+fun FreeLayout(
+    rows: List<RowUi>, c: LayoutCtx, pos: Map<String, Pair<Int, Int>>, fc: FreeCtx,
+    firstFocus: FocusRequester?, moving: String?, modifier: Modifier,
+) {
+    val appRows = rows.filterIsInstance<AppRowUi>()
+    val row = appRows.firstOrNull { it.id == "favs" && it.apps.isNotEmpty() } ?: appRows.firstOrNull { it.apps.isNotEmpty() } ?: return
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier.fillMaxSize()) {
+        val (tw, th) = tileDims(c.style, c.scale)
+        val gap = 12
+        val w = maxWidth.value.toInt()
+        val h = maxHeight.value.toInt()
+        val cols = ((w - 2 * 20) / (tw.value.toInt() + gap)).coerceIn(1, 5)
+        val n = row.apps.size
+        val rowsN = (n + cols - 1) / cols
+        val y0 = ((h - rowsN * (th.value.toInt() + gap)) / 2).coerceAtLeast(0)
+        val defaults = row.apps.mapIndexed { i, a ->
+            val r = i / cols
+            val k = i % cols
+            val inRow = minOf(cols, n - r * cols)
+            val x = (w - inRow * (tw.value.toInt() + gap) + gap) / 2 + k * (tw.value.toInt() + gap)
+            a.pkg to (x to (y0 + r * (th.value.toInt() + gap)))
+        }.toMap()
+        androidx.compose.runtime.SideEffect {
+            fc.defaults.clear(); fc.defaults.putAll(defaults)
+            fc.maxX = (w - tw.value.toInt()).coerceAtLeast(0); fc.maxY = (h - th.value.toInt()).coerceAtLeast(0)
+        }
+        row.apps.forEachIndexed { i, a ->
+            val p = pos[a.pkg] ?: defaults[a.pkg] ?: (0 to 0)
+            Box(
+                Modifier.offset(p.first.dp, p.second.dp).then(
+                    if (moving == a.pkg) Modifier.border(3.dp, Color.White, RoundedCornerShape(14.dp)) else Modifier
+                )
+            ) { AppCell(a, row, c, focusMod(i, firstFocus)) }
         }
     }
 }

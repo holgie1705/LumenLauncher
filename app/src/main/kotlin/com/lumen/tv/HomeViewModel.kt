@@ -182,6 +182,11 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     suspend fun art(a: TvApp, pack: String = ""): Art = repo.art(a, pack)
     suspend fun accent(a: TvApp): Color = repo.art(a, iconPackGlobal).accent
     fun iconPacks(): List<Pair<String, String>> = repo.iconPacks()
+    fun freeNudge(pkg: String, dx: Int, dy: Int, base: Pair<Int, Int>, maxX: Int, maxY: Int) = store.update { p ->
+        val cur = p.freePos[pkg] ?: base
+        p.copy(freePos = p.freePos + (pkg to ((cur.first + dx).coerceIn(0, maxX) to (cur.second + dy).coerceIn(0, maxY))))
+    }
+    fun freeReset(pkg: String? = null) = store.update { p -> p.copy(freePos = if (pkg == null) emptyMap() else p.freePos - pkg) }
     fun setIconPack(pkg: String) = store.update { it.copy(iconPack = pkg) }
 
     // ---------- Starten ----------
@@ -195,7 +200,9 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
         apps.value.firstOrNull { it.pkg == pkg }?.let { open(it) } ?: repo.launchIntent(pkg)?.let { repo.start(it) }
     }
 
-    fun openInput(i: InputSource) = repo.start(i.intent)
+    val inputPlay = MutableStateFlow<InputSource?>(null)
+    fun openInput(i: InputSource) { inputPlay.value = i }   // läuft direkt in Lumen (TvView)
+    fun closeInput() { inputPlay.value = null }
     fun openWatch(w: WatchItem) { w.intent?.let { repo.start(it) } }
     fun toggleNow(n: NowItem) {
         runCatching { if (n.playing) n.controller.transportControls.pause() else n.controller.transportControls.play() }

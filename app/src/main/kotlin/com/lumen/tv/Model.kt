@@ -45,7 +45,7 @@ enum class TileStyle(private val de: String, private val en: String) {
     val label: String get() = t(de, en)
 }
 enum class Layout(private val de: String, private val en: String) {
-    SHELVES("Reihen", "Shelves"), GRID("Raster", "Grid"), SIDEBAR("Seitenleiste", "Sidebar");
+    SHELVES("Reihen", "Shelves"), GRID("Raster", "Grid"), SIDEBAR("Seitenleiste", "Sidebar"), FREE("Frei", "Free");
     val label: String get() = t(de, en)
 }
 enum class Look(private val de: String, private val en: String) {
@@ -126,6 +126,7 @@ data class Prefs(
     val focusStyle: Int = 0,     // 0 Rahmen, 1 Leuchten, 2 Anheben
     val miniOverlay: Boolean = true, // kleine Uhr + Wetter oben links in anderen Apps
     val iconPack: String = "",       // Paketname des gewählten Icon-Packs, leer = App-Icons
+    val freePos: Map<String, Pair<Int, Int>> = emptyMap(), // Layout "Frei": Paket -> (x, y) in dp
     val tileGlass: Int = 0,      // 0..3 -> Kacheln 100/75/50/30 % deckend
     val accent: Int = 1,         // Index in ACCENTS, 0 = automatisch (wechselt mit der App), 1 = festes Blau
     val font: String = "ui",
@@ -166,7 +167,7 @@ data class Prefs(
 val Prefs.scaleF: Float get() = listOf(0.85f, 1f, 1.2f)[scale.coerceIn(0, 2)]
 
 fun Prefs.toJson(): JSONObject = JSONObject().apply {
-    put("lookV", 2); put("focus", focusStyle); put("glass", tileGlass); put("iconPack", iconPack); put("mini", miniOverlay)
+    put("lookV", 2); put("focus", focusStyle); put("glass", tileGlass); put("freePos", JSONObject().also { j -> freePos.forEach { (k, v) -> j.put(k, JSONArray().put(v.first).put(v.second)) } }); put("iconPack", iconPack); put("mini", miniOverlay)
     put("look", look.name); put("tile", tile.name); put("layout", layout.name)
     put("clock", clockStyle); put("timeFmt", timeFormat); put("weather", weather)
     put("wName", weatherName); put("wLat", weatherLat); put("wLon", weatherLon)
@@ -235,6 +236,7 @@ fun prefsFromJson(o: JSONObject): Prefs {
         look = if (o.optInt("lookV", 0) < 2) d.look else runCatching { Look.valueOf(o.getString("look")) }.getOrDefault(d.look),
         focusStyle = o.optInt("focus", d.focusStyle).coerceIn(0, 2),
         tileGlass = o.optInt("glass", d.tileGlass).coerceIn(0, 3),
+        freePos = o.optJSONObject("freePos")?.let { j -> j.keys().asSequence().mapNotNull { k -> j.optJSONArray(k)?.let { a -> k to (a.optInt(0) to a.optInt(1)) } }.toMap() } ?: emptyMap(),
         iconPack = o.optString("iconPack", ""),
         miniOverlay = o.optBoolean("mini", d.miniOverlay),
         tile = runCatching { TileStyle.valueOf(o.getString("tile")) }.getOrDefault(d.tile),
