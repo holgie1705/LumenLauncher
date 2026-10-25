@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="override_desc">Für Fernbedienungs-Shortcuts, Auto-Standby, Kindersicherung und das Überschreiben des Standard-Launchers. Es werden keine Bildschirminhalte gelesen, nur Tastendrücke und der Name der aktiven App.</string>
+</resources>

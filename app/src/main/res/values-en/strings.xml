@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="override_desc">For remote shortcuts, auto-standby, parental controls and overriding the stock launcher. No screen content is read – only key presses and the name of the active app.</string>
+</resources>
