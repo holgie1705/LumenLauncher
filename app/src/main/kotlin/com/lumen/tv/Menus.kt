@@ -3,6 +3,7 @@ package com.lumen.tv
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,10 +68,10 @@ fun MenuDialog(spec: MenuSpec, onDismiss: () -> Unit) {
                         } else false
                     } else false
                 }
-                .clip(RoundedCornerShape(22.dp)).background(PanelBody).padding(vertical = 16.dp),
+                .clip(RoundedCornerShape(26.dp)).background(NeoPanelBrush).border(1.dp, NeoLine, RoundedCornerShape(26.dp)).padding(vertical = 18.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Text(spec.title, fontSize = 18.sp, fontWeight = FontWeight.Medium, color = Color.White, maxLines = 1, modifier = Modifier.padding(horizontal = 28.dp, vertical = 4.dp))
+            Text(spec.title, fontSize = 19.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, modifier = Modifier.padding(horizontal = 26.dp, vertical = 4.dp))
             LazyColumn(Modifier.heightIn(max = 380.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
                 itemsIndexed(spec.items) { i, item ->
                     SettingLine(item.label, "", if (i == 0) Modifier.focusRequester(first) else Modifier) { item.action() }
@@ -115,7 +116,7 @@ fun PinHost(req: PinRequest, vm: HomeViewModel) {
     Dialog(onDismissRequest = { vm.cancelPin() }) {
         LaunchedEffect(req) { delay(80); runCatching { focus.requestFocus() } }
         Column(
-            Modifier.width(340.dp).background(Color(0xFF14161C), RoundedCornerShape(18.dp)).padding(20.dp),
+            Modifier.width(340.dp).clip(RoundedCornerShape(26.dp)).background(NeoPanelBrush).border(1.dp, NeoLine, RoundedCornerShape(26.dp)).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -226,7 +227,7 @@ fun SettingsDialog(
     }
 
     val dens = LocalDensity.current
-    val sizeF = listOf(0.85f, 1f, 1.2f)[prefs.menuSize.coerceIn(0, 2)]
+    val sizeF = listOf(0.85f, 1f, 1.2f, 1.35f)[prefs.menuSize.coerceIn(0, 3)]
     val title = when (page) {
         "look" -> t("Aussehen", "Appearance")
         "power" -> t("Standby & Energie", "Standby & power")
@@ -234,7 +235,16 @@ fun SettingsDialog(
         "remote" -> t("Fernbedienung", "Remote control")
         "kids" -> t("Kindersicherung", "Parental controls")
         "system" -> "System"
-        else -> t("Einstellungen", "Settings")
+        else -> "Lumen Launcher"
+    }
+    val subtitle = when (page) {
+        "look" -> t("Layout, Kacheln, Farben & Schrift", "Layout, tiles, colors & font")
+        "power" -> t("Bildschirmschoner, Timer & Standby", "Screensaver, timer & standby")
+        "rows" -> t("Reihen ein-/ausblenden & sortieren", "Show, hide & sort rows")
+        "remote" -> t("Tasten & Shortcuts", "Keys & shortcuts")
+        "kids" -> t("Sperrzeiten, PIN & Kindermodus", "Lock times, PIN & kids mode")
+        "system" -> t("Launcher, Dienste & Sicherung", "Launcher, services & backup")
+        else -> ""
     }
 
     Dialog(
@@ -246,38 +256,64 @@ fun SettingsDialog(
         // Kein Systemabdunkeln hinter dem Fenster: der Startbildschirm bleibt sichtbar.
         (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
         // Nur ein sanfter Verlauf hinter dem Panel statt eines schwarzen Vollbild-Schleiers.
-        Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent), endX = 1400f))) {
+        Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.Black.copy(alpha = 0.45f), Color.Transparent), endX = 1400f))) {
+            // Schwebendes Glas-Panel mit runden Ecken und feinem Rand
             Column(
-                Modifier.width(400.dp).fillMaxHeight()
-                    .clip(RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp)).background(Color(0xD0363941)),
+                Modifier.padding(start = 20.dp, top = 20.dp, bottom = 20.dp).width(500.dp).fillMaxHeight()
+                    .clip(RoundedCornerShape(30.dp)).background(NeoPanelBrush)
+                    .border(1.dp, NeoLine, RoundedCornerShape(30.dp)),
             ) {
-                PanelHeader(title)
+                PanelHeader(title, subtitle, when (page) { "look" -> Ico.BRUSH; "power" -> Ico.POWER; "rows" -> Ico.LIST; "remote" -> Ico.REMOTE; "kids" -> Ico.LOCK; else -> Ico.GEAR }, if (page == null) "v$APP_VERSION" else "")
                 LazyColumn(
                     Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
                     if (page == null) {
-                        item { PanelSection("Lumen") }
-                        item { PanelRow(Ico.BRUSH, t("Aussehen", "Appearance"), "", Modifier.focusRequester(first)) { page = "look" } }
-                        item { PanelRow(Ico.POWER, t("Standby & Energie", "Standby & power")) { page = "power" } }
-                        item { PanelRow(Ico.LIST, t("Reihen bearbeiten", "Edit rows")) { page = "rows" } }
-                        item { PanelRow(Ico.REMOTE, t("Fernbedienung", "Remote control")) { page = "remote" } }
-                        item { PanelRow(Ico.LOCK, t("Kindersicherung", "Parental controls")) { page = "kids" } }
-                        item { PanelRow(Ico.GEAR, t("System", "System")) { page = "system" } }
+                        // Kachel-Raster: je zwei große farbige Kacheln pro Zeile
                         item {
-                            PanelRow(Ico.GLOBE, "Sprache / Language", listOf("Deutsch", "English", "System")[prefs.lang]) {
-                                vm.update { it.copy(lang = (it.lang + 1) % 3) }
-                            }
+                            TileRow(
+                                { m -> PanelTile(Ico.BRUSH, t("Aussehen", "Appearance"), t("Layout, Farben, Schrift", "Layout, colors, font"), m.focusRequester(first)) { page = "look" } },
+                                { m -> PanelTile(Ico.LIST, t("Reihen", "Rows"), t("Ein-/ausblenden, sortieren", "Show, hide, sort"), m) { page = "rows" } },
+                            )
                         }
-                        item { PanelRow(Ico.DOT, "VPN-Dot", onOff(prefs.dotOn)) { vpnOpen = true } }
-                        item { PanelRow(Ico.GLOBE, "Web-Widgets", "${prefs.webWidgets.size}") { webMgrOpen = true } }
-                        item { PanelRow(Ico.INFO, "Info", "Lumen $APP_VERSION") { infoOpen = true } }
+                        item {
+                            TileRow(
+                                { m -> PanelTile(Ico.POWER, t("Standby", "Standby"), t("Schoner, Timer, Energie", "Saver, timer, power"), m) { page = "power" } },
+                                { m -> PanelTile(Ico.REMOTE, t("Fernbedienung", "Remote"), t("Tasten & Shortcuts", "Keys & shortcuts"), m) { page = "remote" } },
+                            )
+                        }
+                        item {
+                            TileRow(
+                                { m -> PanelTile(Ico.LOCK, t("Kindersicherung", "Parental"), t("PIN & Sperrzeiten", "PIN & lock times"), m) { page = "kids" } },
+                                { m -> PanelTile(Ico.GEAR, "System", t("Launcher & Dienste", "Launcher & services"), m) { page = "system" } },
+                            )
+                        }
+                        item {
+                            TileRow(
+                                { m -> PanelTile(Ico.DOT, "VPN-Dot", onOff(prefs.dotOn), m) { vpnOpen = true } },
+                                { m -> PanelTile(Ico.GLOBE, "Web-Widgets", "${prefs.webWidgets.size} " + t("aktiv", "active"), m) { webMgrOpen = true } },
+                            )
+                        }
+                        item {
+                            TileRow(
+                                { m -> PanelTile(Ico.GLOBE, t("Sprache", "Language"), listOf("Deutsch", "English", "System")[prefs.lang], m) { vm.update { it.copy(lang = (it.lang + 1) % 3) } } },
+                                { m -> PanelTile(Ico.INFO, "Info", "Version $APP_VERSION", m) { infoOpen = true } },
+                            )
+                        }
                         item { PanelSection("Android") }
-                        item { PanelRow(Ico.PHONE, t("Android-Einstellungen", "Android settings")) { openSystem(Settings.ACTION_SETTINGS) } }
-                        item { PanelRow(Ico.WIFI, t("Netzwerk & WLAN", "Network & Wi-Fi")) { openSystem(Settings.ACTION_WIFI_SETTINGS) } }
-                        item { PanelRow(Ico.SOUND, t("Ton", "Sound")) { openSystem(Settings.ACTION_SOUND_SETTINGS) } }
-                        item { PanelRow(Ico.GRID, t("Apps verwalten", "Manage apps")) { openSystem(Settings.ACTION_APPLICATION_SETTINGS) } }
+                        item {
+                            TileRow(
+                                { m -> PanelTile(Ico.PHONE, t("Einstellungen", "Settings"), "Android", m, small = true) { openSystem(Settings.ACTION_SETTINGS) } },
+                                { m -> PanelTile(Ico.WIFI, t("Netzwerk", "Network"), "WLAN / LAN", m, small = true) { openSystem(Settings.ACTION_WIFI_SETTINGS) } },
+                            )
+                        }
+                        item {
+                            TileRow(
+                                { m -> PanelTile(Ico.SOUND, t("Ton", "Sound"), "Audio", m, small = true) { openSystem(Settings.ACTION_SOUND_SETTINGS) } },
+                                { m -> PanelTile(Ico.GRID, "Apps", t("verwalten", "manage"), m, small = true) { openSystem(Settings.ACTION_APPLICATION_SETTINGS) } },
+                            )
+                        }
                     } else {
                         item { PanelRow(Ico.BACK, t("Zurück", "Back"), "", Modifier.focusRequester(first)) { page = null } }
                         when (page) {
@@ -295,7 +331,8 @@ fun SettingsDialog(
                         } }
                         item { SettingLine(t("Uhr & Wetter in Apps", "Clock & weather in apps"), onOff(prefs.miniOverlay)) { vm.update { it.copy(miniOverlay = !it.miniOverlay) } } }
                         item { SettingLine(t("Kachel-Transparenz", "Tile transparency"), listOf("0 %", "25 %", "50 %", "70 %")[prefs.tileGlass.coerceIn(0, 3)]) { vm.update { it.copy(tileGlass = (it.tileGlass + 1) % 4) } } }
-                        item { SettingLine(t("Fokus-Stil der Kacheln", "Tile focus style"), listOf(t("Rahmen (ruhig)", "Frame (calm)"), t("Leuchten", "Glow"), t("Anheben", "Lift"))[prefs.focusStyle.coerceIn(0, 2)]) { vm.update { it.copy(focusStyle = (it.focusStyle + 1) % 3) } } }
+                        item { SettingLine(t("Fokus-Stil der Kacheln", "Tile focus style"), focusStyleName(prefs.focusStyle)) { vm.update { it.copy(focusStyle = (it.focusStyle + 1) % 5) } } }
+                        item { SettingLine(t("Farbe der Menüs", "Menu color"), MENU_THEMES[prefs.menuTheme.coerceIn(0, MENU_THEMES.lastIndex)].label) { vm.update { it.copy(menuTheme = (it.menuTheme + 1) % MENU_THEMES.size) } } }
                         item { SettingLine("Look", prefs.look.label) { vm.update { it.copy(look = it.look.next()) } } }
                         item { SettingLine(t("Akzentfarbe", "Accent color"), accentName(prefs.accent)) { vm.update { it.copy(accent = (it.accent + 1) % ACCENTS.size) } } }
                         item { SettingLine(t("Kachel-Stil", "Tile style"), prefs.tile.label) { vm.update { it.copy(tile = it.tile.next()) } } }
@@ -352,12 +389,12 @@ fun SettingsDialog(
                                 sub = MenuSpec(t("Menü-Schrift", "Menu font"), opts.map { (k, l) -> MenuItemSpec(l) { vm.update { p -> p.copy(menuFont = k) }; sub = null } })
                             }
                         }
-                        item { SettingLine(t("Menü-Schriftgröße", "Menu text size"), listOf(t("Klein", "Small"), t("Normal", "Normal"), t("Groß", "Large"))[prefs.menuSize]) { vm.update { it.copy(menuSize = (it.menuSize + 1) % 3) } } }
+                        item { SettingLine(t("Menü-Schriftgröße", "Menu text size"), listOf(t("Klein", "Small"), t("Normal", "Normal"), t("Groß", "Large"), t("Sehr groß", "Extra large"))[prefs.menuSize.coerceIn(0, 3)]) { vm.update { it.copy(menuSize = (it.menuSize + 1) % 4) } } }
                         item { Hint(t("Eigene Schriften (ttf/otf) kopierst du nach /Android/data/com.lumen.tv/files/fonts/ – danach erscheinen sie in der Schriftart-Auswahl. Die Menü-Schrift gilt für dieses Menü und die Kopfzeile.", "Copy your own fonts (ttf/otf) to /Android/data/com.lumen.tv/files/fonts/ – they then appear in the font list. The menu font applies to this menu and the top bar.")) }
                             }
                             "power" -> {
-                        item { SettingLine(t("Standby-Anzeige nach", "Standby display after"), minutes(prefs.idleMin)) { vm.update { it.copy(idleMin = IDLE_OPTIONS.after(it.idleMin)) } } }
-                        item { SettingLine(t("Standby-Anzeige Stil", "Standby display style"), if (prefs.idleStyle == 0) t("Uhr (OLED-schonend)", "Clock (OLED-friendly)") else t("Fotos", "Photos")) { vm.update { it.copy(idleStyle = 1 - it.idleStyle) } } }
+                        item { SettingLine(t("Bildschirmschoner nach", "Screensaver after"), minutes(prefs.idleMin)) { vm.update { it.copy(idleMin = IDLE_OPTIONS.after(it.idleMin)) } } }
+                        item { SettingLine(t("Bildschirmschoner", "Screensaver"), listOf(t("Uhr (OLED-schonend)", "Clock (OLED-friendly)"), t("Eigene Fotos", "Own photos"), t("Galerie aus dem Netz + Uhr & Wetter", "Web gallery + clock & weather"))[prefs.idleStyle.coerceIn(0, 2)]) { vm.update { it.copy(idleStyle = (it.idleStyle + 1) % 3) } } }
                         item { SettingLine(t("Auto-Standby des TV nach", "TV auto-standby after"), hours(prefs.standbyMin)) { vm.update { it.copy(standbyMin = STANDBY_OPTIONS.after(it.standbyMin)) } } }
                         item { Hint(t("Auto-Standby und Einschlaf-Timer brauchen die Bedienungshilfe. Läuft Ton, wird nicht abgeschaltet. Ob der TV dabei wirklich in Standby geht, hängt vom Gerät ab.", "Auto-standby and the sleep timer need the accessibility service. Nothing is switched off while audio is playing. Whether the TV really enters standby depends on the device.")) }
                             }

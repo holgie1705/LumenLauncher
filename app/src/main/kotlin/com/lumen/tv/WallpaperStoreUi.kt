@@ -93,9 +93,9 @@ fun WallpaperStoreDialog(vm: HomeViewModel, onClose: () -> Unit) {
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Box(Modifier.fillMaxSize().background(Ink.copy(alpha = 0.98f))) {
-            Column(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 28.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(t("Wallpaper-Galerie", "Wallpaper gallery"), fontSize = 24.sp, fontWeight = FontWeight.W300, color = Color.White)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        NeoSheet(Ico.BRUSH, t("Wallpaper-Galerie", "Wallpaper gallery"), t("Bing, NASA, Wikimedia & mehr", "Bing, NASA, Wikimedia & more"), width = 1120.dp) {
+            Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     WallSource.entries.forEach { s ->
                         Pill((if (s == source) "● " else "") + s.label) { if (s != source) { source = s; page = 0 } }

@@ -233,3 +233,45 @@ Die Bilder gehören ihren Urhebern (Lizenz steht unter der Vorschau) – nur fü
 ## v1.57
 - Kacheln unten neu: Text zur App steht fest, die fokussierte Reihe sitzt immer direkt darunter, Reihen darüber verschwinden oben (kein Überlappen mehr).
 - App-Name wechselt sauber: alter Name blendet erst aus, dann der neue ein.
+
+## v1.58
+- „Stock-Launcher überschreiben“ greift nur noch beim echten Startbildschirm des Stock-Launchers (HOME-Activity), nicht bei jedem Fenster einer App, die auch Launcher sein kann. waipu-Apps werden nie überschrieben (App sprang kurz nach dem Start zurück zu Lumen).
+
+## v1.59
+- Neuer Look „Neo-Glas“: Einstellungen als schwebendes Glas-Panel mit bunten Symbolen, Untertiteln und gelbem Fokus-Ring; Werte als Cyan-Kapseln; Menüs, PIN-Feld, Knöpfe und Kopfzeilen-Symbole im selben Stil.
+- Radio neu gestaltet: große „Jetzt läuft“-Karte mit Logo, LIVE-Anzeige und Equalizer; Sender als Raster mit Logos; Favoriten/Beliebt/Suche als Reiter; lange drücken = Favorit speichern/entfernen.
+
+## v1.60
+- Radio-Karte auf dem Startbildschirm neu: Glaskarte in Senderfarbe mit großem Logo, „LIVE RADIO“, Song, animierter Wellenform und runder Stopp-Taste.
+- Fokus-Stile der Kacheln überarbeitet: Rahmen (weißer Ring + Schatten), Neon-Leuchten (Farbverlaufs-Ring + Leuchten in App-Farbe), Anheben (3D, tiefer Schatten); dazu ein sanfter Glanz auf der fokussierten Kachel.
+- Einstellungen: Titel und Abschnitt heißen wieder „Lumen Launcher“.
+
+## v1.61
+- Radio-Karte kompakter; Spektrum-Analyzer (Balken von unten, Verlauf) und Lautsprecher-Symbol statt Punkte.
+- Fokus-Stile: Anheben hebt die Kachel jetzt sichtbar an; neu „Glas“ und „Unterstrich“ (5 Stile).
+- Neu: Farbe der Menüs (Nachtblau, Graphit, Mokka & Weiß, Violett, Smaragd, Bordeaux, Mitternacht) unter Aussehen.
+- Menü-Schriftgröße zusätzlich „Sehr groß“.
+- Statusleiste (WLAN, VPN, RAM, Speicher) etwas größer; Uhr links etwas höher.
+
+## v1.62
+- Einstellungen: Hauptseite als Raster großer, farbiger Kacheln (Kategorie-Farbe, Symbol im Glaskreis, Kurzinfo); Android-Bereich als kleine Kacheln; Panel breiter.
+- An/Aus-Einstellungen als Schalter.
+- Senderlogos zusätzlich aus dem TuneIn-Verzeichnis (randlos, gute Qualität), Favicons als Rückfall.
+- Uhr noch etwas höher.
+
+## v1.63
+- Autostart-App startet nur noch nach dem Einschalten der Box, nicht mehr nach jeder Neuinstallation oder jedem Neustart von Lumen.
+
+## v1.64
+- Kopfzeilen-Knöpfe (Radio, Suche, Timer, Einstellungen …): im Fokus wieder gefüllt in der Fokusfarbe (Gelb bzw. Farbe des Menü-Themas) mit dunkler Schrift.
+- Uhr oben bündig ausgerichtet (Wetter bleibt).
+
+## v1.65
+- VPN-Dot neu gestaltet: großer pulsierender Status-Punkt mit Land/Flagge und IP links, Einstellungen in Abschnitten rechts.
+- Unterdialoge (Info, Web-Widgets, Wallpaper-Galerie, Wetter, Ort) im gemeinsamen modernen Rahmen: schwebende Glaskarte im Menü-Thema, farbiger Kopf.
+- Unterseiten der Einstellungen zeigen das passende farbige Symbol im Kopf.
+
+## v1.66
+- Einstellungen: Untertitel auf der Hauptseite entfernt, Versionsnummer oben rechts.
+- Neue Schalter: Verlaufs-Spur, weißer Knopf mit Häkchen und Schatten, gleitende Animation. Mehrfach-Werte als Kapsel mit Pfeil.
+- Neuer Bildschirmschoner „Galerie aus dem Netz“: Fotos von Bing, Unsplash und Wikimedia mit Überblendung und Zoom, große Uhr, Datum und Wetter (Standby & Energie → Bildschirmschoner).

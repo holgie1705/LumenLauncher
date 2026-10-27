@@ -43,7 +43,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.tv.material3.Text
 import kotlinx.coroutines.delay
 
-const val APP_VERSION = "1.57"
+const val APP_VERSION = "1.66"
 private const val TELEGRAM_URL = "https://t.me/HOLGeH"
 private const val MAIL = "holgie4711@proton.me"
 private const val COFFEE_URL = "https://buymeacoffee.com/holgie"
@@ -71,11 +71,12 @@ fun InfoDialog(onClose: () -> Unit) {
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Box(Modifier.fillMaxSize().background(Ink.copy(alpha = 0.98f))) {
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        NeoSheet(Ico.INFO, "Info", "Lumen Launcher $APP_VERSION") {
             LazyColumn(
-                Modifier.align(Alignment.Center).width(800.dp).fillMaxHeight(),
+                Modifier.fillMaxWidth().weight(1f),
                 state = listState,
-                contentPadding = PaddingValues(vertical = 32.dp),
+                contentPadding = PaddingValues(vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 // Kopf ist fokussierbar: so scrollt die Liste mit „Hoch“ wirklich bis ganz nach oben.
@@ -89,7 +90,6 @@ fun InfoDialog(onClose: () -> Unit) {
                             .padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        Text("Info", fontSize = 30.sp, fontWeight = FontWeight.W300, color = Color.White)
                         LumenLogo(Modifier.padding(bottom = 8.dp))
                         Text("Version $APP_VERSION", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color.White)
                         Text(

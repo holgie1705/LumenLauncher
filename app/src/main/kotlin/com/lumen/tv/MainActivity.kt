@@ -15,7 +15,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val special = intent.hasExtra(EXTRA_LOCKED) || intent.getBooleanExtra(EXTRA_IDLE, false)
         if (savedInstanceState == null) {
-            if (!autostartDone && !special) { autostartDone = true; runAutostart() }
+            // Autostart-App nur nach dem Einschalten der Box (nicht nach Update/Neuinstallation oder Neustart von Lumen)
+            if (!autostartDone && !special) { autostartDone = true; if (android.os.SystemClock.elapsedRealtime() < 5 * 60_000L) runAutostart() }
             handleIntent(intent)
             if (!dotChecked) { dotChecked = true; vm.prefs.value.let { if (it.dotOn) VpnDot.sync(this, it) } }
         }

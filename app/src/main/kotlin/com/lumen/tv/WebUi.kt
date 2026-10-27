@@ -136,9 +136,9 @@ fun WebWidgetsDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Box(Modifier.fillMaxSize().background(Ink.copy(alpha = 0.98f))) {
-            Column(Modifier.align(Alignment.Center).width(760.dp).padding(vertical = 26.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Web-Widgets", fontSize = 28.sp, fontWeight = FontWeight.W300, color = Color.White)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        NeoSheet(Ico.GLOBE, "Web-Widgets", t("Webseiten als Live-Kacheln", "Web pages as live tiles"), width = 800.dp) {
+            Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     t("Jede Webadresse wird als Kachel in der Reihe „Widgets“ live angezeigt (z. B. Home Assistant, Grafana, Wetterradar, Börsenticker). OK auf der Kachel öffnet sie groß und bedienbar. Jedes Widget braucht Arbeitsspeicher – wenige reichen.",
                         "Any web address is shown live as a tile in the “Widgets” row (e.g. Home Assistant, Grafana, weather radar, stock ticker). OK on a tile opens it large and usable. Each widget needs memory – a few are enough."),

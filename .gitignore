@@ -1,5 +1,6 @@
 .gradle/
 build/
+.kotlin/
 local.properties
 .idea/
 *.iml
@@ -8,4 +9,5 @@ local.properties
 *.jks
 *.keystore
 .DS_Store
-.kotlin/
+build-install.bat
+build-log.txt

@@ -123,7 +123,8 @@ data class Prefs(
     val weatherLon: Double = 0.0,
     val dim: Int = 1,            // 0..3 -> 0/25/50/75 %
     val blur: Int = 0,           // 0..3
-    val focusStyle: Int = 0,     // 0 Rahmen, 1 Leuchten, 2 Anheben
+    val focusStyle: Int = 0,     // 0 Rahmen, 1 Neon, 2 Anheben, 3 Glas, 4 Unterstrich
+    val menuTheme: Int = 0,      // Farbe von Einstellungen/Menüs/Radio (siehe MENU_THEMES)
     val miniOverlay: Boolean = true, // kleine Uhr + Wetter oben links in anderen Apps
     val iconPack: String = "",       // Paketname des gewählten Icon-Packs, leer = App-Icons
     val freePos: Map<String, Pair<Int, Int>> = emptyMap(), // Layout "Frei": Paket -> (x, y) in dp
@@ -133,7 +134,7 @@ data class Prefs(
     val scale: Int = 1,          // 0..2 -> 85/100/120 %
     val slideshowMin: Int = 15,  // 0 = aus
     val idleMin: Int = 10,       // Standby-Anzeige, 0 = aus
-    val idleStyle: Int = 0,      // 0 = Uhr, 1 = Fotos
+    val idleStyle: Int = 0,      // 0 = Uhr, 1 = eigene Fotos, 2 = Galerie aus dem Netz
     val standbyMin: Int = 0,     // Auto-Standby des TV, 0 = aus
     val allSort: Int = 0,        // 0 = A-Z, 1 = zuletzt, 2 = häufig, 3 = eigene Reihenfolge
     val appOrder: List<String> = emptyList(), // Reihenfolge für allSort = 3
@@ -154,7 +155,7 @@ data class Prefs(
     val tempF: Boolean = false,  // Wetter in °F/mph statt °C/km/h
     val barPos: Int = 0,         // Kopfzeile (Uhr, Wetter, Status): 0 = oben, 1 = unten
     val menuFont: String = "",   // eigene Schrift für Menüs/Kopfzeile, "" = wie Schriftart
-    val menuSize: Int = 1,       // 0..2 -> 85/100/120 % Schriftgröße im Einstellungs-Menü
+    val menuSize: Int = 1,       // 0..3 -> 85/100/120/135 % Schriftgröße im Einstellungs-Menü
     val lang: Int = 0,           // 0 = Deutsch, 1 = English, 2 = System
     val dotOn: Boolean = false,  // VPN-Dot (Overlay) aktiv
     val dotSize: Int = 12,       // 8..20 dp
@@ -167,7 +168,7 @@ data class Prefs(
 val Prefs.scaleF: Float get() = listOf(0.85f, 1f, 1.2f)[scale.coerceIn(0, 2)]
 
 fun Prefs.toJson(): JSONObject = JSONObject().apply {
-    put("lookV", 2); put("focus", focusStyle); put("glass", tileGlass); put("freePos", JSONObject().also { j -> freePos.forEach { (k, v) -> j.put(k, JSONArray().put(v.first).put(v.second)) } }); put("iconPack", iconPack); put("mini", miniOverlay)
+    put("lookV", 2); put("focus", focusStyle); put("menuTheme", menuTheme); put("glass", tileGlass); put("freePos", JSONObject().also { j -> freePos.forEach { (k, v) -> j.put(k, JSONArray().put(v.first).put(v.second)) } }); put("iconPack", iconPack); put("mini", miniOverlay)
     put("look", look.name); put("tile", tile.name); put("layout", layout.name)
     put("clock", clockStyle); put("timeFmt", timeFormat); put("weather", weather)
     put("wName", weatherName); put("wLat", weatherLat); put("wLon", weatherLon)
@@ -234,7 +235,8 @@ fun prefsFromJson(o: JSONObject): Prefs {
     } ?: emptyList()
     return Prefs(
         look = if (o.optInt("lookV", 0) < 2) d.look else runCatching { Look.valueOf(o.getString("look")) }.getOrDefault(d.look),
-        focusStyle = o.optInt("focus", d.focusStyle).coerceIn(0, 2),
+        focusStyle = o.optInt("focus", d.focusStyle).coerceIn(0, 4),
+        menuTheme = o.optInt("menuTheme", d.menuTheme).coerceIn(0, MENU_THEMES.lastIndex),
         tileGlass = o.optInt("glass", d.tileGlass).coerceIn(0, 3),
         freePos = o.optJSONObject("freePos")?.let { j -> j.keys().asSequence().mapNotNull { k -> j.optJSONArray(k)?.let { a -> k to (a.optInt(0) to a.optInt(1)) } }.toMap() } ?: emptyMap(),
         iconPack = o.optString("iconPack", ""),
@@ -254,7 +256,7 @@ fun prefsFromJson(o: JSONObject): Prefs {
         scale = o.optInt("scale", d.scale).coerceIn(0, 2),
         slideshowMin = o.optInt("slide", d.slideshowMin),
         idleMin = o.optInt("idle", d.idleMin),
-        idleStyle = o.optInt("idleStyle", d.idleStyle).coerceIn(0, 1),
+        idleStyle = o.optInt("idleStyle", d.idleStyle).coerceIn(0, 2),
         standbyMin = o.optInt("standby", d.standbyMin),
         allSort = o.optInt("allSort", d.allSort).coerceIn(0, 3),
         appOrder = strs(o.optJSONArray("appOrder")),
@@ -281,7 +283,7 @@ fun prefsFromJson(o: JSONObject): Prefs {
         tempF = o.optBoolean("tempF", d.tempF),
         barPos = o.optInt("barPos", d.barPos).coerceIn(0, 1),
         menuFont = o.optString("menuFont", ""),
-        menuSize = o.optInt("menuSize", d.menuSize).coerceIn(0, 2),
+        menuSize = o.optInt("menuSize", d.menuSize).coerceIn(0, 3),
         lang = o.optInt("lang", d.lang).coerceIn(0, 2),
         dotOn = o.optBoolean("dotOn", d.dotOn),
         dotSize = o.optInt("dotSize", d.dotSize).coerceIn(8, 20),
@@ -309,7 +311,7 @@ fun Prefs.withStyle(o: JSONObject): Prefs = copy(
     accent = o.optInt("accent", accent).coerceIn(0, ACCENTS.lastIndex),
     font = o.optString("font", font),
     scale = o.optInt("scale", scale).coerceIn(0, 2),
-    idleStyle = o.optInt("idleStyle", idleStyle).coerceIn(0, 1),
+    idleStyle = o.optInt("idleStyle", idleStyle).coerceIn(0, 2),
 )
 
 sealed interface RowUi { val id: String; val title: String }

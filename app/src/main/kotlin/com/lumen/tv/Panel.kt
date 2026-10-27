@@ -6,18 +6,24 @@ import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -192,65 +198,185 @@ fun LumenLogo(modifier: Modifier = Modifier, big: Boolean = true) {
     }
 }
 
-val PanelBody = Color(0xE6363941)
+val PanelBody = Color(0xF2141A33)
 val PanelBand = Color(0xFF2B2C31)
 val PanelFocus = Color(0x38FFFFFF)
 
+/** Akzentfarbe je Symbol – bunte Icon-Kreise wie in modernen TV-Oberflächen. */
+fun icoTint(i: Ico): Color = when (i) {
+    Ico.BRUSH -> Color(0xFFFF7AC6); Ico.POWER -> Color(0xFFFFB648); Ico.LIST, Ico.GRID -> Color(0xFF7C9CFF)
+    Ico.REMOTE -> Color(0xFF59E3A7); Ico.LOCK -> Color(0xFFFF6B6B); Ico.GEAR -> NeoCyan; Ico.GLOBE -> Color(0xFF66C7FF)
+    Ico.DOT -> Color(0xFF7CE0A3); Ico.INFO -> NeoCyan; Ico.PHONE -> Color(0xFFB794FF); Ico.WIFI -> Color(0xFF66C7FF)
+    Ico.SOUND -> Color(0xFFFFD36B); Ico.RADIO -> Color(0xFFFF8A5B); Ico.BACK -> Color.White
+    else -> NeoCyan
+}
+
+/** Kopf des schwebenden Panels: Zahnrad im Cyan-Kreis, Titel, Untertitel, Datum. */
 @Composable
-fun PanelHeader(title: String) {
-    Column {
+fun PanelHeader(title: String, subtitle: String = "", icon: Ico = Ico.GEAR, badge: String = "") {
+    val tint = if (icon == Ico.GEAR) NeoCyan else icoTint(icon)
+    Row(
+        Modifier.fillMaxWidth().padding(start = 22.dp, end = 22.dp, top = 22.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Box(
-            Modifier.fillMaxWidth().height(120.dp)
-                .background(Brush.horizontalGradient(listOf(Color(0xFF3B4C9B), Color(0xFF2D3040)))),
-        ) {
-            LumenLogo(Modifier.align(Alignment.CenterStart).padding(start = 28.dp))
-            Text(
-                LocalDate.now().format(DateTimeFormatter.ofPattern("EEE dd.MM.yyyy", Lang.locale)),
-                fontSize = 13.sp, color = Color.White.copy(alpha = 0.85f),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(end = 22.dp, bottom = 8.dp),
-            )
+            Modifier.size(52.dp).background(Brush.linearGradient(listOf(tint.copy(alpha = 0.5f), NeoViolet.copy(alpha = 0.3f))), androidx.compose.foundation.shape.CircleShape)
+                .border(1.5.dp, tint.copy(alpha = 0.8f), androidx.compose.foundation.shape.CircleShape),
+            contentAlignment = Alignment.Center,
+        ) { PanelIcon(icon, Modifier.size(24.dp), Color.White) }
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, fontSize = 21.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (subtitle.isNotEmpty()) Text(subtitle, fontSize = 12.sp, color = Color.White.copy(alpha = 0.65f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        Box(Modifier.fillMaxWidth().background(PanelBand).padding(horizontal = 28.dp, vertical = 14.dp)) {
-            Text(title, fontSize = 15.sp, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
+        if (badge.isNotEmpty()) Box(
+            Modifier.background(NeoCyan.copy(alpha = 0.16f), RoundedCornerShape(12.dp)).border(1.dp, NeoCyan.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                .padding(horizontal = 10.dp, vertical = 4.dp),
+        ) { Text(badge, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = NeoCyan) }
     }
 }
 
 @Composable
 fun PanelSection(title: String) {
-    Text(
-        title.uppercase(Lang.locale), fontSize = 12.sp, letterSpacing = 1.5.sp, color = Color.White.copy(alpha = 0.55f),
-        modifier = Modifier.padding(start = 28.dp, top = 16.dp, bottom = 4.dp),
-    )
+    Row(Modifier.padding(start = 26.dp, top = 16.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(8.dp).background(NeoCyan, androidx.compose.foundation.shape.CircleShape))
+        Spacer(Modifier.width(10.dp))
+        Text(title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+    }
 }
 
-/** Zeile der Hauptliste: abgerundeter Fokus-Balken mit Rahmen, Symbol in kleiner Kachel. */
+/** Zeile der Hauptliste: Glaskarte, buntes Symbol im Kreis, im Fokus gelber Ring. */
 @Composable
 fun PanelRow(icon: Ico, label: String, value: String = "", modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(18.dp)
+    val tint = icoTint(icon)
     Surface(
         onClick = onClick,
-        modifier = modifier.padding(horizontal = 12.dp, vertical = 1.dp).fillMaxWidth().height(54.dp),
+        modifier = modifier.padding(horizontal = 14.dp, vertical = 3.dp).fillMaxWidth().height(58.dp),
         shape = ClickableSurfaceDefaults.shape(shape = shape),
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = Color.Transparent,
-            focusedContainerColor = PanelFocus,
+            containerColor = NeoCard,
+            focusedContainerColor = NeoGlassHi,
         ),
-        scale = ClickableSurfaceDefaults.scale(focusedScale = 1f),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.02f),
         border = ClickableSurfaceDefaults.border(
-            focusedBorder = Border(BorderStroke(1.5.dp, Color.White.copy(alpha = 0.45f)), shape = shape),
+            border = Border(BorderStroke(1.dp, NeoLine), shape = shape),
+            focusedBorder = Border(BorderStroke(2.dp, NeoYellow), shape = shape),
         ),
     ) {
-        Row(Modifier.fillMaxSize().padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(34.dp).background(Color.White.copy(alpha = 0.10f), RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
-                PanelIcon(icon, Modifier.size(20.dp))
+        Row(Modifier.fillMaxSize().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(36.dp).background(tint.copy(alpha = 0.18f), androidx.compose.foundation.shape.CircleShape), contentAlignment = Alignment.Center) {
+                PanelIcon(icon, Modifier.size(19.dp), tint)
             }
-            Spacer(Modifier.width(16.dp))
-            Text(label, fontSize = 16.sp, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            Spacer(Modifier.width(14.dp))
+            Text(label, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             if (value.isNotEmpty()) {
-                Spacer(Modifier.width(16.dp))
-                Text(value, fontSize = 13.sp, color = Color.White.copy(alpha = 0.7f), maxLines = 1)
+                Spacer(Modifier.width(12.dp))
+                Box(Modifier.background(NeoCyan.copy(alpha = 0.16f), RoundedCornerShape(10.dp)).padding(horizontal = 10.dp, vertical = 4.dp)) {
+                    Text(value, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = NeoCyan, maxLines = 1)
+                }
             }
         }
     }
+}
+
+/** Zwei Kacheln nebeneinander. */
+@Composable
+fun TileRow(a: @Composable (Modifier) -> Unit, b: @Composable (Modifier) -> Unit) {
+    Row(Modifier.padding(horizontal = 14.dp, vertical = 5.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        a(Modifier.weight(1f)); b(Modifier.weight(1f))
+    }
+}
+
+/** Große Einstellungs-Kachel: Farbverlauf in der Kategorie-Farbe, Symbol im Glaskreis, Titel und kleine Info. Im Fokus: hebt sich, gelber Ring, Glanz. */
+@Composable
+fun PanelTile(icon: Ico, label: String, info: String, modifier: Modifier = Modifier, small: Boolean = false, onClick: () -> Unit) {
+    val tint = icoTint(icon)
+    val shape = RoundedCornerShape(22.dp)
+    var focused by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    Surface(
+        onClick = onClick,
+        modifier = modifier.height(if (small) 74.dp else 104.dp).onFocusChanged { focused = it.hasFocus },
+        shape = ClickableSurfaceDefaults.shape(shape = shape),
+        colors = ClickableSurfaceDefaults.colors(containerColor = Color.Transparent, focusedContainerColor = Color.Transparent),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
+        border = ClickableSurfaceDefaults.border(
+            border = Border(BorderStroke(1.dp, Color.White.copy(alpha = 0.10f)), shape = shape),
+            focusedBorder = Border(BorderStroke(2.5.dp, NeoYellow), shape = shape),
+        ),
+        glow = ClickableSurfaceDefaults.glow(focusedGlow = androidx.tv.material3.Glow(elevationColor = tint.copy(alpha = 0.55f), elevation = 18.dp)),
+    ) {
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.linearGradient(listOf(tint.copy(alpha = if (focused) 0.62f else 0.38f), tint.copy(alpha = if (focused) 0.22f else 0.10f), Color.Black.copy(alpha = 0.15f))),
+            ).padding(14.dp),
+        ) {
+            if (small) {
+                Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(36.dp).background(Color.White.copy(alpha = 0.16f), androidx.compose.foundation.shape.CircleShape), contentAlignment = Alignment.Center) {
+                        PanelIcon(icon, Modifier.size(19.dp), Color.White)
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(label, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(info, fontSize = 11.sp, color = Color.White.copy(alpha = 0.7f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+            } else {
+                Box(Modifier.size(40.dp).background(Color.White.copy(alpha = 0.16f), androidx.compose.foundation.shape.CircleShape), contentAlignment = Alignment.Center) {
+                    PanelIcon(icon, Modifier.size(21.dp), Color.White)
+                }
+                Column(Modifier.align(Alignment.BottomStart)) {
+                    Text(label, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(info, fontSize = 11.sp, color = Color.White.copy(alpha = 0.75f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+            if (focused) Box(Modifier.matchParentSize().background(Brush.linearGradient(0f to Color.White.copy(alpha = 0.16f), 0.5f to Color.Transparent)))
+        }
+    }
+}
+
+/**
+ * Moderner Rahmen für Unterdialoge: abgedunkelter Hintergrund mit Farbschein, schwebende Glaskarte im Menü-Thema,
+ * Kopf mit farbigem Symbolkreis, Titel und Untertitel. Inhalt füllt den Rest.
+ */
+@Composable
+fun NeoSheet(
+    icon: Ico, title: String, subtitle: String = "", width: androidx.compose.ui.unit.Dp = 840.dp,
+    content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit,
+) {
+    val tint = icoTint(icon)
+    Box(
+        Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.6f))
+            .background(Brush.radialGradient(listOf(tint.copy(alpha = 0.28f), Color.Transparent), radius = 1100f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            Modifier.width(width).fillMaxHeight(0.92f)
+                .clip(RoundedCornerShape(32.dp)).background(NeoPanelBrush)
+                .border(1.dp, NeoLine, RoundedCornerShape(32.dp))
+                .padding(horizontal = 26.dp, vertical = 22.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier.size(54.dp).background(Brush.linearGradient(listOf(tint.copy(alpha = 0.55f), tint.copy(alpha = 0.18f))), androidx.compose.foundation.shape.CircleShape)
+                        .border(1.5.dp, tint.copy(alpha = 0.8f), androidx.compose.foundation.shape.CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) { PanelIcon(icon, Modifier.size(26.dp), Color.White) }
+                Spacer(Modifier.width(16.dp))
+                Column {
+                    Text(title, fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
+                    if (subtitle.isNotEmpty()) Text(subtitle, fontSize = 13.sp, color = Color.White.copy(alpha = 0.65f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+            content()
+        }
+    }
+}
+
+/** Kleine Abschnitts-Überschrift in Unterdialogen. */
+@Composable
+fun SheetSection(title: String) {
+    Text(title.uppercase(Lang.locale), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.6.sp, color = NeoCyan, modifier = Modifier.padding(start = 14.dp, top = 12.dp, bottom = 2.dp))
 }

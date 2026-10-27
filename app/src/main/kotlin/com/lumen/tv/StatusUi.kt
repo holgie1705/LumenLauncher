@@ -40,7 +40,7 @@ fun StatusBar(s: StatusInfo?, timerMin: Int) {
     Row(
         Modifier.background(Color.White.copy(alpha = 0.08f), shape)
             .border(1.dp, Color.White.copy(alpha = 0.10f), shape)
-            .padding(horizontal = 10.dp, vertical = 4.dp),
+            .padding(horizontal = 13.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -63,19 +63,19 @@ fun StatusBar(s: StatusInfo?, timerMin: Int) {
 @Composable
 private fun StatusItem(text: String, highlight: Boolean = false, icon: @Composable () -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(15.dp)) { icon() }
-        Text(text, fontSize = 10.sp, color = if (highlight) Good else Color.White.copy(alpha = 0.85f), maxLines = 1)
+        Box(Modifier.size(18.dp)) { icon() }
+        Text(text, fontSize = 12.sp, color = if (highlight) Good else Color.White.copy(alpha = 0.85f), maxLines = 1)
     }
 }
 
 @Composable
 private fun Divider() {
-    Box(Modifier.size(1.dp, 12.dp).background(Color.White.copy(alpha = 0.15f)))
+    Box(Modifier.size(1.dp, 15.dp).background(Color.White.copy(alpha = 0.15f)))
 }
 
 @Composable
 private fun NetIcon(net: String, level: Int) {
-    Canvas(Modifier.size(15.dp)) {
+    Canvas(Modifier.size(18.dp)) {
         val w = size.width
         val h = size.height
         val stroke = 1.8.dp.toPx()
@@ -106,7 +106,7 @@ private fun NetIcon(net: String, level: Int) {
 
 @Composable
 private fun VpnIcon(on: Boolean) {
-    Canvas(Modifier.size(15.dp)) {
+    Canvas(Modifier.size(18.dp)) {
         val w = size.width * 0.8f
         val h = size.height
         val dx = size.width * 0.1f
@@ -128,7 +128,7 @@ private fun VpnIcon(on: Boolean) {
 
 @Composable
 private fun Ring(used: Float) {
-    Canvas(Modifier.size(15.dp)) {
+    Canvas(Modifier.size(18.dp)) {
         val u = used.coerceIn(0f, 1f)
         val stroke = 3.dp.toPx()
         val inset = stroke / 2
@@ -146,7 +146,7 @@ private fun Ring(used: Float) {
 
 @Composable
 private fun TimerIcon() {
-    Canvas(Modifier.size(15.dp)) {
+    Canvas(Modifier.size(18.dp)) {
         val c = center
         val r = size.minDimension / 2 - 1.5.dp.toPx()
         val stroke = 1.8.dp.toPx()

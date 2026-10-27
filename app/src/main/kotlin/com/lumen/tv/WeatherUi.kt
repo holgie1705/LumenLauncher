@@ -8,6 +8,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -75,7 +79,8 @@ fun ClockWeatherWidget(prefs: Prefs, weather: State<WeatherInfo?>, onClick: () -
             horizontalArrangement = Arrangement.spacedBy(18.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ClockBlock(prefs.clockStyle, now, prefs.is24(ctx))
+            // Uhr etwas höher als das Wetter
+            Box(Modifier.align(Alignment.Top).offset(y = (-4).dp)) { ClockBlock(prefs.clockStyle, now, prefs.is24(ctx)) }
             if (prefs.weather > 0) WeatherBlock(prefs, weather.value)
         }
     }
@@ -160,7 +165,7 @@ fun WeatherDialog(prefs: Prefs, w: WeatherInfo?, onPlace: () -> Unit, onClose: (
     LaunchedEffect(Unit) { delay(80); runCatching { first.requestFocus() } }
     Dialog(onDismissRequest = onClose) {
         Column(
-            Modifier.width(520.dp).background(Color(0xFF14161C), RoundedCornerShape(18.dp)).padding(24.dp),
+            Modifier.width(520.dp).clip(RoundedCornerShape(28.dp)).background(NeoPanelBrush).border(1.dp, NeoLine, RoundedCornerShape(28.dp)).padding(26.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(prefs.weatherName, fontSize = 22.sp, fontWeight = FontWeight.Medium, color = Color.White)
@@ -218,7 +223,7 @@ fun PlaceDialog(vm: HomeViewModel, onClose: () -> Unit) {
 
     Dialog(onDismissRequest = onClose) {
         Column(
-            Modifier.width(560.dp).background(Color(0xFF14161C), RoundedCornerShape(18.dp)).padding(24.dp),
+            Modifier.width(560.dp).clip(RoundedCornerShape(28.dp)).background(NeoPanelBrush).border(1.dp, NeoLine, RoundedCornerShape(28.dp)).padding(26.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(t("Ort für das Wetter", "Place for the weather"), fontSize = 22.sp, fontWeight = FontWeight.Medium, color = Color.White)

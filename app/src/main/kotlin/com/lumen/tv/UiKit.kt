@@ -2,6 +2,8 @@ package com.lumen.tv
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -22,6 +24,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,7 +44,15 @@ var iconPackGlobal by androidx.compose.runtime.mutableStateOf("")
 /** Deckkraft der App-Kacheln (1 = voll, kleiner = durchsichtiger). */
 var tileAlphaGlobal by androidx.compose.runtime.mutableFloatStateOf(1f)
 
-/** Einheitliche fokussierbare Karte: ruhiger weißer Rahmen, kein Wackeln, keine Farbwechsel. */
+/**
+ * Einheitliche fokussierbare Karte. Fokus-Stile:
+ *  0 = Rahmen: klarer weißer Ring, leicht größer, weicher Schatten
+ *  1 = Neon: Farbverlaufs-Ring mit Leuchten in der App-Farbe
+ *  2 = Anheben (3D): Kachel steigt sichtbar nach oben, wird deutlich größer, tiefer Schatten
+ *  3 = Glas: helles Milchglas mit Lichtkante oben
+ *  4 = Unterstrich: Kachel bleibt ruhig, darunter ein farbiger Balken (wie bei Streaming-Apps)
+ * Kein Wackeln, keine Farbwechsel im Hintergrund.
+ */
 @Composable
 fun FocusCard(
     w: Dp, h: Dp, glow: Color, modifier: Modifier = Modifier,
@@ -50,63 +61,97 @@ fun FocusCard(
     bg: Float = tileAlphaGlobal,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    var focused by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    val style = focusStyleGlobal
+    val lift by androidx.compose.animation.core.animateDpAsState(if (focused && style == 2) (-12).dp else 0.dp, label = "lift")
     Surface(
         onClick = onClick,
         onLongClick = onLong,
-        modifier = modifier.size(w, h).onFocusChanged { if (it.hasFocus) onFocus() },
+        modifier = modifier.size(w, h)
+            .then(if (style == 2) Modifier.graphicsLayer { translationY = lift.toPx() } else Modifier)
+            .onFocusChanged { focused = it.hasFocus; if (it.hasFocus) onFocus() },
         shape = ClickableSurfaceDefaults.shape(shape = shape),
         colors = ClickableSurfaceDefaults.colors(
             containerColor = Color.White.copy(alpha = 0.08f * bg),
-            focusedContainerColor = Color.White.copy(alpha = 0.12f * bg),
+            focusedContainerColor = Color.White.copy(alpha = (if (style == 3) 0.26f else 0.14f) * bg.coerceAtLeast(0.6f)),
         ),
-        scale = ClickableSurfaceDefaults.scale(focusedScale = when (focusStyleGlobal) { 1 -> 1.04f; 2 -> 1.10f; else -> 1f }),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = when (style) { 1 -> 1.07f; 2 -> 1.14f; 3 -> 1.05f; 4 -> 1.02f; else -> 1.06f }),
         border = ClickableSurfaceDefaults.border(
-            focusedBorder = Border(BorderStroke(if (focusStyleGlobal == 0) 3.dp else 2.dp, Color.White), shape = shape),
+            border = Border(BorderStroke(1.dp, Color.White.copy(alpha = 0.10f)), shape = shape),
+            focusedBorder = when (style) {
+                1 -> Border(BorderStroke(3.dp, androidx.compose.ui.graphics.Brush.linearGradient(listOf(NeoCyan, NeoViolet, NeoYellow))), shape = shape)
+                2 -> Border(BorderStroke(2.5.dp, Color.White), shape = shape)
+                3 -> Border(BorderStroke(1.5.dp, Color.White.copy(alpha = 0.75f)), shape = shape)
+                4 -> Border(BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)), shape = shape)
+                else -> Border(BorderStroke(3.dp, Color.White), shape = shape)
+            },
         ),
-        glow = ClickableSurfaceDefaults.glow(focusedGlow = when (focusStyleGlobal) {
-            1 -> Glow(elevationColor = Color.White.copy(alpha = 0.45f), elevation = 22.dp)
-            2 -> Glow(elevationColor = Color.Black.copy(alpha = 0.65f), elevation = 26.dp)
-            else -> Glow(elevationColor = Color.White.copy(alpha = 0.22f), elevation = 12.dp)
+        glow = ClickableSurfaceDefaults.glow(focusedGlow = when (style) {
+            1 -> Glow(elevationColor = glow.copy(alpha = 0.85f), elevation = 26.dp)
+            2 -> Glow(elevationColor = Color.Black.copy(alpha = 0.9f), elevation = 40.dp)
+            3 -> Glow(elevationColor = Color.White.copy(alpha = 0.30f), elevation = 16.dp)
+            4 -> Glow(elevationColor = Color.Transparent, elevation = 0.dp)
+            else -> Glow(elevationColor = Color.Black.copy(alpha = 0.55f), elevation = 18.dp)
         }),
-        content = content,
-    )
-}
-
-@Composable
-fun Pill(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(22.dp)
-    Surface(
-        onClick = onClick,
-        modifier = modifier.height(44.dp),
-        shape = ClickableSurfaceDefaults.shape(shape = shape),
-        colors = ClickableSurfaceDefaults.colors(
-            containerColor = Color.White.copy(alpha = 0.10f),
-            focusedContainerColor = Color.White.copy(alpha = 0.22f),
-        ),
-        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.06f),
-        border = ClickableSurfaceDefaults.border(
-            focusedBorder = Border(BorderStroke(2.dp, Color.White.copy(alpha = 0.9f)), shape = shape),
-        ),
     ) {
-        Box(Modifier.fillMaxHeight().padding(horizontal = 18.dp), contentAlignment = Alignment.Center) {
-            Text(text, fontSize = 15.sp, color = Color.White, maxLines = 1)
+        content()
+        if (focused) when (style) {
+            4 -> Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(5.dp).background(NeoYellow))
+            3 -> Box(
+                Modifier.fillMaxSize().background(
+                    androidx.compose.ui.graphics.Brush.verticalGradient(0f to Color.White.copy(alpha = 0.32f), 0.18f to Color.White.copy(alpha = 0.10f), 1f to Color.Transparent),
+                ),
+            )
+            else -> Box(
+                Modifier.fillMaxSize().background(
+                    androidx.compose.ui.graphics.Brush.linearGradient(0f to Color.White.copy(alpha = 0.20f), 0.45f to Color.White.copy(alpha = 0.04f), 1f to Color.Transparent),
+                ),
+            )
         }
     }
 }
 
+/** Neon-Glas-Pille: ruhig im Glas, im Fokus gelber Ring; "selected" = aktive Auswahl (Cyan). */
 @Composable
-fun SettingLine(label: String, value: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun Pill(text: String, modifier: Modifier = Modifier, selected: Boolean = false, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(22.dp)
+    var focused by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     Surface(
         onClick = onClick,
-        modifier = modifier.padding(horizontal = 12.dp, vertical = 1.dp).fillMaxWidth().height(50.dp),
-        shape = ClickableSurfaceDefaults.shape(shape = RoundedCornerShape(14.dp)),
+        modifier = modifier.height(44.dp).onFocusChanged { focused = it.hasFocus },
+        shape = ClickableSurfaceDefaults.shape(shape = shape),
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = Color.Transparent,
-            focusedContainerColor = PanelFocus,
+            containerColor = if (selected) NeoCyan else NeoGlass,
+            focusedContainerColor = if (selected) NeoCyan else NeoGlassHi,
         ),
-        scale = ClickableSurfaceDefaults.scale(focusedScale = 1f),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
         border = ClickableSurfaceDefaults.border(
-            focusedBorder = Border(BorderStroke(1.5.dp, Color.White.copy(alpha = 0.45f)), shape = RoundedCornerShape(14.dp)),
+            border = Border(BorderStroke(1.dp, if (selected) Color.Transparent else NeoLine), shape = shape),
+            focusedBorder = Border(BorderStroke(2.5.dp, NeoYellow), shape = shape),
+        ),
+    ) {
+        Box(Modifier.fillMaxHeight().padding(horizontal = 18.dp), contentAlignment = Alignment.Center) {
+            Text(text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = if (selected) Color(0xFF071318) else Color.White, maxLines = 1)
+        }
+    }
+}
+
+/** Einstellungs-Zeile als Glaskarte; der Wert steht als kleine Cyan-Kapsel rechts. */
+@Composable
+fun SettingLine(label: String, value: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(16.dp)
+    Surface(
+        onClick = onClick,
+        modifier = modifier.padding(horizontal = 12.dp, vertical = 3.dp).fillMaxWidth().height(52.dp),
+        shape = ClickableSurfaceDefaults.shape(shape = shape),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = NeoCard,
+            focusedContainerColor = NeoGlassHi,
+        ),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.02f),
+        border = ClickableSurfaceDefaults.border(
+            border = Border(BorderStroke(1.dp, NeoLine), shape = shape),
+            focusedBorder = Border(BorderStroke(2.dp, NeoYellow), shape = shape),
         ),
     ) {
         Row(
@@ -114,12 +159,24 @@ fun SettingLine(label: String, value: String, modifier: Modifier = Modifier, onC
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                label, fontSize = 15.sp, color = Color.White, maxLines = 1,
+                label, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Color.White, maxLines = 1,
                 overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f),
             )
-            if (value.isNotEmpty()) {
-                Spacer(Modifier.width(24.dp))
-                Text(value, fontSize = 14.sp, color = Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Medium, maxLines = 1)
+            val on = value == t("An", "On")
+            if (on || value == t("Aus", "Off")) {
+                Spacer(Modifier.width(16.dp))
+                NeoSwitch(on)
+            } else if (value.isNotEmpty()) {
+                // Mehrfach-Werte als Kapsel mit Pfeilen – OK schaltet weiter
+                Spacer(Modifier.width(16.dp))
+                Row(
+                    Modifier.background(Color.Black.copy(alpha = 0.28f), RoundedCornerShape(12.dp)).border(1.dp, NeoCyan.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(value, fontSize = 13.sp, color = Color.White, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("›", fontSize = 16.sp, color = NeoCyan, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
@@ -142,17 +199,83 @@ fun IconPill(icon: Ico, label: String, modifier: Modifier = Modifier, active: Bo
         modifier = modifier.height(44.dp).onFocusChanged { focused = it.hasFocus },
         shape = ClickableSurfaceDefaults.shape(shape = shape),
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = if (active) Color(0xFF1DB954).copy(alpha = 0.35f) else Color.Black.copy(alpha = 0.28f),
-            focusedContainerColor = Color.White,
+            containerColor = if (active) Color(0xFF1DB954).copy(alpha = 0.35f) else Color(0x5C0E1424),
+            focusedContainerColor = NeoYellow,
         ),
-        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.08f),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.06f),
+        border = ClickableSurfaceDefaults.border(
+            border = Border(BorderStroke(1.dp, NeoLine), shape = shape),
+            focusedBorder = Border(BorderStroke(2.dp, Color.White), shape = shape),
+        ),
     ) {
         Row(Modifier.fillMaxHeight().padding(horizontal = 13.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PanelIcon(icon, Modifier.size(20.dp), if (focused) Color.Black else Color.White)
-            if (focused) Text(label, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, color = Color.Black, maxLines = 1)
+            PanelIcon(icon, Modifier.size(20.dp), if (focused) Color(0xFF14161C) else Color.White)
+            if (focused) Text(label, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, color = Color(0xFF14161C), maxLines = 1)
         }
     }
 }
 
 /** Seitenabstand der Startseite (Uhr, Reihen, Statusleiste). */
 val SIDE_PAD = 26.dp
+
+// ---------------------------------------------------------------- Neo-Glas-Farben (Einstellungen, Radio, Menüs)
+class MenuTheme(val de: String, val en: String, val top: Long, val mid: Long, val bottom: Long, val accent: Long, val focus: Long, val accent2: Long) {
+    val label: String get() = t(de, en)
+}
+/** Farbvarianten für Einstellungen, Menüs und Radio. */
+val MENU_THEMES = listOf(
+    MenuTheme("Nachtblau", "Night blue", 0xF21A2140, 0xF2121731, 0xF20D1124, 0xFF4FE3F0, 0xFFFFE14D, 0xFF8E5CFF),
+    MenuTheme("Graphit", "Graphite", 0xF2303338, 0xF2232529, 0xF2181A1D, 0xFF9AD0FF, 0xFFFFFFFF, 0xFF6B7CFF),
+    MenuTheme("Mokka & Weiß", "Mocha & white", 0xF2603E2B, 0xF2472D1F, 0xF2301E14, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFC8A27A),
+    MenuTheme("Violett", "Violet", 0xF2382065, 0xF2241544, 0xF2160D2C, 0xFFFF7AC6, 0xFFFFE14D, 0xFF8E5CFF),
+    MenuTheme("Smaragd", "Emerald", 0xF20F3D35, 0xF20B2B26, 0xF2071C19, 0xFF5CF2B5, 0xFFFFE14D, 0xFF2FB8FF),
+    MenuTheme("Bordeaux", "Bordeaux", 0xF25C1A2A, 0xF240121E, 0xF22A0B13, 0xFFFFC6D0, 0xFFFFE14D, 0xFFFF6B8B),
+    MenuTheme("Mitternacht", "Midnight", 0xF20B0B0F, 0xF2070709, 0xF2000000, 0xFF4FE3F0, 0xFFFFE14D, 0xFF8E5CFF),
+)
+/** Gewählte Menüfarbe (wird vom Startbildschirm aus den Einstellungen gesetzt). */
+var menuThemeGlobal by androidx.compose.runtime.mutableIntStateOf(0)
+private val curTheme: MenuTheme get() = MENU_THEMES[menuThemeGlobal.coerceIn(0, MENU_THEMES.lastIndex)]
+
+/** Akzent (Werte, aktive Auswahl). */
+val NeoCyan: Color get() = Color(curTheme.accent)
+/** Fokus-Ring. */
+val NeoYellow: Color get() = Color(curTheme.focus)
+/** Zweiter Akzent (Verläufe). */
+val NeoViolet: Color get() = Color(curTheme.accent2)
+val NeoGlass = Color(0x1FFFFFFF)
+val NeoGlassHi = Color(0x33FFFFFF)
+val NeoCard = Color(0x12FFFFFF)
+val NeoLine = Color(0x26FFFFFF)
+/** Hintergrund der schwebenden Panels. */
+val NeoPanelBrush: androidx.compose.ui.graphics.Brush
+    get() = curTheme.let { th -> androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(th.top), Color(th.mid), Color(th.bottom))) }
+
+fun focusStyleName(i: Int): String = when (i) {
+    1 -> t("Neon-Leuchten", "Neon glow"); 2 -> t("Anheben (3D)", "Lift (3D)"); 3 -> t("Glas", "Glass"); 4 -> t("Unterstrich", "Underline")
+    else -> t("Rahmen", "Frame")
+}
+
+/** Moderner Schalter: Verlaufs-Spur, weißer Knopf mit Schatten und Häkchen, gleitet weich hin und her. */
+@Composable
+fun NeoSwitch(on: Boolean) {
+    val x by androidx.compose.animation.core.animateDpAsState(if (on) 26.dp else 0.dp, label = "knob")
+    Box(
+        Modifier.size(58.dp, 32.dp)
+            .background(
+                if (on) androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(NeoViolet, NeoCyan))
+                else androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Black.copy(alpha = 0.45f), Color.Black.copy(alpha = 0.35f))),
+                RoundedCornerShape(16.dp),
+            )
+            .border(1.dp, if (on) Color.White.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.22f), RoundedCornerShape(16.dp))
+            .padding(3.dp),
+    ) {
+        Box(
+            Modifier.offset(x = x).size(26.dp)
+                .graphicsLayer { shadowElevation = 6f; shape = androidx.compose.foundation.shape.CircleShape; clip = true }
+                .background(if (on) Color.White else Color(0xFFB8BCC8), androidx.compose.foundation.shape.CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (on) Text("✓", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1B2140))
+        }
+    }
+}

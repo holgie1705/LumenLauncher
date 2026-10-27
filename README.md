@@ -15,18 +15,25 @@ Lumen aims to be a full alternative to launchers like Projectivy, CleanMyTV or F
 - Clock (digital, minimal, analog) and weather (Open-Meteo, no key needed), position of header and tiles selectable
 - Small clock and weather in the top left corner while another app is running (optional)
 - Move tiles with the D-pad, favorites row, custom row order
-- Calm focus frame, glow or lift effect
+- Five tile focus styles: frame, neon glow, lift (3D), glass, underline
 
 **Wallpapers and themes**
 - Pictures, GIFs and videos from a local folder, rotating automatically
 - Built-in wallpaper gallery (Bing daily image, Wikimedia Commons, NASA, picsum.photos)
 - Icon pack support (ADW/Nova/Apex format, `appfilter.xml`)
+- Modern "Neo glass" menus: floating settings panel with colorful category tiles, switches, version badge
+- Menu colors: night blue, graphite, mocha & white, violet, emerald, bordeaux, midnight; adjustable menu text size
 - Looks: Pure, OLED, Aurora, Glass; accent color; modern fonts (Outfit, Plus Jakarta Sans, Manrope, Sora, Bai Jamjuree) or your own fonts
 - Save and share your look as a theme file
 
 **Radio**
-- Station search through radio-browser.info, background playback, "now playing" card with selectable position
-- Station logos with sensible fallbacks
+- Station search through radio-browser.info, background playback
+- Radio screen with a large "now playing" card and a station grid (favorites, popular, search); long-press to save a favorite
+- Compact "Live radio" card on the home screen with spectrum analyzer and stop button, selectable position
+- Station logos from the TuneIn directory, with favicon fallbacks
+
+**Screensaver**
+- Clock (OLED-friendly), your own photos, or a web gallery (Bing, Unsplash, Wikimedia) with crossfade and slow zoom, large clock, date and weather
 
 **Web widgets**
 - Show web pages as live tiles on the home screen, open them fullscreen and interactive
@@ -108,7 +115,8 @@ The accessibility service reads window content only to press "Restart" in the An
 Lumen has no accounts, no ads and no analytics. The only online requests are:
 - **Open-Meteo** – weather and place search (only when weather is on)
 - **radio-browser.info** – radio station search
-- **Wallpaper gallery** – Bing, Wikimedia Commons, NASA, picsum.photos (only when you open the gallery)
+- **TuneIn (opml.radiotime.com)** – station logos (only the station name is sent)
+- **Wallpaper gallery** – Bing, Wikimedia Commons, NASA, picsum.photos (only when you open the gallery, or when the web gallery screensaver is running)
 - **ipapi.co** – country of your public IP in the VPN dot menu (only while a VPN is active)
 - Whatever web widgets you add yourself
 
@@ -143,6 +151,8 @@ Kotlin 2.0, Jetpack Compose for TV (`androidx.tv:tv-material`), Media3 ExoPlayer
 - The power-menu restart click depends on the texts of your firmware's menu.
 - "Continue watching" needs `READ_TV_LISTINGS` (grant it under Settings → Rows). Only entries the source apps mark as searchable are returned; on older firmwares the old system-only permission applies and the row stays empty.
 - The mini clock may be covered by apps that draw over everything in fullscreen.
+- "Override stock launcher" only reacts to the real home screen of the stock launcher; waipu.tv apps are never overridden.
+- After `adb install -r` Android may bring the last used app to the front; run `adb shell am start -a android.intent.action.MAIN -c android.intent.category.HOME` to return to Lumen.
 - Release builds use R8 minification; if something breaks, please open an issue with details.
 
 ## Disclaimer
@@ -153,7 +163,7 @@ Lumen is provided "as is", without warranty of any kind. Features such as app di
 
 - Fonts: Bai Jamjuree, Outfit, Plus Jakarta Sans, Manrope, Sora – SIL Open Font License 1.1. The license texts with the original copyright lines are in the [`licenses/`](licenses) folder.
 - Libraries: AndroidX / Jetpack Compose, Media3, Coil – Apache License 2.0
-- Weather: [Open-Meteo](https://open-meteo.com) · Radio: [radio-browser.info](https://www.radio-browser.info)
+- Weather: [Open-Meteo](https://open-meteo.com) · Radio: [radio-browser.info](https://www.radio-browser.info) · Station logos: TuneIn
 
 ## License
 

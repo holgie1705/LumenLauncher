@@ -37,19 +37,31 @@ import org.json.JSONObject
  */
 class OverrideService : AccessibilityService() {
     // Alle anderen Launcher auf dem Gerät (auch der der waipu-Box) werden automatisch erkannt.
-    private var stockCache: Set<String> = emptySet()
+    // Nur der eigentliche Startbildschirm (die HOME-Activity) zählt – nicht jedes Fenster einer App,
+    // die zufällig auch Startbildschirm sein kann (z. B. waipu-Apps auf der waipu-Box).
+    private var homeCache: Map<String, Set<String>> = emptyMap()
     private var stockAt = 0L
-    private fun stockPkgs(): Set<String> {
+    private fun homeActivities(): Map<String, Set<String>> {
         val now = SystemClock.elapsedRealtime()
-        if (stockCache.isEmpty() || now - stockAt > 60_000) {
-            val homes = runCatching {
+        if (homeCache.isEmpty() || now - stockAt > 60_000) {
+            homeCache = runCatching {
                 packageManager.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0)
-                    .map { it.activityInfo.packageName }.toSet() - packageName
-            }.getOrDefault(emptySet())
-            stockCache = homes + STOCK_PKGS + "com.amazon.tv.launcher"
+                    .map { it.activityInfo }
+                    .filter { it.packageName != packageName }
+                    .groupBy({ it.packageName }, { it.name })
+                    .mapValues { it.value.toSet() }
+            }.getOrDefault(emptyMap())
             stockAt = now
         }
-        return stockCache
+        return homeCache
+    }
+    /** true nur, wenn wirklich der Stock-Launcher-Startbildschirm im Vordergrund ist. */
+    private fun isStockHome(pkg: String, cls: String?): Boolean {
+        if (pkg.contains("waipu", true) || pkg.contains("exaring", true) || pkg.contains("settings", true)) return false
+        val acts = homeActivities()[pkg]
+        if (acts != null) return cls != null && cls in acts
+        // Bekannte Stock-Launcher, die sich nicht als HOME melden (z. B. eingefroren/anders registriert)
+        return pkg in STOCK_PKGS || pkg == "com.amazon.tv.launcher"
     }
     private val handler = Handler(Looper.getMainLooper())
     private val sp by lazy { getSharedPreferences("lumen", MODE_PRIVATE) }
@@ -184,9 +196,8 @@ class OverrideService : AccessibilityService() {
         }
         if (parental.isBlocked(pkg)) {
             bringLumen { putExtra(EXTRA_LOCKED, pkg) }
-        } else if (pkg in stockPkgs() && sp.getBoolean("override", false) &&
-            System.currentTimeMillis() > sp.getLong("graceUntil", 0L) &&
-            !pkg.contains("settings", ignoreCase = true)) {
+        } else if (sp.getBoolean("override", false) && isStockHome(pkg, e.className?.toString()) &&
+            System.currentTimeMillis() > sp.getLong("graceUntil", 0L)) {
             bringLumen()
         }
     }

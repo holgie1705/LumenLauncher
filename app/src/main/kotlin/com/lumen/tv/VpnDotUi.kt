@@ -1,5 +1,9 @@
 package com.lumen.tv
 
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -82,79 +86,96 @@ fun VpnDotDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Box(Modifier.fillMaxSize().background(Ink.copy(alpha = 0.98f))) {
-            LazyColumn(
-                Modifier.align(Alignment.Center).width(800.dp).fillMaxHeight(),
-                contentPadding = PaddingValues(vertical = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                item { Text("VPN-Dot", fontSize = 30.sp, fontWeight = FontWeight.W300, color = Color.White) }
-                item {
-                    Column(
-                        Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Box(Modifier.size(16.dp).background(if (vpn) DOT_GREEN else DOT_RED, CircleShape))
-                            Text(
-                                if (vpn) t("VPN ist verbunden", "VPN is connected") else t("Kein VPN erkannt", "No VPN detected"),
-                                fontSize = 20.sp, fontWeight = FontWeight.Medium, color = Color.White,
-                            )
-                        }
-                        val sub = when {
-                            !prefs.dotOn -> t("Der Punkt ist ausgeschaltet.", "The dot is switched off.")
-                            !overlay -> t("Berechtigung „Über anderen Apps einblenden“ fehlt.", "Permission “Display over other apps” is missing.")
-                            else -> t("Der Punkt blinkt im eingestellten Intervall.", "The dot appears at the configured interval.")
-                        }
-                        Text(sub, fontSize = 14.sp, color = Color.White.copy(alpha = 0.65f))
-                        if (vpn) {
-                            val c = country
-                            val line = when {
-                                !lookupDone -> t("VPN-Land: wird ermittelt …", "VPN country: looking up …")
-                                c == null || (c.name.isEmpty() && c.ip.isEmpty()) -> t("VPN-Land: nicht ermittelbar", "VPN country: unavailable")
-                                else -> t("VPN-Land: ", "VPN country: ") + c.name + " " + c.flag
-                            }
-                            Text(line, fontSize = 14.sp, color = Color.White.copy(alpha = 0.65f))
-                            if (c != null && c.ip.isNotEmpty()) Text(t("VPN-IP: ", "VPN IP: ") + c.ip, fontSize = 14.sp, color = Color.White.copy(alpha = 0.65f))
-                        }
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        NeoSheet(Ico.DOT, "VPN-Dot", t("Zeigt dir in jeder App, ob dein VPN läuft", "Shows in every app whether your VPN is on")) {
+            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                // ---------- Links: großer Status ----------
+                val stateColor = if (vpn) DOT_GREEN else DOT_RED
+                val pulse by produceState(0f, prefs.dotOn) {
+                    while (true) { value = (System.currentTimeMillis() % 2000L) / 2000f; delay(80) }
+                }
+                Column(
+                    Modifier.width(300.dp).fillMaxHeight().clip(RoundedCornerShape(26.dp))
+                        .background(Brush.verticalGradient(listOf(stateColor.copy(alpha = 0.28f), Color.White.copy(alpha = 0.04f))))
+                        .padding(22.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Spacer(Modifier.height(6.dp))
+                    Box(Modifier.size(130.dp), contentAlignment = Alignment.Center) {
+                        // pulsierender Ring um den Punkt
+                        Box(Modifier.size((70 + 55 * pulse).dp).background(stateColor.copy(alpha = 0.30f * (1f - pulse)), CircleShape))
+                        Box(Modifier.size(70.dp).background(Brush.radialGradient(listOf(stateColor, stateColor.copy(alpha = 0.7f))), CircleShape))
                     }
-                }
-                item {
-                    SettingLine(t("VPN-Dot aktiv", "VPN dot enabled"), if (prefs.dotOn) t("An", "On") else t("Aus", "Off"), Modifier.focusRequester(first)) {
-                        val on = !prefs.dotOn
-                        vm.update { it.copy(dotOn = on) }
-                        if (on && !VpnDot.canOverlay(ctx)) overlaySettings()
-                    }
-                }
-                item {
-                    SettingLine(t("Berechtigung „Über anderen Apps einblenden“", "Permission “Display over other apps”"),
-                        if (overlay) t("erteilt", "granted") else t("öffnen", "open")) { overlaySettings() }
-                }
-                item { SettingLine(t("Punktgröße", "Dot size"), "${prefs.dotSize} px") { vm.update { it.copy(dotSize = VpnDot.SIZES.cycle(it.dotSize)) } } }
-                item { SettingLine(t("Blinkintervall", "Blink interval"), secs(prefs.dotInterval)) { vm.update { it.copy(dotInterval = VpnDot.INTERVAL_OPTIONS.cycle(it.dotInterval)) } } }
-                item { SettingLine(t("Anzeigedauer", "Display duration"), secs(prefs.dotDuration)) { vm.update { it.copy(dotDuration = VpnDot.DURATION_OPTIONS.cycle(it.dotDuration)) } } }
-                item { SettingLine(t("Position", "Position"), VpnDot.positionName(prefs.dotPos)) { vm.update { it.copy(dotPos = (it.dotPos + 1) % 4) } } }
-                item { SettingLine(t("Autostart nach dem Booten", "Auto-start after boot"), if (prefs.dotAuto) t("An", "On") else t("Aus", "Off")) { vm.update { it.copy(dotAuto = !it.dotAuto) } } }
-                item {
-                    SettingLine(t("Punkt jetzt testen", "Test the dot now"), "") {
-                        if (!VpnDot.canOverlay(ctx)) overlaySettings()
-                        else scope.launch {
-                            VpnDot.start(ctx)
-                            delay((vm.prefs.value.dotDuration + 1) * 1000L)
-                            if (!vm.prefs.value.dotOn) VpnDot.stop(ctx)
-                        }
-                    }
-                }
-                item {
                     Text(
-                        t(
-                            "Grün = VPN aktiv, rot = kein VPN. Das Land wird über die öffentliche IP-Adresse (ipapi.co) ermittelt – nur solange dieses Menü offen und ein VPN aktiv ist. GPS wird nicht benutzt.",
-                            "Green = VPN active, red = no VPN. The country is looked up from your public IP address (ipapi.co) – only while this menu is open and a VPN is active. GPS is not used.",
-                        ),
-                        fontSize = 13.sp, color = Color.White.copy(alpha = 0.5f),
+                        if (vpn) t("VPN verbunden", "VPN connected") else t("Kein VPN", "No VPN"),
+                        fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White,
+                    )
+                    if (vpn) {
+                        val c = country
+                        when {
+                            !lookupDone -> Text(t("Land wird ermittelt …", "Looking up country …"), fontSize = 14.sp, color = Color.White.copy(alpha = 0.7f))
+                            c == null || (c.name.isEmpty() && c.ip.isEmpty()) -> Text(t("Land nicht ermittelbar", "Country unavailable"), fontSize = 14.sp, color = Color.White.copy(alpha = 0.7f))
+                            else -> {
+                                Text(c.flag, fontSize = 40.sp)
+                                Text(c.name, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                            }
+                        }
+                        if (c != null && c.ip.isNotEmpty()) Box(Modifier.background(Color.White.copy(alpha = 0.10f), RoundedCornerShape(10.dp)).padding(horizontal = 10.dp, vertical = 4.dp)) {
+                            Text("IP " + c.ip, fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
+                        }
+                    }
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        when {
+                            !prefs.dotOn -> t("Der Punkt ist ausgeschaltet.", "The dot is switched off.")
+                            !overlay -> t("Berechtigung fehlt – siehe rechts.", "Permission missing – see right.")
+                            else -> t("Grün = VPN aktiv · Rot = kein VPN", "Green = VPN on · Red = no VPN")
+                        },
+                        fontSize = 12.sp, color = Color.White.copy(alpha = 0.65f),
                     )
                 }
-                item { Pill(t("Schließen", "Close")) { onClose() } }
+
+                // ---------- Rechts: Einstellungen ----------
+                LazyColumn(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    item { SheetSection(t("Allgemein", "General")) }
+                    item {
+                        SettingLine(t("VPN-Dot aktiv", "VPN dot enabled"), if (prefs.dotOn) t("An", "On") else t("Aus", "Off"), Modifier.focusRequester(first)) {
+                            val on = !prefs.dotOn
+                            vm.update { it.copy(dotOn = on) }
+                            if (on && !VpnDot.canOverlay(ctx)) overlaySettings()
+                        }
+                    }
+                    item { SettingLine(t("Autostart nach dem Booten", "Auto-start after boot"), if (prefs.dotAuto) t("An", "On") else t("Aus", "Off")) { vm.update { it.copy(dotAuto = !it.dotAuto) } } }
+                    item {
+                        SettingLine(t("Über anderen Apps einblenden", "Display over other apps"),
+                            if (overlay) t("erteilt", "granted") else t("öffnen", "open")) { overlaySettings() }
+                    }
+                    item { SheetSection(t("Darstellung", "Appearance")) }
+                    item { SettingLine(t("Punktgröße", "Dot size"), "${prefs.dotSize} px") { vm.update { it.copy(dotSize = VpnDot.SIZES.cycle(it.dotSize)) } } }
+                    item { SettingLine(t("Position", "Position"), VpnDot.positionName(prefs.dotPos)) { vm.update { it.copy(dotPos = (it.dotPos + 1) % 4) } } }
+                    item { SettingLine(t("Blinkintervall", "Blink interval"), secs(prefs.dotInterval)) { vm.update { it.copy(dotInterval = VpnDot.INTERVAL_OPTIONS.cycle(it.dotInterval)) } } }
+                    item { SettingLine(t("Anzeigedauer", "Display duration"), secs(prefs.dotDuration)) { vm.update { it.copy(dotDuration = VpnDot.DURATION_OPTIONS.cycle(it.dotDuration)) } } }
+                    item {
+                        Row(Modifier.padding(start = 12.dp, top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Pill("▶ " + t("Punkt testen", "Test dot"), selected = true) {
+                                if (!VpnDot.canOverlay(ctx)) overlaySettings()
+                                else scope.launch {
+                                    VpnDot.start(ctx)
+                                    delay((vm.prefs.value.dotDuration + 1) * 1000L)
+                                    if (!vm.prefs.value.dotOn) VpnDot.stop(ctx)
+                                }
+                            }
+                            Pill(t("Schließen", "Close")) { onClose() }
+                        }
+                    }
+                    item {
+                        Text(
+                            t("Das Land wird über die öffentliche IP (ipapi.co) ermittelt – nur solange dieses Menü offen und ein VPN aktiv ist. GPS wird nicht benutzt.",
+                                "The country is looked up from your public IP (ipapi.co) – only while this menu is open and a VPN is active. GPS is not used."),
+                            fontSize = 12.sp, color = Color.White.copy(alpha = 0.5f), modifier = Modifier.padding(start = 14.dp, top = 12.dp),
+                        )
+                    }
+                }
             }
         }
     }
