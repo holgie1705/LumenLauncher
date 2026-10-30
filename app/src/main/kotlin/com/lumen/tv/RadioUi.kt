@@ -1,5 +1,11 @@
 package com.lumen.tv
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -72,40 +78,44 @@ private fun stationColor(name: String): Color {
     return Color(palette[(name.hashCode() and 0x7fffffff) % palette.size])
 }
 
-/** Kachel eines gespeicherten Senders: Logo (falls vorhanden) auf Farbverlauf, ♪-Anzeige bei laufender Wiedergabe. */
+/** Runde Senderkachel: Logo im Kreis, Name darunter; OK spielt direkt, beim laufenden Sender dreht sich ein Farbring. */
 @Composable
 fun RadioTile(s: Station, style: TileStyle, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit, onLong: () -> Unit) {
-    val ctx = LocalContext.current
     val now by Radio.now.collectAsState()
     val playing by Radio.playing.collectAsState()
     val active = now?.uuid == s.uuid
-    val base = stationColor(s.name)
-    val (wd, ht) = wideDims(style, scale)
-    FocusCard(wd, ht, base, modifier, onFocus, onClick, onLong) {
-        Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(base.copy(alpha = tileAlphaGlobal), base.copy(alpha = 0.45f * tileAlphaGlobal), Color(0xFF111319).copy(alpha = tileAlphaGlobal))))) {
-            StationLogo(s, Modifier.align(Alignment.Center).size((64 * scale).dp), (28 * scale).sp)
-            Text(
-                s.name, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.align(Alignment.BottomStart).padding(start = 10.dp, end = 10.dp, bottom = 8.dp),
-            )
-            if (active) Text(
-                if (playing) "♪ " + t("läuft", "playing") else "… " + t("lädt", "loading"),
-                fontSize = 11.sp, color = Color.White,
-                modifier = Modifier.align(Alignment.TopStart).padding(8.dp).background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp)).padding(horizontal = 8.dp, vertical = 2.dp),
-            )
+    val d = wideDims(style, scale).second.coerceAtLeast(84.dp)
+    val spin = rememberInfiniteTransition(label = "ring")
+    val angle by spin.animateFloat(0f, 360f, infiniteRepeatable(tween(4000, easing = LinearEasing)), label = "a")
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Box(contentAlignment = Alignment.Center) {
+            if (active) androidx.compose.foundation.Canvas(Modifier.size(d + 10.dp)) {
+                rotate(if (playing) angle else 0f) {
+                    drawCircle(Brush.sweepGradient(listOf(NeoCyan, NeoViolet, NeoYellow, NeoCyan)), style = androidx.compose.ui.graphics.drawscope.Stroke(4.dp.toPx()))
+                }
+            }
+            FocusCard(d, d, stationColor(s.name), modifier, onFocus, onClick, onLong, shape = CircleShape, bg = 1f) {
+                StationLogo(s, Modifier.fillMaxSize(), 22.sp, round = true)
+            }
         }
+        Text(
+            (if (active) "♪ " else "") + s.name, fontSize = 12.sp, fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+            color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(d + 20.dp), textAlign = TextAlign.Center,
+        )
     }
 }
 
-/** Erste Kachel der Radio-Reihe: öffnet die Sendersuche. */
+/** Erste Kachel der Radio-Reihe: öffnet das Radio (rund, passend zu den Senderkacheln). */
 @Composable
 fun RadioAddTile(style: TileStyle, scale: Float, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
-    val (wd, ht) = wideDims(style, scale)
-    FocusCard(wd, ht, DefaultAccent, modifier, onFocus, onClick) {
-        Column(Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            PanelIcon(Ico.RADIO, Modifier.size((34 * scale).dp))
-            Text(t("Sender suchen", "Find stations"), fontSize = 13.sp, color = Color.White, textAlign = TextAlign.Center, maxLines = 1)
+    val d = wideDims(style, scale).second.coerceAtLeast(84.dp)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        FocusCard(d, d, DefaultAccent, modifier, onFocus, onClick, shape = CircleShape, bg = 1f) {
+            Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFFFF8A5B).copy(alpha = 0.6f), NeoViolet.copy(alpha = 0.5f)))), contentAlignment = Alignment.Center) {
+                PanelIcon(Ico.RADIO, Modifier.size(d * 0.4f), Color.White)
+            }
         }
+        Text(t("Radio", "Radio"), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color.White, maxLines = 1)
     }
 }
 
@@ -119,22 +129,36 @@ fun RadioSearchDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
     var favMode by remember { mutableStateOf(prefs.stations.isNotEmpty()) }
     var results by remember { mutableStateOf<List<Station>>(emptyList()) }
     var info by remember { mutableStateOf(t("Lade beliebte deutsche Sender …", "Loading popular German stations …")) }
+    var genre by remember { mutableStateOf("") }
+    var country by remember { mutableStateOf("DE") }
+    var showHistory by remember { mutableStateOf(false) }
+    var podOpen by remember { mutableStateOf(false) }
     val field = remember { FocusRequester() }
     val now by Radio.now.collectAsState()
     val playing by Radio.playing.collectAsState()
     val buffering by Radio.buffering.collectAsState()
     val track by Radio.track.collectAsState()
     val err by Radio.error.collectAsState()
+    val history by Radio.history.collectAsState()
+    val sleepUntil by Radio.sleepUntil.collectAsState()
     val saved = prefs.stations.map { it.uuid }.toSet()
     val shown = if (favMode) prefs.stations else results
 
     fun search(q: String) {
-        favMode = false
+        favMode = false; genre = ""
         info = t("Suche …", "Searching …")
         scope.launch {
             val found = RadioApi.search(q)
             results = if (q.isBlank()) prefs.stations + found.filter { f -> prefs.stations.none { it.uuid == f.uuid } } else found
             info = if (results.isEmpty()) t("Nichts gefunden – oder der Senderdienst ist gerade nicht erreichbar.", "Nothing found – or the station service is unreachable.") else ""
+        }
+    }
+    fun browse(tag: String) {
+        favMode = false; genre = tag; query = ""
+        info = t("Lade …", "Loading …")
+        scope.launch {
+            results = RadioApi.browse(tag, country)
+            info = if (results.isEmpty()) t("Keine Sender gefunden.", "No stations found.") else ""
         }
     }
     fun toggleSave(s: Station) {
@@ -193,6 +217,13 @@ fun RadioSearchDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
                                 Pill("■ " + t("Stopp", "Stop")) { Radio.stop(ctx) }
                                 Pill(if (st.uuid in saved) "✓ " + t("Favorit", "Favorite") else "★ " + t("Speichern", "Save"), selected = st.uuid in saved) { toggleSave(st) }
                             }
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                val sleepMin = if (sleepUntil > System.currentTimeMillis()) ((sleepUntil - System.currentTimeMillis()) / 60_000 + 1).toInt() else 0
+                                Pill("☾ " + if (sleepMin > 0) "$sleepMin min" else t("Timer", "Timer"), selected = sleepMin > 0) {
+                                    Radio.setSleep(ctx, listOf(0, 15, 30, 45, 60, 90).let { l -> l[(l.indexOfFirst { it > sleepMin }.takeIf { it >= 0 } ?: 0)] })
+                                }
+                                if (history.isNotEmpty()) Pill("≡ " + t("Verlauf", "History"), selected = showHistory) { showHistory = !showHistory }
+                            }
                         }
                     }
                     if (err.isNotEmpty()) Text(err, fontSize = 13.sp, color = Color(0xFFFFB37A))
@@ -210,8 +241,26 @@ fun RadioSearchDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
                         Pill("★ " + t("Favoriten", "Favorites") + " (${prefs.stations.size})", Modifier.focusRequester(firstBtn), selected = favMode) { favMode = true }
                         Pill(t("Beliebt", "Popular"), selected = !favMode && query.isBlank()) { query = ""; search("") }
                         Pill("⌕ " + query.ifEmpty { t("Sender suchen …", "Search stations …") }, selected = !favMode && query.isNotBlank()) { editing = true }
+                        Pill("🎙 Podcasts") { podOpen = true }
                         Spacer(Modifier.weight(1f))
                         Pill(t("Schließen", "Close")) { onClose() }
+                    }
+                    // Genre- und Land-Auswahl
+                    val genres = listOf(
+                        "pop" to "Pop", "rock" to "Rock", "schlager" to "Schlager", "news" to t("Nachrichten", "News"),
+                        "80s" to "80er", "90s" to "90er", "dance" to t("Dance/Elektro", "Dance"), "jazz" to "Jazz",
+                        "classical" to t("Klassik", "Classical"), "oldies" to "Oldies", "hip hop" to "Hip-Hop", "country" to "Country",
+                    )
+                    androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        item {
+                            Pill(when (country) { "DE" -> "🇩🇪 DE"; "AT" -> "🇦🇹 AT"; "CH" -> "🇨🇭 CH"; else -> "🌍 " + t("Welt", "World") }, selected = true) {
+                                country = when (country) { "DE" -> "AT"; "AT" -> "CH"; "CH" -> ""; else -> "DE" }
+                                if (genre.isNotEmpty()) browse(genre)
+                            }
+                        }
+                        itemsIndexed(genres) { _, g ->
+                            Pill(g.second, selected = genre == g.first && !favMode) { browse(g.first) }
+                        }
                     }
                     if (editing) BasicTextField(
                         value = query, onValueChange = { query = it }, singleLine = true,
@@ -232,7 +281,30 @@ fun RadioSearchDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
                         },
                         fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = if (favMode) Color(0xFFFFD36B) else Color.White.copy(alpha = 0.75f),
                     )
-                    LazyVerticalGrid(
+                    if (showHistory) LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        item { Text(t("Zuletzt gehört – OK sucht den Titel auf YouTube", "Recently played – OK searches the track on YouTube"), fontSize = 13.sp, color = Color.White.copy(alpha = 0.6f)) }
+                        itemsIndexed(history) { _, h ->
+                            Surface(
+                                onClick = {
+                                    val q = java.net.URLEncoder.encode(h.title, "UTF-8")
+                                    runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://music.youtube.com/search?q=$q")).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                                        .onFailure { runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://www.youtube.com/results?search_query=$q")).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) } }
+                                },
+                                shape = ClickableSurfaceDefaults.shape(shape = RoundedCornerShape(12.dp)),
+                                colors = ClickableSurfaceDefaults.colors(containerColor = NeoCard, focusedContainerColor = NeoGlassHi),
+                                border = ClickableSurfaceDefaults.border(focusedBorder = Border(BorderStroke(2.dp, NeoYellow), shape = RoundedCornerShape(12.dp))),
+                            ) {
+                                Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    Text("♪", fontSize = 16.sp, color = NeoCyan)
+                                    Column(Modifier.weight(1f)) {
+                                        Text(h.title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        if (h.station.isNotEmpty()) Text(h.station, fontSize = 12.sp, color = Color.White.copy(alpha = 0.55f), maxLines = 1)
+                                    }
+                                    Text("▶", fontSize = 13.sp, color = Color.White.copy(alpha = 0.5f))
+                                }
+                            }
+                        }
+                    } else LazyVerticalGrid(
                         columns = GridCells.Adaptive(250.dp),
                         modifier = Modifier.weight(1f).fillMaxWidth(),
                         contentPadding = PaddingValues(vertical = 6.dp, horizontal = 4.dp),
@@ -245,6 +317,7 @@ fun RadioSearchDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
                     }
                 }
             }
+            if (podOpen) PodcastDialog(vm, prefs) { podOpen = false }
         }
     }
 }
@@ -433,16 +506,16 @@ private fun logoCandidates(s: Station, tune: String? = null): List<String> {
 
 /** Senderlogo auf hellem, abgerundetem Grund; fällt Schritt für Schritt auf Alternativen und zuletzt auf Anfangsbuchstaben zurück. */
 @Composable
-fun StationLogo(s: Station, modifier: Modifier, initialSize: androidx.compose.ui.unit.TextUnit) {
+fun StationLogo(s: Station, modifier: Modifier, initialSize: androidx.compose.ui.unit.TextUnit, round: Boolean = false) {
     val ctx = LocalContext.current
     val tune by androidx.compose.runtime.produceState<String?>(null, s.uuid) { value = StationLogos.tunein(s.name) }
     val cands = remember(s.uuid, s.favicon, s.home, tune) { logoCandidates(s, tune) }
     var idx by remember(s.uuid, tune) { mutableStateOf(0) }
     val base = stationColor(s.name)
-    val shape = RoundedCornerShape(14.dp)
+    val shape: androidx.compose.ui.graphics.Shape = if (round) CircleShape else RoundedCornerShape(14.dp)
     if (idx < cands.size) {
         val full = cands[idx] == tune   // TuneIn-Logos sind randlos und quadratisch -> füllend anzeigen
-        Box(modifier.clip(shape).background(Color(0xFFF1F3F8)).padding(if (full) 0.dp else 7.dp), contentAlignment = Alignment.Center) {
+        Box(modifier.clip(shape).background(Color(0xFFF1F3F8)).padding(if (full) 0.dp else if (round) 14.dp else 7.dp), contentAlignment = Alignment.Center) {
             AsyncImage(
                 model = ImageRequest.Builder(ctx).data(cands[idx]).addHeader("User-Agent", WallSources.userAgent()).size(256, 256).build(),
                 contentDescription = null, contentScale = if (full) ContentScale.Crop else ContentScale.Fit, modifier = Modifier.fillMaxSize(),

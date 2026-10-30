@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -108,7 +109,7 @@ fun NetScreensaver(wall: Wall?, weather: WeatherInfo?, place: String, is24: Bool
                     .padding(horizontal = 18.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(weatherIcon(weather.code, weather.isDay), fontSize = 30.sp)
+                WeatherGlyph(weather.code, weather.isDay, Modifier.size(36.dp))
                 Text("${weather.temp}°", fontSize = 30.sp, fontWeight = FontWeight.Light, color = Color.White)
                 Column {
                     Text(weatherText(weather.code), fontSize = 14.sp, color = Color.White, maxLines = 1)

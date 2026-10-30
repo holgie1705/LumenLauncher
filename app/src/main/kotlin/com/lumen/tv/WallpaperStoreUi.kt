@@ -92,6 +92,17 @@ fun WallpaperStoreDialog(vm: HomeViewModel, onClose: () -> Unit) {
         }
     }
 
+    fun removeWall(w: RemoteWall) {
+        scope.launch {
+            status = t("Entferne …", "Removing …")
+            val ok = WallSources.remove(ctx, w)
+            owned.value = ownedNames(ctx)
+            vm.reloadWallpapers()
+            status = if (ok) t("Entfernt – wird nicht mehr als Wallpaper genutzt.", "Removed – no longer used as wallpaper.")
+            else t("Konnte nicht entfernt werden.", "Could not remove it.")
+        }
+    }
+
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
         NeoSheet(Ico.BRUSH, t("Wallpaper-Galerie", "Wallpaper gallery"), t("Bing, NASA, Wikimedia & mehr", "Bing, NASA, Wikimedia & more"), width = 1120.dp) {
@@ -112,7 +123,7 @@ fun WallpaperStoreDialog(vm: HomeViewModel, onClose: () -> Unit) {
                             val have = "dl_" + w.id.replace(Regex("[^A-Za-z0-9_-]"), "_").take(60) in owned.value
                             val mod = if (w === walls.firstOrNull()) Modifier.focusRequester(first) else Modifier
                             Surface(
-                                onClick = { download(w) },
+                                onClick = { if (have) removeWall(w) else download(w) },
                                 modifier = mod.fillMaxWidth().aspectRatio(16f / 9f).onFocusChanged { if (it.isFocused) focused = w },
                                 shape = ClickableSurfaceDefaults.shape(shape = RoundedCornerShape(12.dp)),
                                 colors = ClickableSurfaceDefaults.colors(containerColor = Color.White.copy(alpha = 0.06f)),
@@ -138,7 +149,11 @@ fun WallpaperStoreDialog(vm: HomeViewModel, onClose: () -> Unit) {
                     if (loading) Text(t("Lade Bilder …", "Loading pictures …"), fontSize = 16.sp, color = Color.White.copy(alpha = 0.7f), modifier = Modifier.padding(8.dp))
                 }
                 focused?.let {
-                    Text(it.title, fontSize = 15.sp, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    val fHave = "dl_" + it.id.replace(Regex("[^A-Za-z0-9_-]"), "_").take(60) in owned.value
+                    Text(
+                        (if (fHave) t("✓ aktiv · OK = entfernen  ·  ", "✓ active · OK = remove  ·  ") else t("OK = hinzufügen  ·  ", "OK = add  ·  ")) + it.title,
+                        fontSize = 15.sp, color = if (fHave) Color(0xFF7CE0A6) else Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    )
                     Text(it.credit, fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 if (status.isNotEmpty()) Text(status, fontSize = 14.sp, color = Color(0xFFFFD27A))
@@ -151,8 +166,8 @@ fun WallpaperStoreDialog(vm: HomeViewModel, onClose: () -> Unit) {
                 }
                 Text(
                     t(
-                        "OK auf ein Bild lädt es in den Wallpaper-Ordner. Bilder gehören ihren Urhebern (Lizenz siehe Zeile oben) – gedacht für den privaten Gebrauch auf diesem TV.",
-                        "Press OK on a picture to save it to the wallpaper folder. Pictures belong to their authors (license shown above) – meant for private use on this TV.",
+                        "OK fügt ein Bild hinzu – bei einem Bild mit ✓ nimmt OK es wieder heraus. Bilder gehören ihren Urhebern (Lizenz siehe Zeile oben) – gedacht für den privaten Gebrauch auf diesem TV.",
+                        "OK adds a picture – on one marked ✓ it removes it again. Pictures belong to their authors (license shown above) – meant for private use on this TV.",
                     ),
                     fontSize = 11.sp, color = Color.White.copy(alpha = 0.45f),
                 )

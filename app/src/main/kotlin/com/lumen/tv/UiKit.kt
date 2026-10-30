@@ -231,10 +231,32 @@ val MENU_THEMES = listOf(
     MenuTheme("Smaragd", "Emerald", 0xF20F3D35, 0xF20B2B26, 0xF2071C19, 0xFF5CF2B5, 0xFFFFE14D, 0xFF2FB8FF),
     MenuTheme("Bordeaux", "Bordeaux", 0xF25C1A2A, 0xF240121E, 0xF22A0B13, 0xFFFFC6D0, 0xFFFFE14D, 0xFFFF6B8B),
     MenuTheme("Mitternacht", "Midnight", 0xF20B0B0F, 0xF2070709, 0xF2000000, 0xFF4FE3F0, 0xFFFFE14D, 0xFF8E5CFF),
+    // Platzhalter: wird zur Laufzeit aus den Farben des aktuellen Wallpapers berechnet
+    MenuTheme("Aus dem Wallpaper", "From wallpaper", 0xF21A2140, 0xF2121731, 0xF20D1124, 0xFF4FE3F0, 0xFFFFE14D, 0xFF8E5CFF),
 )
+const val THEME_FROM_WALL = 7
+
+/** Farben des aktuellen Wallpapers (lebendig, dunkel), gesetzt vom Startbildschirm. */
+var wallColorsGlobal by androidx.compose.runtime.mutableStateOf<Pair<Int, Int>?>(null)
+
+private fun mix(a: Int, b: Int, f: Float): Long {
+    fun ch(x: Int, s: Int) = (x shr s) and 0xFF
+    val r = (ch(a, 16) * (1 - f) + ch(b, 16) * f).toInt(); val g = (ch(a, 8) * (1 - f) + ch(b, 8) * f).toInt(); val bl = (ch(a, 0) * (1 - f) + ch(b, 0) * f).toInt()
+    return (0xF2L shl 24) or (r.toLong() shl 16) or (g.toLong() shl 8) or bl.toLong()
+}
 /** Gewählte Menüfarbe (wird vom Startbildschirm aus den Einstellungen gesetzt). */
 var menuThemeGlobal by androidx.compose.runtime.mutableIntStateOf(0)
-private val curTheme: MenuTheme get() = MENU_THEMES[menuThemeGlobal.coerceIn(0, MENU_THEMES.lastIndex)]
+private val curTheme: MenuTheme
+    get() {
+        val i = menuThemeGlobal.coerceIn(0, MENU_THEMES.lastIndex)
+        val wc = wallColorsGlobal
+        if (i != THEME_FROM_WALL || wc == null) return MENU_THEMES[i]
+        val (vib, dark) = wc
+        val black = 0xFF05060A.toInt()
+        // Panel: dunkle Wallpaper-Farbe stark abgedunkelt; Akzent: lebendige Farbe aufgehellt
+        val accent = (0xFFL shl 24) or (mix(vib, 0xFFFFFFFF.toInt(), 0.25f) and 0xFFFFFFL)
+        return MenuTheme("", "", mix(dark, black, 0.55f), mix(dark, black, 0.70f), mix(dark, black, 0.82f), accent, 0xFFFFE14D, (0xFFL shl 24) or (mix(vib, black, 0.2f) and 0xFFFFFFL))
+    }
 
 /** Akzent (Werte, aktive Auswahl). */
 val NeoCyan: Color get() = Color(curTheme.accent)
@@ -278,4 +300,20 @@ fun NeoSwitch(on: Boolean) {
             if (on) Text("✓", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1B2140))
         }
     }
+}
+
+/** Fokussierbare Listenzeile: dezent, im Fokus gelber Rand – damit man mit der Fernbedienung durch lange Listen scrollen kann. */
+@Composable
+fun FocusRow(modifier: Modifier = Modifier, highlight: Boolean = false, onClick: () -> Unit = {}, content: @Composable () -> Unit) {
+    val shape = RoundedCornerShape(14.dp)
+    Surface(
+        onClick = onClick, modifier = modifier.fillMaxWidth(),
+        shape = ClickableSurfaceDefaults.shape(shape = shape),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = if (highlight) NeoCyan.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.05f),
+            focusedContainerColor = if (highlight) NeoCyan.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.14f),
+        ),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.01f),
+        border = ClickableSurfaceDefaults.border(focusedBorder = Border(BorderStroke(2.dp, NeoYellow), shape = shape)),
+    ) { content() }
 }

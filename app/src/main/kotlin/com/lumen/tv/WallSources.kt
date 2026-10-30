@@ -15,11 +15,22 @@ import java.time.LocalDate
 class RemoteWall(val id: String, val thumb: String, val full: String, val title: String, val credit: String, val source: WallSource)
 
 /** Öffentliche Quellen ohne Konto und ohne API-Schlüssel. */
-enum class WallSource(private val de: String, private val en: String) {
+enum class WallSource(private val de: String, private val en: String, val query: String = "") {
     BING("Bing Tagesbild", "Bing picture of the day"),
     WIKI("Wikimedia (Qualitätsbilder)", "Wikimedia (featured pictures)"),
     NASA("NASA (Weltall)", "NASA (space)"),
-    PICSUM("Fotos (Unsplash)", "Photos (Unsplash)");
+    PICSUM("Fotos (Unsplash)", "Photos (Unsplash)"),
+    // Wallhaven: große, kuratierte Wallpaper-Sammlung (ohne Konto/Schlüssel, nur jugendfrei)
+    WH_NATURE("Natur", "Nature", "nature landscape"),
+    WH_SPACE("Weltall & Sterne", "Space & stars", "space galaxy nebula"),
+    WH_CITY("Städte & Architektur", "Cities & architecture", "city skyline architecture"),
+    WH_MINIMAL("Minimalistisch", "Minimal", "minimal"),
+    WH_ABSTRACT("Abstrakt & Muster", "Abstract & patterns", "abstract gradient"),
+    WH_DARK("Dunkel & Neon", "Dark & neon", "dark neon synthwave"),
+    WH_ANIMALS("Tiere", "Animals", "animals wildlife"),
+    WH_CARS("Autos & Technik", "Cars & tech", "cars vehicles"),
+    WH_FANTASY("Fantasy & Digital Art", "Fantasy & digital art", "fantasy digital art"),
+    WH_SEASONS("Jahreszeiten", "Seasons", "autumn winter forest");
     val label: String get() = t(de, en)
 }
 
@@ -51,8 +62,22 @@ object WallSources {
                 WallSource.WIKI -> wiki(page)
                 WallSource.NASA -> nasa(page)
                 WallSource.PICSUM -> picsum(page)
+                else -> wallhaven(src, page)   // alle WH_*-Quellen
             }
         }.getOrDefault(emptyList())
+    }
+
+    /** Wallhaven-Suche (frei, kein Schlüssel; categories=general, purity=sfw, mind. 1920×1080). */
+    private fun wallhaven(src: WallSource, page: Int): List<RemoteWall> {
+        val q = URLEncoder.encode(src.query, "UTF-8")
+        val txt = getText("https://wallhaven.cc/api/v1/search?q=$q&categories=100&purity=100&atleast=1920x1080&sorting=toplist&page=${page + 1}") ?: return emptyList()
+        val arr = JSONObject(txt).optJSONArray("data") ?: return emptyList()
+        return (0 until arr.length()).mapNotNull { i ->
+            val o = arr.getJSONObject(i)
+            val full = o.optString("path"); if (full.isEmpty()) return@mapNotNull null
+            val thumb = o.optJSONObject("thumbs")?.optString("small").orEmpty().ifEmpty { full }
+            RemoteWall("wh_" + o.optString("id"), thumb, full, src.label, "Wallhaven · " + o.optString("resolution", ""), src)
+        }
     }
 
     private fun bing(): List<RemoteWall> {
@@ -137,6 +162,20 @@ object WallSources {
             if (size in 1..12_000_000L) return orig
         }
         return urls.firstOrNull { it.contains("~large.jpg", true) } ?: urls.firstOrNull { it.contains("~medium.jpg", true) } ?: orig
+    }
+
+    /** Dateiname-Schlüssel (ohne Endung), den [download] für dieses Bild vergibt. */
+    private fun key(w: RemoteWall): String = "dl_" + w.id.replace(Regex("[^A-Za-z0-9_-]"), "_").take(60)
+
+    /** Entfernt ein bereits geladenes Bild wieder aus dem Wallpaper-Ordner. Rückgabe: true = etwas gelöscht. */
+    suspend fun remove(ctx: Context, w: RemoteWall): Boolean = withContext(Dispatchers.IO) {
+        runCatching {
+            val dir = ctx.getExternalFilesDir("wallpapers") ?: return@runCatching false
+            val k = key(w)
+            var any = false
+            dir.listFiles()?.forEach { if (File(it.name).nameWithoutExtension == k && it.delete()) any = true }
+            any
+        }.getOrDefault(false)
     }
 
     /** Lädt das Bild in den Wallpaper-Ordner. Rückgabe: Datei oder null. */

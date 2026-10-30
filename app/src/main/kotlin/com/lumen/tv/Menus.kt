@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -46,6 +47,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.tv.material3.Text
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun MenuDialog(spec: MenuSpec, onDismiss: () -> Unit) {
@@ -156,12 +158,19 @@ fun SettingsDialog(
 ) {
     val ctx = LocalContext.current
     var note by remember { mutableStateOf("") }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     var sub by remember { mutableStateOf<MenuSpec?>(null) }
     var placeOpen by remember { mutableStateOf(false) }
     var vpnOpen by remember { mutableStateOf(false) }
     var infoOpen by remember { mutableStateOf(false) }
     var webMgrOpen by remember { mutableStateOf(false) }
     var storeOpen by remember { mutableStateOf(false) }
+    var perfOpen by remember { mutableStateOf(false) }
+    var widgetsOpen by remember { mutableStateOf(false) }
+    var updOpen by remember { mutableStateOf(false) }
+    var learnOpen by remember { mutableStateOf(false) }
+    var keypadOpen by remember { mutableStateOf(false) }
+    var wizardOpen by remember { mutableStateOf(false) }
     var page by remember { mutableStateOf<String?>(null) }
     val first = remember { FocusRequester() }
     val a11y = remember { a11yEnabled(ctx) }
@@ -270,6 +279,9 @@ fun SettingsDialog(
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
                     if (page == null) {
+                        Updater.available.value?.let { u ->
+                            item { TileRow({ m -> PanelTile(Ico.DOWNLOAD, t("Update verfügbar", "Update available"), "Lumen ${u.version} – " + t("jetzt installieren", "install now"), m) { updOpen = true } }) }
+                        }
                         // Kachel-Raster: je zwei große farbige Kacheln pro Zeile
                         item {
                             TileRow(
@@ -297,7 +309,13 @@ fun SettingsDialog(
                         }
                         item {
                             TileRow(
+                                { m -> PanelTile(Ico.GAUGE, t("Leistung", "Performance"), t("RAM, Speicher, Boost", "RAM, storage, boost"), m) { perfOpen = true } },
                                 { m -> PanelTile(Ico.GLOBE, t("Sprache", "Language"), listOf("Deutsch", "English", "System")[prefs.lang], m) { vm.update { it.copy(lang = (it.lang + 1) % 3) } } },
+                            )
+                        }
+                        item {
+                            TileRow(
+                                { m -> PanelTile(Ico.TIMER, t("Info-Widgets", "Info widgets"), t("Fußball, News, Countdown …", "Football, news, countdown …"), m) { widgetsOpen = true } },
                                 { m -> PanelTile(Ico.INFO, "Info", "Version $APP_VERSION", m) { infoOpen = true } },
                             )
                         }
@@ -329,23 +347,41 @@ fun SettingsDialog(
                                     (if (packs.isEmpty()) listOf(MenuItemSpec(t("Keine Icon-Packs installiert", "No icon packs installed")) { sub = null }) else packs.map { p -> MenuItemSpec(p.second) { vm.setIconPack(p.first); sub = null } }),
                             )
                         } }
-                        item { SettingLine(t("Uhr & Wetter in Apps", "Clock & weather in apps"), onOff(prefs.miniOverlay)) { vm.update { it.copy(miniOverlay = !it.miniOverlay) } } }
+                        item {
+                            val mpNames = listOf(t("Aus", "Off"), t("Oben links", "Top left"), t("Oben rechts", "Top right"), t("Unten links", "Bottom left"), t("Unten rechts", "Bottom right"))
+                            SettingLine(t("Uhr & Wetter in Apps", "Clock & weather in apps"), if (prefs.miniOverlay) mpNames[prefs.miniPos + 1] else mpNames[0]) {
+                                sub = MenuSpec(t("Uhr & Wetter in Apps", "Clock & weather in apps"), mpNames.mapIndexed { i, n -> MenuItemSpec(n) {
+                                    vm.update { if (i == 0) it.copy(miniOverlay = false) else it.copy(miniOverlay = true, miniPos = i - 1) }; sub = null
+                                } })
+                            }
+                        }
                         item { SettingLine(t("Kachel-Transparenz", "Tile transparency"), listOf("0 %", "25 %", "50 %", "70 %")[prefs.tileGlass.coerceIn(0, 3)]) { vm.update { it.copy(tileGlass = (it.tileGlass + 1) % 4) } } }
                         item { SettingLine(t("Fokus-Stil der Kacheln", "Tile focus style"), focusStyleName(prefs.focusStyle)) { vm.update { it.copy(focusStyle = (it.focusStyle + 1) % 5) } } }
+                        item { SettingLine(t("Animierter Hintergrund", "Animated background"), animBgName(prefs.animBg)) { vm.update { it.copy(animBg = (it.animBg + 1) % 11) } } }
+                        item { SettingLine(t("Saisonale Themes (Halloween, Weihnachten, Silvester, Ostern)", "Seasonal themes (Halloween, Christmas, New Year, Easter)"), onOff(prefs.seasonal)) { vm.update { it.copy(seasonal = !it.seasonal) } } }
+                        item { SettingLine(t("Hintergrund nach Tageszeit & Wetter", "Background by time & weather"), onOff(prefs.wxBg)) { vm.update { it.copy(wxBg = !it.wxBg) } } }
                         item { SettingLine(t("Farbe der Menüs", "Menu color"), MENU_THEMES[prefs.menuTheme.coerceIn(0, MENU_THEMES.lastIndex)].label) { vm.update { it.copy(menuTheme = (it.menuTheme + 1) % MENU_THEMES.size) } } }
                         item { SettingLine("Look", prefs.look.label) { vm.update { it.copy(look = it.look.next()) } } }
                         item { SettingLine(t("Akzentfarbe", "Accent color"), accentName(prefs.accent)) { vm.update { it.copy(accent = (it.accent + 1) % ACCENTS.size) } } }
                         item { SettingLine(t("Kachel-Stil", "Tile style"), prefs.tile.label) { vm.update { it.copy(tile = it.tile.next()) } } }
-                        item { SettingLine(t("Kachel-Größe", "Tile size"), listOf(t("Klein", "Small"), t("Normal", "Normal"), t("Groß", "Large"))[prefs.scale]) { vm.update { it.copy(scale = (it.scale + 1) % 3) } } }
+                        item { SettingLine(t("Kachel-Größe", "Tile size"), "${(TILE_SCALES[prefs.tileScale.coerceIn(0, 6)] * 100).toInt()} %") { vm.update { it.copy(tileScale = (it.tileScale + 1) % TILE_SCALES.size) } } }
+                        item { SettingLine(t("Abstände", "Spacing"), "${TILE_GAPS[prefs.tileGap.coerceIn(0, 4)]} dp") { vm.update { it.copy(tileGap = (it.tileGap + 1) % TILE_GAPS.size) } } }
                         item { SettingLine("Layout", prefs.layout.label) { vm.update { it.copy(layout = it.layout.next()) } } }
                         if (prefs.layout == Layout.FREE) {
                             item { Hint(t("Frei: zeigt deine Favoriten (sonst die erste App-Reihe). Lange auf eine Kachel drücken → „Frei verschieben“.", "Free: shows your favorites (otherwise the first app row). Long-press a tile → “Move freely”.")) }
                             item { SettingLine(t("Freie Anordnung zurücksetzen", "Reset free arrangement"), "") { vm.freeReset(); note = t("Zurückgesetzt.", "Reset.") } }
                         }
-                        item { SettingLine(t("Uhr-Stil", "Clock style"), listOf(t("Digital", "Digital"), "Minimal", t("Analog", "Analog"))[prefs.clockStyle]) { vm.update { it.copy(clockStyle = (it.clockStyle + 1) % 3) } } }
+                        item { SettingLine(t("Uhr-Stil", "Clock style"), clockStyleName(prefs.clockStyle)) { vm.update { it.copy(clockStyle = (it.clockStyle + 1) % 6) } } }
+                        item {
+                            val cpNames = listOf(t("Oben links", "Top left"), t("Oben rechts", "Top right"), t("Unten links", "Bottom left"), t("Unten rechts", "Bottom right"))
+                            SettingLine(t("Uhr & Wetter Position", "Clock & weather position"), cpNames[prefs.clockPos.coerceIn(0, 3)]) {
+                                sub = MenuSpec(t("Uhr & Wetter Position", "Clock & weather position"), cpNames.mapIndexed { i, n -> MenuItemSpec(n) { vm.update { it.copy(clockPos = i) }; sub = null } })
+                            }
+                        }
                         item { SettingLine(t("Zeitformat", "Time format"), listOf(t("24 Stunden", "24 hours"), "System", t("12 Stunden (AM/PM)", "12 hours (AM/PM)"))[prefs.timeFormat]) { vm.update { it.copy(timeFormat = (it.timeFormat + 1) % 3) } } }
                         item { SettingLine(t("Wetter", "Weather"), listOf(t("Aus", "Off"), t("Kompakt", "Compact"), t("Mit Vorschau", "With forecast"))[prefs.weather]) { vm.update { it.copy(weather = (it.weather + 1) % 3) } } }
                         item { SettingLine(t("Wetter-Ort", "Weather place"), prefs.weatherName.ifEmpty { t("nicht gesetzt", "not set") }) { placeOpen = true } }
+                        item { SettingLine(t("Unwetterwarnungen (DWD)", "Severe weather alerts (DWD)"), onOff(prefs.weatherAlerts)) { vm.update { it.copy(weatherAlerts = !it.weatherAlerts) } } }
                         item { SettingLine(t("Temperatur-Einheit", "Temperature unit"), if (prefs.tempF) "°F / mph" else "°C / km/h") { vm.update { it.copy(tempF = !it.tempF) } } }
                         item {
                             SettingLine(t("Schriftart", "Font"), fontLabel(prefs.font)) {
@@ -428,7 +464,32 @@ fun SettingsDialog(
                                 Pill(t("Löschen", "Delete")) { vm.update { p -> p.copy(shortcuts = p.shortcuts - s) } }
                             }
                         }
-                        item { SettingLine(t("Neue Tastenbelegung …", "New key assignment …"), "") { pickKey() } }
+                        item {
+                            SettingLine("📱 " + t("Handy als Fernbedienung", "Phone as remote"), onOff(prefs.phoneRemote)) {
+                                vm.update { it.copy(phoneRemote = !it.phoneRemote, remoteCode = it.remoteCode.ifEmpty { (1000..9999).random().toString() }) }
+                                if (!prefs.phoneRemote && OverrideService.instance == null) note = t("Dafür die Bedienungshilfe „Lumen Home-Taste“ einschalten.", "Turn on the “Lumen Home-Taste” accessibility service for this.")
+                            }
+                        }
+                        if (prefs.phoneRemote && prefs.remoteCode.isNotEmpty()) item { PhoneRemoteInfo(prefs.remoteCode, OverrideService.instance != null) }
+                        if (prefs.phoneRemote) item { SettingLine(t("Neuen Code erzeugen (alte Handys abmelden)", "New code (sign out old phones)"), prefs.remoteCode) { vm.update { it.copy(remoteCode = (1000..9999).random().toString()) } } }
+                        item { SettingLine("🎯 " + t("Taste anlernen – einfach auf der Fernbedienung drücken", "Learn a button – just press it on the remote"), "") { learnOpen = true } }
+                        item { SettingLine(t("Neue Tastenbelegung aus Liste …", "New key assignment from list …"), "") { pickKey() } }
+                        item {
+                            val ri = remember { RemoteDetect.detect() }
+                            Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.05f)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(t("Erkannt: ", "Detected: ") + ri.box, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                Text(t("Fernbedienung: ", "Remote: ") + ri.remotes.joinToString(", ").ifEmpty { "–" }, fontSize = 12.sp, color = Color.White.copy(alpha = 0.7f))
+                                Text(t("Sondertasten: ", "Extra keys: ") + ri.keys.joinToString(", ") { it.second }.ifEmpty { t("keine gemeldet – „Taste anlernen“ nutzen", "none reported – use “Learn a button”") }, fontSize = 12.sp, color = NeoCyan)
+                            }
+                        }
+                        item {
+                            val ri = remember { RemoteDetect.detect() }
+                            val pre = remember(ri) { RemoteDetect.preset(ri) }
+                            if (pre.isNotEmpty()) SettingLine(t("Empfohlene Belegung für die Farbtasten übernehmen", "Apply recommended color-key layout"), "${pre.size}") {
+                                vm.update { p -> p.copy(shortcuts = p.shortcuts.filterNot { s -> pre.any { it.keyCode == s.keyCode && !s.long } } + pre) }
+                                note = t("Übernommen: Rot = Lumen, Grün = Schlaftimer, Gelb = Standby, Blau = Sprachsuche.", "Applied: red = Lumen, green = sleep timer, yellow = standby, blue = voice search.")
+                            }
+                        }
                         item { Hint(t("Shortcuts brauchen die Bedienungshilfe (siehe System). Belegte Tasten verlieren ihre normale Funktion.", "Shortcuts need the accessibility service (see System). Assigned keys lose their normal function.")) }
                             }
                             "kids" -> {
@@ -453,8 +514,13 @@ fun SettingsDialog(
                         item { SettingLine(t("Stock-Launcher überschreiben", "Override stock launcher"), onOff(overrideOn)) { vm.setOverride(!overrideOn) } }
                         item { SettingLine(t("Bedienungshilfe „Lumen Home-Taste“", "Accessibility service “Lumen Home-Taste”"), if (a11y) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_ACCESSIBILITY_SETTINGS) } }
                         item { SettingLine(t("Zugriff auf laufende Medien (Reihe „Läuft gerade“)", "Access to playing media (row “Now playing”)"), if (notif) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS) } }
+                        item { SettingLine(t("Ziffernblock (ADB) – Zahlen am TV eingeben", "Number pad (ADB) – enter numbers on TV"), "") { keypadOpen = true } }
                         item { SettingLine(t("Stock-Launcher einfrieren (Root)", "Freeze stock launcher (root)"), "") { vm.freezeStock(true) { ok -> note = if (ok) t("Stock-Launcher eingefroren.", "Stock launcher frozen.") else t("Fehlgeschlagen (kein Root?).", "Failed (no root?).") } } }
                         item { SettingLine(t("Stock-Launcher wieder aktivieren (Root)", "Re-enable stock launcher (root)"), "") { vm.freezeStock(false) { ok -> note = if (ok) t("Stock-Launcher aktiviert.", "Stock launcher enabled.") else t("Fehlgeschlagen (kein Root?).", "Failed (no root?).") } } }
+                        item { SettingLine(t("Nach Updates suchen", "Check for updates"), "v$APP_VERSION") {
+                            scope.launch { val u = Updater.check(force = true); if (u != null) updOpen = true else note = t("Lumen ist aktuell.", "Lumen is up to date.") }
+                        } }
+                        item { SettingLine(t("Einrichtungs-Assistent erneut starten", "Run setup assistant again"), "") { wizardOpen = true } }
                         item { SettingLine(t("Einstellungen exportieren", "Export settings"), "") { note = t("Gespeichert", "Saved") + ": " + vm.exportSettings() } }
                         item { SettingLine(t("Einstellungen importieren", "Import settings"), "") { note = if (vm.importSettings()) t("Importiert.", "Imported.") else t("Keine gültige lumen-settings.json gefunden.", "No valid lumen-settings.json found.") } }
                         item { Hint(t("Ordner (unter /Android/data/com.lumen.tv/files/): wallpapers (Bild, GIF, Video), fonts (ttf/otf), themes (json).", "Folders (under /Android/data/com.lumen.tv/files/): wallpapers (image, GIF, video), fonts (ttf/otf), themes (json).")) }
@@ -470,6 +536,12 @@ fun SettingsDialog(
             if (infoOpen) InfoDialog { infoOpen = false }
             if (webMgrOpen) WebWidgetsDialog(vm, prefs) { webMgrOpen = false }
             if (storeOpen) WallpaperStoreDialog(vm) { storeOpen = false }
+            if (perfOpen) PerformanceDialog(vm, prefs, apps) { perfOpen = false }
+            if (widgetsOpen) WidgetSettingsDialog(vm) { widgetsOpen = false }
+            if (updOpen) Updater.available.value?.let { u -> UpdateDialog(u) { updOpen = false } }
+            if (wizardOpen) SetupWizard(vm, apps) { wizardOpen = false }
+            if (learnOpen) KeyLearnDialog(onKey = { code -> learnOpen = false; pickPress(code) }, onCancel = { learnOpen = false })
+            if (keypadOpen) KeypadSettingsDialog(vm) { keypadOpen = false }
         }
         }
         }

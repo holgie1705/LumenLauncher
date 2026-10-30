@@ -81,7 +81,7 @@ fun openSettingsPage(ctx: Context, action: String): String? {
     return t("Die Android-Einstellungen konnten nicht geöffnet werden.", "Could not open the Android settings.")
 }
 
-enum class Ico { GRID, LIST, GEAR, SCREEN, WIFI, SOUND, INFO, DOT, GLOBE, POWER, REMOTE, LOCK, BRUSH, PHONE, BACK, SEARCH, TIMER, RADIO, RESTART, DOWNLOAD }
+enum class Ico { GRID, LIST, GEAR, SCREEN, WIFI, SOUND, INFO, DOT, GLOBE, POWER, REMOTE, LOCK, BRUSH, PHONE, BACK, SEARCH, TIMER, RADIO, RESTART, DOWNLOAD, GAUGE }
 
 /** Kleine, selbst gezeichnete Symbole – keine zusätzliche Icon-Bibliothek, kein zusätzlicher Speicher. */
 @Composable
@@ -161,6 +161,10 @@ fun PanelIcon(kind: Ico, modifier: Modifier = Modifier.size(22.dp), color: Color
                 line(12f, 2.5f, 12f, 9f)
             }
             Ico.DOWNLOAD -> { line(12f, 3f, 12f, 15f); line(6.5f, 10f, 12f, 15.5f); line(17.5f, 10f, 12f, 15.5f); line(4f, 20f, 20f, 20f) }
+            Ico.GAUGE -> {
+                drawArc(color, 160f, 220f, false, p(3f, 5f), Size(18f * s, 18f * s), style = sw)
+                line(12f, 14f, 16.5f, 8.5f); drawCircle(color, 1.8f * s, p(12f, 14f))
+            }
             Ico.SEARCH -> { drawCircle(color, 6.5f * s, p(10f, 10f), style = sw); line(15f, 15f, 21f, 21f) }
             Ico.TIMER -> {
                 drawCircle(color, 8f * s, p(12f, 13f), style = sw)
@@ -207,7 +211,7 @@ fun icoTint(i: Ico): Color = when (i) {
     Ico.BRUSH -> Color(0xFFFF7AC6); Ico.POWER -> Color(0xFFFFB648); Ico.LIST, Ico.GRID -> Color(0xFF7C9CFF)
     Ico.REMOTE -> Color(0xFF59E3A7); Ico.LOCK -> Color(0xFFFF6B6B); Ico.GEAR -> NeoCyan; Ico.GLOBE -> Color(0xFF66C7FF)
     Ico.DOT -> Color(0xFF7CE0A3); Ico.INFO -> NeoCyan; Ico.PHONE -> Color(0xFFB794FF); Ico.WIFI -> Color(0xFF66C7FF)
-    Ico.SOUND -> Color(0xFFFFD36B); Ico.RADIO -> Color(0xFFFF8A5B); Ico.BACK -> Color.White
+    Ico.SOUND -> Color(0xFFFFD36B); Ico.RADIO -> Color(0xFFFF8A5B); Ico.BACK -> Color.White; Ico.GAUGE -> Color(0xFFFF5FA2); Ico.TIMER -> Color(0xFFB57BFF)
     else -> NeoCyan
 }
 
@@ -220,13 +224,13 @@ fun PanelHeader(title: String, subtitle: String = "", icon: Ico = Ico.GEAR, badg
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            Modifier.size(52.dp).background(Brush.linearGradient(listOf(tint.copy(alpha = 0.5f), NeoViolet.copy(alpha = 0.3f))), androidx.compose.foundation.shape.CircleShape)
+            Modifier.size(54.dp).background(Brush.linearGradient(listOf(tint.copy(alpha = 0.55f), tint.copy(alpha = 0.18f))), androidx.compose.foundation.shape.CircleShape)
                 .border(1.5.dp, tint.copy(alpha = 0.8f), androidx.compose.foundation.shape.CircleShape),
             contentAlignment = Alignment.Center,
-        ) { PanelIcon(icon, Modifier.size(24.dp), Color.White) }
-        Spacer(Modifier.width(14.dp))
+        ) { PanelIcon(icon, Modifier.size(26.dp), Color.White) }
+        Spacer(Modifier.width(16.dp))
         Column(Modifier.weight(1f)) {
-            Text(title, fontSize = 21.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(title, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (subtitle.isNotEmpty()) Text(subtitle, fontSize = 12.sp, color = Color.White.copy(alpha = 0.65f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         if (badge.isNotEmpty()) Box(
@@ -238,11 +242,8 @@ fun PanelHeader(title: String, subtitle: String = "", icon: Ico = Ico.GEAR, badg
 
 @Composable
 fun PanelSection(title: String) {
-    Row(Modifier.padding(start = 26.dp, top = 16.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(8.dp).background(NeoCyan, androidx.compose.foundation.shape.CircleShape))
-        Spacer(Modifier.width(10.dp))
-        Text(title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
-    }
+    // Gleiche Optik wie die Abschnitts-Überschriften in den Dialogen (SheetSection).
+    Text(title.uppercase(Lang.locale), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.6.sp, color = NeoCyan, modifier = Modifier.padding(start = 26.dp, top = 14.dp, bottom = 2.dp))
 }
 
 /** Zeile der Hauptliste: Glaskarte, buntes Symbol im Kreis, im Fokus gelber Ring. */
@@ -282,9 +283,9 @@ fun PanelRow(icon: Ico, label: String, value: String = "", modifier: Modifier = 
 
 /** Zwei Kacheln nebeneinander. */
 @Composable
-fun TileRow(a: @Composable (Modifier) -> Unit, b: @Composable (Modifier) -> Unit) {
+fun TileRow(a: @Composable (Modifier) -> Unit, b: (@Composable (Modifier) -> Unit)? = null) {
     Row(Modifier.padding(horizontal = 14.dp, vertical = 5.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        a(Modifier.weight(1f)); b(Modifier.weight(1f))
+        a(Modifier.weight(1f)); if (b != null) b(Modifier.weight(1f)) else Spacer(Modifier.weight(1f))
     }
 }
 

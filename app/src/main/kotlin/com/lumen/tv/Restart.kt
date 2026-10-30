@@ -20,7 +20,7 @@ object DeviceRestart {
             if (sys) return@thread
             val svc = OverrideService.instance
             val menu = svc?.performGlobalAction(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG) == true
-            if (menu) android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ svc?.autoClickRestart() }, 700)
+            if (menu) android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ svc?.autoClickRestart() }, 180)
             android.os.Handler(android.os.Looper.getMainLooper()).post {
                 Toast.makeText(
                     app,

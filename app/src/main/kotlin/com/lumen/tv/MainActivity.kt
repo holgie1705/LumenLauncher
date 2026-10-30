@@ -7,6 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val vm: HomeViewModel by viewModels()
@@ -20,11 +22,23 @@ class MainActivity : ComponentActivity() {
             handleIntent(intent)
             if (!dotChecked) { dotChecked = true; vm.prefs.value.let { if (it.dotOn) VpnDot.sync(this, it) } }
         }
+        // Handy-Fernbedienung: Steuerkreuz-Tasten an Lumen selbst weiterreichen
+        lifecycleScope.launch {
+            RemoteBus.keys.collect { code ->
+                dispatchKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, code))
+                dispatchKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, code))
+            }
+        }
         setContent {
             val prefs by vm.prefs.collectAsStateWithLifecycle()
-            LumenTheme(prefs.font) { HomeScreen(vm) }
+            LumenTheme(prefs.font) {
+                if (!prefs.langPicked) LanguagePick(vm) else HomeScreen(vm)
+            }
         }
     }
+
+    override fun onResume() { super.onResume(); GoalWatch.foreground = true; OverrideService.instance?.lumenResumed() }
+    override fun onPause() { GoalWatch.foreground = false; OverrideService.instance?.lumenPaused(); super.onPause() }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)

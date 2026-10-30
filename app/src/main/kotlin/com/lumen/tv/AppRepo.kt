@@ -292,34 +292,6 @@ class AppRepo(private val ctx: Context) {
         }
     }.getOrDefault(emptyList())
 
-    // ---------- Plugins ----------
-    /**
-     * Plugin-Protokoll: Eine App deklariert einen exportierten ContentProvider mit
-     * <intent-filter><action android:name="com.lumen.tv.PLUGIN"/></intent-filter>
-     * und liefert unter content://<authority>/rows die Spalten: row, title, image, intent.
-     */
-    suspend fun plugins(): List<PluginRow> = withContext(Dispatchers.IO) {
-        runCatching {
-            val out = mutableListOf<PluginRow>()
-            pm.queryIntentContentProviders(Intent("com.lumen.tv.PLUGIN"), 0).forEach { ri ->
-                val auth = ri.providerInfo.authority.split(";").first()
-                val groups = linkedMapOf<String, MutableList<WatchItem>>()
-                runCatching {
-                    ctx.contentResolver.query(Uri.parse("content://$auth/rows"), arrayOf("row", "title", "image", "intent"), null, null, null)?.use { c ->
-                        var n = 0
-                        while (c.moveToNext() && n < 80) {
-                            val row = c.getString(0) ?: ri.loadLabel(pm).toString()
-                            groups.getOrPut(row) { mutableListOf() } += WatchItem(c.getString(1).orEmpty(), c.getString(2), safeIntent(c.getString(3)), 0f)
-                            n++
-                        }
-                    }
-                }
-                groups.forEach { (t, items) -> out += PluginRow("plugin:$auth:$t", t, items.take(20)) }
-            }
-            out.toList()
-        }.getOrDefault(emptyList())
-    }
-
     // ---------- Status ----------
     fun status(): StatusInfo {
         val cm = ctx.getSystemService(ConnectivityManager::class.java)
@@ -362,8 +334,11 @@ class AppRepo(private val ctx: Context) {
             else -> runCatching {
                 val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                 BitmapFactory.decodeFile(f.path, bounds)
+                // Nur bis zur tatsächlichen Bildschirmauflösung dekodieren – mehr Pixel kann der TV-Ausgang nicht zeigen.
+                val dm = ctx.resources.displayMetrics
+                val target = maxOf(dm.widthPixels, dm.heightPixels, 1280).let { (it * 1.1f).toInt() }  // etwas Reserve für Crop
                 var s = 1
-                while (bounds.outWidth / s > 2560) s *= 2
+                while (bounds.outWidth / (s * 2) >= target) s *= 2
                 BitmapFactory.decodeFile(f.path, BitmapFactory.Options().apply { inSampleSize = s; inPreferredConfig = Bitmap.Config.RGB_565 })
                     ?.asImageBitmap()?.let { Wall.Still(it) }
             }.getOrNull()

@@ -11,3 +11,5 @@ local.properties
 .DS_Store
 build-install.bat
 build-log.txt
+log-holen.bat
+crash-log.txt

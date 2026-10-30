@@ -50,7 +50,7 @@ import androidx.tv.material3.Text
 
 /** Alles, was die Layouts zum Zeichnen der Kacheln brauchen. */
 class LayoutCtx(
-    val style: TileStyle, val scale: Float, val vm: HomeViewModel,
+    val style: TileStyle, val scale: Float, val gap: Dp, val vm: HomeViewModel,
     val onHero: (HeroInfo) -> Unit, val onMenu: (TvApp, AppRowUi) -> Unit,
     val onRadioSearch: () -> Unit = {}, val onStationMenu: (Station) -> Unit = {},
     val onWebOpen: (WebWidget) -> Unit = {}, val onWebMenu: (WebWidget) -> Unit = {},
@@ -117,6 +117,7 @@ private fun LazyListScope.rowItems(row: RowUi, c: LayoutCtx, first: FocusRequest
         is WatchRowUi -> itemsIndexed(row.items) { i, w -> WatchCell(w, row, i, c, focusMod(i, first)) }
         is NowRowUi -> itemsIndexed(row.items) { i, n -> NowCell(n, c, focusMod(i, first)) }
         is WebRowUi -> itemsIndexed(row.widgets, key = { _, w -> w.id }) { i, w -> WebCell(w, c, focusMod(i, first)) }
+        is InfoRowUi -> itemsIndexed(row.kinds, key = { _, k -> "info_$k" }) { i, k -> InfoWidgetCell(k, c.vm, focusMod(i, first), c.onHero, wideDims(c.style, c.scale)) }
         is RadioRowUi -> {
             item(key = "radio_add") { RadioAddCell(c, focusMod(0, first)) }
             itemsIndexed(row.stations, key = { _, s -> s.uuid }) { _, s -> RadioCell(s, c, Modifier) }
@@ -131,6 +132,7 @@ private fun LazyGridScope.gridItems(row: RowUi, c: LayoutCtx, first: FocusReques
         is WatchRowUi -> gridItemsIndexed(row.items) { i, w -> WatchCell(w, row, i, c, focusMod(i, first)) }
         is NowRowUi -> gridItemsIndexed(row.items) { i, n -> NowCell(n, c, focusMod(i, first)) }
         is WebRowUi -> gridItemsIndexed(row.widgets, key = { _, w -> "${row.id}:${w.id}" }) { i, w -> WebCell(w, c, focusMod(i, first)) }
+        is InfoRowUi -> gridItemsIndexed(row.kinds, key = { _, k -> "${row.id}:$k" }) { i, k -> InfoWidgetCell(k, c.vm, focusMod(i, first), c.onHero, wideDims(c.style, c.scale)) }
         is RadioRowUi -> {
             item(key = "${row.id}:add") { RadioAddCell(c, focusMod(0, first)) }
             gridItemsIndexed(row.stations, key = { _, s -> "${row.id}:${s.uuid}" }) { _, s -> RadioCell(s, c, Modifier) }
@@ -151,7 +153,7 @@ fun ShelfLayout(
         androidx.compose.foundation.layout.BoxWithConstraints(modifier) {
             val th = tileDims(c.style, c.scale).second
             val labelExtra = if (c.style == TileStyle.ICON || c.style == TileStyle.ROUND) 28.dp else 0.dp
-            fun rowH(r: RowUi?): Dp = (if (r is WebRowUi) th * 2.4f else th) + labelExtra + 70.dp
+            fun rowH(r: RowUi?): Dp = when (r) { is WebRowUi -> th * 2.4f + labelExtra + 70.dp; is RadioRowUi -> th + 22.dp + 70.dp; else -> th + labelExtra + 70.dp }
             val listH = rowH(rows.firstOrNull()).coerceAtMost(maxHeight)
             Column(Modifier.fillMaxSize()) {
                 androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
@@ -196,8 +198,8 @@ private fun ShelfList(
                     color = Color.White.copy(alpha = 0.92f), modifier = Modifier.padding(start = SIDE_PAD, top = 10.dp),
                 )
                 LazyRow(
-                    contentPadding = PaddingValues(horizontal = SIDE_PAD, vertical = 18.dp),
-                    horizontalArrangement = Arrangement.spacedBy(18.dp),
+                    contentPadding = PaddingValues(horizontal = SIDE_PAD, vertical = c.gap),
+                    horizontalArrangement = Arrangement.spacedBy(c.gap),
                 ) { rowItems(row, c, if (idx == 0) firstFocus else null) }
             }
         }
@@ -207,13 +209,13 @@ private fun ShelfList(
 // ---------------------------------------------------------------- Layout 2: Raster
 @Composable
 fun GridLayout(rows: List<RowUi>, c: LayoutCtx, firstFocus: FocusRequester?, modifier: Modifier) {
-    val cell = maxOf(tileDims(c.style, c.scale).first, (192 * c.scale).dp) + 24.dp
+    val cell = maxOf(tileDims(c.style, c.scale).first, (192 * c.scale).dp) + c.gap + 6.dp
     LazyVerticalGrid(
         columns = GridCells.Adaptive(cell),
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = SIDE_PAD, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(22.dp),
-        horizontalArrangement = Arrangement.spacedBy(18.dp),
+        verticalArrangement = Arrangement.spacedBy(c.gap + 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(c.gap),
     ) {
         rows.forEachIndexed { ri, row ->
             item(key = "h:${row.id}", span = { GridItemSpan(maxLineSpan) }) {
@@ -275,7 +277,7 @@ fun FreeLayout(
 fun SidebarLayout(rows: List<RowUi>, c: LayoutCtx, firstFocus: FocusRequester?, modifier: Modifier) {
     var selected by remember { mutableIntStateOf(0) }
     val sel = rows.getOrNull(selected.coerceIn(0, (rows.size - 1).coerceAtLeast(0)))
-    val cell = maxOf(tileDims(c.style, c.scale).first, (192 * c.scale).dp) + 24.dp
+    val cell = maxOf(tileDims(c.style, c.scale).first, (192 * c.scale).dp) + c.gap + 6.dp
     Row(modifier) {
         LazyColumn(
             Modifier.width(250.dp).fillMaxHeight().padding(start = 40.dp, end = 8.dp, top = 8.dp),
@@ -293,8 +295,8 @@ fun SidebarLayout(rows: List<RowUi>, c: LayoutCtx, firstFocus: FocusRequester?, 
                     columns = GridCells.Adaptive(cell),
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     contentPadding = PaddingValues(start = 16.dp, end = SIDE_PAD, top = 12.dp, bottom = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(22.dp),
-                    horizontalArrangement = Arrangement.spacedBy(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(c.gap + 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(c.gap),
                 ) { gridItems(sel, c, null) }
             }
         }

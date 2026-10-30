@@ -11,8 +11,8 @@ android {
         applicationId = "com.lumen.tv"
         minSdk = 26
         targetSdk = 34
-        versionCode = 76
-        versionName = "1.66"
+        versionCode = 110
+        versionName = "2.00"
     }
     buildTypes {
         release {
@@ -51,8 +51,11 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("io.coil-kt:coil-gif:2.7.0")
     implementation("io.coil-kt:coil-svg:2.7.0")
+    implementation("com.google.zxing:core:3.5.3")
     implementation("androidx.media3:media3-exoplayer:1.4.1")
     implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
     implementation("androidx.media3:media3-ui:1.4.1")
     implementation("androidx.profileinstaller:profileinstaller:1.3.1")
+    // ADB-Client, um Zifferntasten an die Box zu senden (wie atvtools)
+    implementation("dev.mobile:dadb:1.2.10")
 }

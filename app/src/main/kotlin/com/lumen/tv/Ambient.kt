@@ -14,6 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -33,11 +34,13 @@ fun AmbientHost(hero: State<HeroInfo?>, vm: HomeViewModel, prefs: Prefs, wall: W
     val accent by produceState(fixed ?: DefaultAccent, hero.value?.key, prefs.accent) {
         value = fixed ?: hero.value?.app?.let { vm.accent(it) } ?: DefaultAccent
     }
-    Ambient(prefs.look, accent, wall, prefs.dim * 0.25f, prefs.blur)
+    val wx by vm.weather.collectAsState()
+    Ambient(prefs.look, accent, wall, prefs.dim * 0.25f, prefs.blur, (if (prefs.seasonal) seasonBg() else null) ?: prefs.animBg, if (prefs.wxBg) (wx?.code ?: -1) else null)
 }
 
+/** wxCode: null = Wetter-Effekt aus; -1 = an, aber noch kein Wetter. */
 @Composable
-fun Ambient(look: Look, accent: Color, wall: Wall?, dim: Float, blur: Int) {
+fun Ambient(look: Look, accent: Color, wall: Wall?, dim: Float, blur: Int, anim: Int = 0, wxCode: Int? = null) {
     val color = animateColorAsState(accent, tween(900), label = "accent")
     val blurDp = listOf(0, 8, 16, 28)[blur.coerceIn(0, 3)].dp
     Box(Modifier.fillMaxSize().background(Ink)) {
@@ -52,6 +55,8 @@ fun Ambient(look: Look, accent: Color, wall: Wall?, dim: Float, blur: Int) {
             }
             if (wall != null) Box(Modifier.fillMaxSize().background(Ink.copy(alpha = dim)))
         }
+        AnimatedBackground(anim, color.value)
+        if (wxCode != null) WeatherEffect(wxCode.takeIf { it >= 0 })
         when (look) {
             Look.AURORA -> Aurora(color, 1f)
             Look.GLASS -> Aurora(color, 0.5f)

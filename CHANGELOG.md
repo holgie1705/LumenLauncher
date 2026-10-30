@@ -21,17 +21,6 @@
   (rückgängig: `adb shell pm enable com.google.android.tvlauncher`) – klappt nicht auf jedem Gerät.
 - Mit Root: Einstellungen → System → "Stock-Launcher einfrieren (Root)".
 
-## Plugins schreiben
-Eine App deklariert einen exportierten ContentProvider:
-
-    <provider android:name=".MyRows" android:authorities="com.example.rows" android:exported="true">
-        <intent-filter><action android:name="com.lumen.tv.PLUGIN"/></intent-filter>
-    </provider>
-
-`content://com.example.rows/rows` liefert einen Cursor mit den Spalten
-`row` (Reihentitel), `title`, `image` (URL oder content-URI), `intent` (Intent.toUri(URI_INTENT_SCHEME)).
-Lumen zeigt jede `row` als eigene Reihe unter "Plugins".
-
 ## Layouts, Uhr, Wetter
 - Einstellungen → Aussehen: **Layout** (Reihen / Raster / Seitenleiste), **Kachel-Stil** (Banner, Breit, Kompakt, Icons, Rund),
   **Uhr-Stil** (Digital, Minimal, Analog), **Wetter** (Aus / Kompakt / Mit Vorschau), **Wetter-Ort**.
@@ -275,3 +264,146 @@ Die Bilder gehören ihren Urhebern (Lizenz steht unter der Vorschau) – nur fü
 - Einstellungen: Untertitel auf der Hauptseite entfernt, Versionsnummer oben rechts.
 - Neue Schalter: Verlaufs-Spur, weißer Knopf mit Häkchen und Schatten, gleitende Animation. Mehrfach-Werte als Kapsel mit Pfeil.
 - Neuer Bildschirmschoner „Galerie aus dem Netz“: Fotos von Bing, Unsplash und Wikimedia mit Überblendung und Zoom, große Uhr, Datum und Wetter (Standby & Energie → Bildschirmschoner).
+
+## v1.67
+- Neu: Einstellungen → „Leistung“: Ringanzeigen für Arbeitsspeicher, Speicher und Temperatur; RAM-Boost (beendet Hintergrund-Apps, mit Ausnahmeliste; spielende Apps bleiben); Aufräumen (Lumen-Cache, mit Root alle App-Caches); Systeminfos (Gerät, Android, CPU, Bildschirm, Laufzeit, RAM von Lumen).
+
+## v1.68
+- Leistung: mehr Temperatur-Quellen; gibt die Box keine Gradzahl frei, zeigt die Karte „Wärme“ den Android-Wärmestatus und die Reserve bis zur Drosselung.
+- RAM-Boost schützt immer System-Apps, Launcher, Tastatur, Bedienungshilfen, Benachrichtigungs-Zugriffe und VPN-Apps; die Ausnahmeliste zeigt nur noch normale Apps.
+
+## v1.69
+- Neue Reihe „Infos“ mit Info-Widgets (Einstellungen → Info-Widgets): Fußball (OpenLigaDB: Live-Stand, nächstes/letztes Spiel, Tabellenplatz, Detailansicht mit Tabelle), Wetter groß (Stundenwerte, Regenradar des DWD), Countdown (auch jährlich), Notiz, Heimnetz (Router-/Internet-Ping, Speedtest, Gerätesuche).
+- News-Ticker als Laufzeile (Tagesschau, Sportschau, kicker, heise, SPIEGEL), oben oder unten.
+- Notiz und Countdowns am Handy/PC im Browser bearbeiten (mit Code, nur solange die Widget-Einstellungen offen sind).
+- Radio-Reihe auf dem Startbildschirm mit runden Senderlogos; OK spielt direkt, laufender Sender mit drehendem Farbring.
+
+## v1.70
+- Info-Widgets haben jetzt die Größe der normalen Kacheln (Inhalt kompakt).
+- Fußball: Standard-Liga 2. Bundesliga.
+- Neu: Schnellmenü in der Kopfzeile (Lautstärke, Schlaftimer, Radio, Bildschirmschoner, RAM-Boost, Netzwerk, Bluetooth, Leistung).
+- Neu: Update-Hinweis – prüft GitHub-Releases, markiert das Zahnrad und installiert die neue Version auf Knopfdruck (System → Nach Updates suchen).
+- Neu: Einrichtungs-Assistent beim ersten Start (Sprache, Ort, Lieblings-Apps, Look); erneut startbar unter System.
+
+## v1.71
+- Neue Uhr-Designs: Flip-Uhr (umklappende Ziffern), Wortuhr („Es ist Viertel nach acht“), Neon.
+- Animierte Hintergründe (gezeichnet, sparsam): Sternenhimmel mit Sternschnuppen, Polarlicht, Farbfluss, Bokeh, Regen, Schnee.
+- Hintergrund nach Tageszeit & Wetter: nachts dunkler, abends warm; Regen/Schnee/Nebel/Gewitter als Effekt; Wallpaper mit passenden Wörtern im Dateinamen (z. B. regen, sonne, nacht, abend) werden bevorzugt.
+- Menüfarbe „Aus dem Wallpaper“: Menüs übernehmen die Farben des aktuellen Hintergrundbilds.
+
+## v1.72
+- Heimnetz: nutzt bei aktivem VPN das echte WLAN/LAN (richtige IP, Router, Gerätesuche); Anzeige „WLAN + VPN“; Router-Erkennung mit mehreren Ports und Rückfall auf .1; Gerätesuche mit mehr typischen Ports.
+
+## v1.73
+- Heimnetz: erkennt das echte Netz über den Schnittstellennamen (eth/wlan statt VPN-Tunnel tun/ppp/wg); Router-Adresse von Hand eintragbar; Anzeige aller Schnittstellen zur Fehlersuche.
+
+## v1.74
+- Fix: Absturz-Schleife mit aktivem VPN (Binden ans WLAN wird von Android verweigert) – Heimnetz-Abfragen fangen alle Fehler ab.
+
+## v1.75
+- Heimnetz-Erkennung auf den Stand von 1.72 zurückgesetzt (1.73/1.74 führten mit VPN zu Neustart-Schleifen); Router-Feld und Schnittstellen-Anzeige wieder entfernt.
+
+## v1.76
+- Heimnetz-Geräteliste, letzte Spiele und Tabelle lassen sich jetzt mit der Fernbedienung blättern.
+- Speedtest neu: Ping, Jitter, Download und Upload (Cloudflare) mit Live-Anzeige und Einschätzung (4K/HD).
+- Fußball: Vereinslogos zuverlässiger (https, User-Agent), sonst Kreis mit Vereinskürzel.
+- Leistung: „Gründlich beenden" stoppt Apps wie andere App-Killer über „Beenden erzwingen" (braucht die Bedienungshilfe „Lumen Home-Taste").
+- Fernbedienung: „Taste anlernen" – gewünschte Taste einfach drücken. Box und Fernbedienung werden erkannt, Sondertasten angezeigt, Vorschlag für die Farbtasten.
+
+## v1.77
+- Uhr & Wetter lassen sich in alle vier Ecken setzen (Einstellungen → Aussehen → „Uhr & Wetter Position"). Rechts gespiegelt (Uhr außen), unten bündig über der Leiste; die Radio-Karte „unter der Uhr" wandert mit.
+
+## v1.78
+- Kleine Uhr & Wetter in anderen Apps: Ecke wählbar (Einstellungen → Aussehen → „Uhr & Wetter in Apps": Aus, oben/unten, links/rechts).
+- Plugins-Reihe entfernt (wurde von keiner App genutzt).
+
+## v1.79
+- Neues Info-Widget „Jetzt im TV": aktuelle Sendung mit Fortschritt und „Danach" für deine Sender (wechselt alle 8 s), OK öffnet das Programm aller gewählten Sender; Klick auf einen Sender startet waipu.tv. Programmdaten: epgshare01 (XMLTV), alle 6 Stunden aktualisiert.
+- Fußball: Tor-Alarm für den eigenen Verein – blinkendes Banner in Lumen, Hinweis auch über anderen Apps (während des Spiels jede Minute geprüft).
+- Neues Info-Widget „Sonne & Mond": Sonnenbogen mit aktueller Position, Auf-/Untergang, Mondphase; Details mit Tageslänge, goldener Stunde, nächstem Voll-/Neumond.
+- Handy als Fernbedienung (Einstellungen → Fernbedienung): QR-Code scannen, dann Steuerkreuz, Lautstärke, Medientasten, Text/Passwörter eintippen und Apps starten. Geschützt durch einen Code.
+- Saisonale Themes: Halloween (Kürbisse, Fledermäuse, Vollmond), Weihnachten (Lichterkette, Schnee), Silvester (Feuerwerk), Ostern (Eier, Blüten) – automatisch zur passenden Zeit, abschaltbar unter Aussehen; auch einzeln als animierter Hintergrund wählbar.
+
+## v1.80
+- Speedtest: Download wird jetzt korrekt gemessen (richtiger User-Agent, kein gzip, bei Bedarf neue Verbindung); Upload ebenfalls mit User-Agent. Schlägt der Download fehl, steht der Grund in der Einschätzung.
+- Heimnetz-Gerätesuche: zeigt – wenn ermittelbar – den Gerätenamen über der IP (Reverse-DNS beim Router, sonst NetBIOS für Windows-PCs).
+- „Jetzt im TV": deutlich mehr Sender (öffentlich-rechtlich, dritte Programme, private Sparten, Nachrichten, Doku, Sport, Sky/Pay-TV, Kinder, Musik). EPG-Quelle unter Info-Widgets frei wählbar, mehrere Quellen (z. B. frei + Sky) mit Leerzeichen getrennt und zusammengeführt.
+- Speicher: Wallpaper wird nur noch in Bildschirmauflösung dekodiert (bei 1080p rund die Hälfte weniger Bild-Speicher, sichtbar identisch); Bild-Cache wird bei Speichernot automatisch freigegeben.
+- Schnellmenü: sitzt tiefer (nicht mehr vom oberen Rand/Overscan verdeckt) und ist über „Anpassen" frei bestückbar (Lautstärke, Timer, Radio, Boost, Netzwerk, Bluetooth, Einstellungen, Android u. a.).
+
+## v1.81
+- Heimnetz-Gerätesuche: zählt nur noch echte Verbindungen (vorher wurde „abgelehnt" mitgezählt, wodurch bei aktivem VPN viel zu viele Geräte erschienen); Scan fest ans Heimnetz gebunden, nicht ans VPN.
+- Gerätenamen: zusätzlich über die ARP-Tabelle der Hersteller aus der MAC-Adresse (z. B. AVM, Apple, Samsung) – Reverse-DNS/NetBIOS bleiben als Ergänzung.
+
+## v1.82
+- Leistung: „Gründlich beenden" (der langsame Ablauf über die App-Einstellungen) entfernt. Der RAM-Boost beendet ohnehin sofort alle Hintergrund-Apps – das ist die schnelle Methode (wie andere App-Killer); ohne Root geht nichts Weitergehendes.
+- RAM-Boost-Ausnahmen: Die aktuell ausgenommenen Apps stehen jetzt oben als eigene Liste und lassen sich dort direkt wieder abwählen; auch Ausnahmen zu deinstallierten Apps erscheinen.
+- Neu: Amtliche Unwetterwarnungen (DWD) werden direkt bei Uhr/Wetter angezeigt (farbige Warn-Zeile, wandert in die gewählte Ecke mit); Details beim Öffnen des Wetters. Abschaltbar unter Aussehen → „Unwetterwarnungen (DWD)".
+
+## v1.83
+- Schnellmenü: Lautstärke (Leiser/Lauter) ist nicht mehr voreingestellt (bei Bedarf unter „Anpassen" wieder aktivierbar).
+- „Anpassen" kann jetzt auch installierte Apps als Kachel ins Schnellmenü legen – ein Klick startet die App. Aufteilung in „Aktionen" und „Apps".
+
+## v1.84
+- Aussehen: Kachelgröße jetzt feinstufig (70–135 %) und eigene Einstellung „Abstände" (8–32 dp) für Raster und Reihen – passt sich so an jede Displaygröße an. Alte Einstellung wird übernommen.
+
+## v1.85
+- Neu: Türkamera / Kamera-Overlay (Einstellungen → System). Kleines Kamerafenster rechts oben über der laufenden App, für einstellbare Dauer (Standard 30 s), mit Stream-URL (rtsp/https/HLS), Name, Größe und Ton. Jede Taste schließt es.
+- Auslösen: manuell (Schnellmenü-Kachel „Türkamera") oder automatisch per Link http://<Box>:8768/show?code=<Code>, den z. B. Home Assistant/ring-mqtt oder Scrypted beim Klingeln aufruft (Ring selbst hat keine offene Schnittstelle, daher Bridge nötig).
+
+## v1.86
+- Türkamera / Kamera-Overlay wieder entfernt.
+
+## v1.87
+- Radio: Entdecken nach Genre (Pop, Rock, Schlager, News, 80er/90er, Dance, Jazz, Klassik …) und Land (DE/AT/CH/Welt).
+- Radio: Songverlauf – zuletzt gehörte Titel, OK sucht den Titel direkt in YouTube Music/YouTube.
+- Radio: Einschlaf-Timer (15–90 min) mit sanftem Ausblenden am Ende.
+
+## v1.88
+- Neu: Podcasts – Suche (Apple-Verzeichnis), Abonnieren, Abspielen mit ±30 s und automatischem Fortsetzen an der Stelle, wo du aufgehört hast. Erreichbar über das Radio (Button „🎙 Podcasts").
+
+## v1.89
+- Podcast-Auswahl: oberster Eintrag bekommt oben etwas Abstand (Fokusrahmen klebt nicht mehr am Rand).
+
+## v1.90
+- Info-Seite neu gestaltet (Neo-Glass): Hero-Kopf mit Verlauf und Kennzahl-Chips (Version, Speicher, Android), Kontakt- und Spenden-Karte, Haftung/Datenschutz in dezenten Glaskästen.
+
+## v1.91
+- Einstellungs-Seiten an die Dialoge angeglichen: gleiche Abschnitts-Überschriften (Cyan, Versalien) und gleiche Kopfzeile wie in Wetter/Heimnetz/Leistung/Info. Zeilen und Karten waren bereits identisch.
+
+## v1.92
+- RAM-Boost-Ausnahmen: eine einzige Liste mit Schaltern – ausgenommene Apps bleiben sichtbar und lassen sich dort direkt wieder ein-/ausschalten (kein Verschwinden mehr nach dem Entfernen).
+- Heimnetz-Gerätesuche: Gerätenamen jetzt über mDNS/Bonjour (Chromecast, Apple-TV/HomePod, Drucker, Sonos, NAS, PCs …) – ARP wird auf neuem Android gesperrt. Namen haben Vorrang, sonst Hersteller aus der MAC.
+- Neustart (oben rechts): das Android-Menü wird jetzt viel schneller automatisch bestätigt, blitzt also nur noch kurz auf (ganz ohne Menü geht nur mit Root).
+
+## v1.93
+- Build-Warnungen bereinigt (veraltetes resolveService bei der Gerätesuche, experimenteller Coil-Cache-Aufruf) – nur Aufräumen, keine Funktionsänderung.
+
+## v1.94
+- RAM-Boost beendet jetzt auch vorinstallierte System-Apps (Netflix, YouTube, waipu …) im Hintergrund – vorher wurden genau die übersprungen, daher oft „0 MB“. Geschützt bleiben Launcher, Tastatur, Bedienungshilfen, VPN, Lumen, deine Ausnahmen und laufende Wiedergabe.
+- Ausnahmen-Liste zeigt jetzt auch System-Apps (zum gezielten Schützen).
+- Boost-Meldung ehrlicher formuliert (freigegebene MB bzw. „lief kaum etwas im Hintergrund“).
+
+## v1.95
+- Wetter-Symbole komplett neu: selbst gezeichnete Icons (Sonne, Mond, Wolken, Regen, Schnee, Gewitter, Nebel) statt Emojis. Dadurch kein leeres Kästchen mehr bei Nebel & Co. – überall einheitlich (Widget, Vorhersage, Wetter-Dialog, Bildschirmschoner, kleine Uhr in anderen Apps).
+
+## v1.96
+- Kleine Uhr/Wetter-Einblendung erscheint jetzt wirklich nur über fremden Apps: Sobald irgendein Lumen-Fenster vorn ist (Hauptmenü, Einstellungen, Schoner), wird sie ausgeblendet – auch direkt nach dem Neustart der Box.
+
+## v1.97
+- Uhr/Wetter-Einblendung korrigiert: Sie flackerte in fremden Apps (das eigene Overlay-Fenster hatte sich selbst ausgeblendet). Jetzt steuert der App-Lebenszyklus die Sichtbarkeit – sichtbar in fremden Apps, ausgeblendet nur in Lumen selbst (Hauptmenü, Einstellungen, Schoner), auch nach Neustart.
+
+## v1.98
+- News-Ticker: mehr Quellen zum An-/Abwählen – überwiegend deutsch: Tagesschau, SPIEGEL, ZEIT, Süddeutsche, FAZ, WELT, n-tv, FOCUS, Tagesspiegel, stern, Sportschau, kicker, SPORT1, heise, Golem, t3n und (englisch) BBC World.
+
+## v1.99
+- Neu: TV-Ziffernblock (Einstellungen → System → „Ziffernblock (ADB)"). Per angelernter Taste ein-/ausschaltbar; Ziffern mit den Pfeiltasten wählen, mehrstellige Zahl (z. B. 155) sammeln, OK sendet sie – optional mit Enter – per ADB an die laufende App (z. B. waipu), genau wie atvtools. Ziel-IP einstellbar (leer = diese Box), Verbindungstest inklusive. Braucht „ADB über Netzwerk" an der Box und einmalige Bestätigung des Lumen-Schlüssels. Kein Root/Shizuku nötig.
+
+## v2.00
+- Wallpaper-Galerie: zehn neue Themen-Sammlungen von Wallhaven (Natur, Weltall & Sterne, Städte & Architektur, Minimalistisch, Abstrakt & Muster, Dunkel & Neon, Tiere, Autos & Technik, Fantasy & Digital Art, Jahreszeiten) – ohne Konto, nur jugendfrei, mindestens 1920×1080.
+- Wallpaper lassen sich jetzt auch wieder abschalten: OK auf ein bereits hinzugefügtes Bild (mit ✓) nimmt es wieder heraus; OK auf ein neues fügt es hinzu. Die Infozeile zeigt an, was OK gerade tut.
+- Flackern beim Zurückschalten behoben: Lumen erscheint jetzt ohne Launcher-Übergangsanimation schlagartig deckend, damit auf schwachen Boxen nicht mehr kurz der Thomson-Startbildschirm durchblitzt.
+- Uhr/Wetter-Overlay erscheint jetzt wirklich nur über echten App-Inhalten – nicht mehr auf fremden Launcher-/Startbildschirmen (z. B. Thomson- oder waipu-Home) und nicht in Lumen selbst. Zusätzlich wird es direkt nach dem Booten kurz unterdrückt und erscheint nie, solange Lumen die Vordergrund-App ist, damit es nicht beim Hochfahren aufblitzt.
+- Nach dem Booten wird Lumen früher und mehrfach nach vorn geholt, damit der Stock-Launcher beim Reboot möglichst kurz zu sehen ist.
+- Ziffernblock: optionales automatisches Senden ohne OK – nach einstellbarer Pause (Aus / 2 / 3 / 5 Sek.) wird die eingetippte Zahl von selbst abgeschickt, wie bei einer echten Nummerntaste. Der Countdown wird im Ziffernblock angezeigt; OK sendet weiterhin sofort, Zurück bricht ab. (Einstellungen → System → Ziffernblock)
+- Erststart: Bei einer frischen Installation erscheint jetzt ganz zuerst eine Sprachauswahl (Deutsch / English); danach läuft Lumen in der gewählten Sprache. Bestehende Installationen bleiben unverändert.

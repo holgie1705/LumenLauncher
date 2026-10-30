@@ -12,7 +12,8 @@ Lumen aims to be a full alternative to launchers like Projectivy, CleanMyTV or F
 - Rows (apps, favorites, now playing, radio, web widgets), grid or sidebar layout, or a free layout where you place your favorites anywhere on the screen
 - Tile styles: banner, wide, compact, icons, round, poster, card
 - Adjustable tile transparency so the wallpaper shines through
-- Clock (digital, minimal, analog) and weather (Open-Meteo, no key needed), position of header and tiles selectable
+- Clock (digital, minimal, analog) and weather (Open-Meteo, no key needed); clock & weather placeable in any corner, with official DWD severe-weather alerts
+- Stepless tile size (70–135 %) and adjustable spacing to fit any display
 - Small clock and weather in the top left corner while another app is running (optional)
 - Move tiles with the D-pad, favorites row, custom row order
 - Five tile focus styles: frame, neon glow, lift (3D), glass, underline
@@ -21,29 +22,46 @@ Lumen aims to be a full alternative to launchers like Projectivy, CleanMyTV or F
 - Pictures, GIFs and videos from a local folder, rotating automatically
 - Built-in wallpaper gallery (Bing daily image, Wikimedia Commons, NASA, picsum.photos)
 - Icon pack support (ADW/Nova/Apex format, `appfilter.xml`)
+- Animated drawn backgrounds (starry sky, northern lights, color flow, bokeh, rain, snow) and an optional background that follows time of day and weather
+- Clock designs: digital, minimal, analog, flip clock, word clock, neon
 - Modern "Neo glass" menus: floating settings panel with colorful category tiles, switches, version badge
-- Menu colors: night blue, graphite, mocha & white, violet, emerald, bordeaux, midnight; adjustable menu text size
+- Menu colors: night blue, graphite, mocha & white, violet, emerald, bordeaux, midnight, or taken from the wallpaper; adjustable menu text size
 - Looks: Pure, OLED, Aurora, Glass; accent color; modern fonts (Outfit, Plus Jakarta Sans, Manrope, Sora, Bai Jamjuree) or your own fonts
 - Save and share your look as a theme file
 
-**Radio**
+**Radio & podcasts**
 - Station search through radio-browser.info, background playback
+- Browse stations by genre (pop, rock, schlager, news, 80s/90s, dance, jazz, classical …) and country (DE/AT/CH/world)
+- Song history of recently played tracks, one click searches a track on YouTube Music
+- Sleep timer (15–90 min) with a gentle fade-out
 - Radio screen with a large "now playing" card and a station grid (favorites, popular, search); long-press to save a favorite
 - Compact "Live radio" card on the home screen with spectrum analyzer and stop button, selectable position
 - Station logos from the TuneIn directory, with favicon fallbacks
+- Podcasts: search (Apple directory), subscribe, play with ±30 s skip and automatic resume where you stopped
 
 **Screensaver**
 - Clock (OLED-friendly), your own photos, or a web gallery (Bing, Unsplash, Wikimedia) with crossfade and slow zoom, large clock, date and weather
+
+**Info widgets and news**
+- "Info" row with football (OpenLigaDB: live score, next/last match, table), large weather (hourly values, DWD rain radar), countdowns, a note and a home network tile (ping, speed test, device scan)
+- News ticker with headlines from Tagesschau, Sportschau, kicker, heise or SPIEGEL
+- Edit the note and countdowns from your phone's browser (local network, code protected)
 
 **Web widgets**
 - Show web pages as live tiles on the home screen, open them fullscreen and interactive
 
 **System integration**
-- Home key override, boot start, auto standby and sleep timer, remote shortcuts (needs the accessibility service)
+- Info widgets: football with goal alert, "On TV now" guide (XMLTV), sun & moon, weather, countdown, note, home network with speed test
+- Phone as remote: scan a QR code, then D-pad, volume, media keys, typing text and launching apps from your phone
+- Seasonal themes: Halloween, Christmas, New Year's Eve and Easter backgrounds, switched on automatically
+- Home key override, boot start, auto standby and sleep timer, remote shortcuts with key learning and remote detection (needs the accessibility service)
 - Parental controls with PIN, enforced outside Lumen too
 - Restart button (root, system permission, or the Android power menu)
+- Quick menu, fully customizable (sleep timer, radio, screensaver, RAM boost, network, Bluetooth, your own apps …)
+- Update check against GitHub releases with one-click install
+- Setup assistant on first start
+- Performance screen: memory, storage and temperature gauges, RAM boost with an exception list, cache cleanup (own cache; all apps with root), system info
 - Optional VPN indicator dot (green = VPN active, red = none)
-- Plugin API: other apps can add rows through a ContentProvider
 - German and English interface
 
 ## Requirements
@@ -65,6 +83,9 @@ The release APK is signed with the debug key so it installs without extra setup.
 
 ## Install
 
+**Easiest:** download the latest `app-release.apk` from the [Releases](../../releases) page and install it on your box (sideload, or `adb install`). Once Lumen runs, it checks GitHub for newer releases and updates itself with one click.
+
+**With adb:**
 ```
 adb connect <TV-IP>:5555
 adb -s <TV-IP>:5555 install -r app-release.apk
@@ -104,6 +125,8 @@ Undo with `adb shell cmd package install-existing <package>`. Some firmwares blo
 | FOREGROUND_SERVICE (+ media playback, special use) | radio playback in the background |
 | POST_NOTIFICATIONS | radio notification |
 | REQUEST_DELETE_PACKAGES | uninstall apps from the long-press menu |
+| KILL_BACKGROUND_PROCESSES | RAM boost in the performance screen |
+| REQUEST_INSTALL_PACKAGES | install a new Lumen version from GitHub (update check) |
 | READ_TV_LISTINGS, READ_EPG_DATA | "Continue watching" rows from other apps (READ_TV_LISTINGS can be granted at runtime or with `adb shell pm grant com.lumen.tv android.permission.READ_TV_LISTINGS`) |
 | Accessibility service (user-enabled) | home key, shortcuts, standby, parental controls, mini clock, restart click in the power menu |
 | Notification access (optional) | "Now playing" row |
@@ -117,6 +140,10 @@ Lumen has no accounts, no ads and no analytics. The only online requests are:
 - **radio-browser.info** – radio station search
 - **TuneIn (opml.radiotime.com)** – station logos (only the station name is sent)
 - **Wallpaper gallery** – Bing, Wikimedia Commons, NASA, picsum.photos (only when you open the gallery, or when the web gallery screensaver is running)
+- **OpenLigaDB** – football matches and tables (only with the football widget)
+- **RSS feeds** of the news sources you select (only with the news ticker)
+- **Deutscher Wetterdienst** – rain radar image; **Cloudflare** – speed test file (only when you start it)
+- **GitHub API** – checks for a newer Lumen release (at most every 6 hours)
 - **ipapi.co** – country of your public IP in the VPN dot menu (only while a VPN is active)
 - Whatever web widgets you add yourself
 
@@ -128,18 +155,6 @@ All settings stay on the device.
 - `wallpapers/` – images (jpg, png, webp), GIFs, videos (mp4, webm, mkv)
 - `fonts/` – your own fonts (ttf, otf)
 - `themes/` – theme files created with "Save look as theme"
-
-## Plugin API
-
-An app can add rows to Lumen with an exported ContentProvider:
-
-```xml
-<provider android:name=".MyRows" android:authorities="com.example.rows" android:exported="true">
-    <intent-filter><action android:name="com.lumen.tv.PLUGIN"/></intent-filter>
-</provider>
-```
-
-`content://com.example.rows/rows` returns a cursor with the columns `row` (row title), `title`, `image` (URL or content URI) and `intent` (`Intent.toUri(URI_INTENT_SCHEME)`). Lumen shows every `row` as its own row under "Plugins".
 
 ## Tech
 

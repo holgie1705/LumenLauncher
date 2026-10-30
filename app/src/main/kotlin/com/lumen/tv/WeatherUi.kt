@@ -1,6 +1,11 @@
 package com.lumen.tv
 
 import android.content.Context
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.widthIn
 import android.text.format.DateFormat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -63,7 +68,7 @@ import kotlin.math.sin
 
 /** Uhr + Wetter oben links. OK öffnet die Wetter-Details (oder die Ortswahl, falls noch kein Ort gesetzt ist). */
 @Composable
-fun ClockWeatherWidget(prefs: Prefs, weather: State<WeatherInfo?>, onClick: () -> Unit) {
+fun ClockWeatherWidget(prefs: Prefs, weather: State<WeatherInfo?>, onClick: () -> Unit, right: Boolean = false, bottom: Boolean = false) {
     val ctx = LocalContext.current
     val now by produceState(LocalDateTime.now()) { while (true) { value = LocalDateTime.now(); delay(10_000) } }
     val shape = RoundedCornerShape(16.dp)
@@ -74,14 +79,18 @@ fun ClockWeatherWidget(prefs: Prefs, weather: State<WeatherInfo?>, onClick: () -
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1.03f),
         border = ClickableSurfaceDefaults.border(focusedBorder = Border(BorderStroke(2.dp, Color.White.copy(alpha = 0.9f)), shape = shape)),
     ) {
-        Row(
+        Column(
             Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = if (right) Alignment.End else Alignment.Start,
         ) {
-            // Uhr etwas höher als das Wetter
-            Box(Modifier.align(Alignment.Top).offset(y = (-4).dp)) { ClockBlock(prefs.clockStyle, now, prefs.is24(ctx)) }
-            if (prefs.weather > 0) WeatherBlock(prefs, weather.value)
+            Row(horizontalArrangement = Arrangement.spacedBy(18.dp), verticalAlignment = Alignment.CenterVertically) {
+                // Uhr etwas höher als das Wetter (unten: bündig unten); rechts gespiegelt: Wetter links, Uhr außen
+                val clockMod = if (bottom) Modifier.align(Alignment.Bottom) else Modifier.align(Alignment.Top).offset(y = (-4).dp)
+                if (right && prefs.weather > 0) WeatherBlock(prefs, weather.value, right = true)
+                Box(clockMod) { ClockBlock(prefs.clockStyle, now, prefs.is24(ctx)) }
+                if (!right && prefs.weather > 0) WeatherBlock(prefs, weather.value)
+            }
+            WeatherAlertChip(prefs, right)
         }
     }
 }
@@ -91,6 +100,19 @@ private fun ClockBlock(style: Int, now: LocalDateTime, is24: Boolean) {
     val time = now.format(DateTimeFormatter.ofPattern(if (is24) "HH:mm" else "h:mm a", Lang.locale))
     val date = now.format(DateTimeFormatter.ofPattern(t("EEEE, d. MMMM", "EEEE, MMMM d"), Lang.locale))
     when (style) {
+        3 -> FlipClock(now, is24)
+        4 -> Column {
+            Text(wordClock(now), fontSize = 20.sp, fontWeight = FontWeight.Light, color = Color.White, maxLines = 2, lineHeight = 22.sp, modifier = Modifier.widthIn(max = 300.dp))
+            Text(date, fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f), maxLines = 1)
+        }
+        5 -> Column {
+            // Neon: farbiges Leuchten durch Schatten in der Menüfarbe
+            Text(
+                time, fontSize = 32.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1,
+                style = androidx.compose.ui.text.TextStyle(shadow = androidx.compose.ui.graphics.Shadow(NeoCyan, androidx.compose.ui.geometry.Offset.Zero, 28f)),
+            )
+            Text(date, fontSize = 11.sp, color = NeoCyan.copy(alpha = 0.85f), maxLines = 1)
+        }
         1 -> Text(time, fontSize = 34.sp, fontWeight = FontWeight.W100, color = Color.White, maxLines = 1)
         2 -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             AnalogClock(Modifier.size(58.dp), now)
@@ -129,16 +151,16 @@ private fun AnalogClock(modifier: Modifier, t: LocalDateTime) {
 }
 
 @Composable
-private fun WeatherBlock(prefs: Prefs, w: WeatherInfo?) {
+private fun WeatherBlock(prefs: Prefs, w: WeatherInfo?, right: Boolean = false) {
     val hasPlace = prefs.weatherLat != 0.0 || prefs.weatherLon != 0.0
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = if (right) Alignment.End else Alignment.Start) {
         when {
             !hasPlace -> Text(t("Wetter einrichten", "Set up weather"), fontSize = 15.sp, color = Color.White.copy(alpha = 0.7f))
             w == null -> Text(t("Wetter lädt …", "Loading weather …"), fontSize = 15.sp, color = Color.White.copy(alpha = 0.7f))
             else -> {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(weatherIcon(w.code, w.isDay), fontSize = 22.sp)
-                    Column {
+                    WeatherGlyph(w.code, w.isDay, Modifier.size(26.dp))
+                    Column(horizontalAlignment = if (right) Alignment.End else Alignment.Start) {
                         Text("${w.temp}°", fontSize = 22.sp, fontWeight = FontWeight.W300, color = Color.White, maxLines = 1)
                         Text(weatherText(w.code), fontSize = 10.sp, color = Color.White.copy(alpha = 0.6f), maxLines = 1)
                     }
@@ -148,7 +170,7 @@ private fun WeatherBlock(prefs: Prefs, w: WeatherInfo?) {
                         w.days.drop(1).take(3).forEach { d ->
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(d.label, fontSize = 10.sp, color = Color.White.copy(alpha = 0.6f), maxLines = 1)
-                                Text(weatherIcon(d.code, true), fontSize = 13.sp)
+                                WeatherGlyph(d.code, true, Modifier.size(18.dp))
                                 Text("${d.max}°/${d.min}°", fontSize = 10.sp, color = Color.White.copy(alpha = 0.75f), maxLines = 1)
                             }
                         }
@@ -169,11 +191,20 @@ fun WeatherDialog(prefs: Prefs, w: WeatherInfo?, onPlace: () -> Unit, onClose: (
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(prefs.weatherName, fontSize = 22.sp, fontWeight = FontWeight.Medium, color = Color.White)
+            if (prefs.weatherAlerts) {
+                val alerts by produceState<List<WxAlert>>(emptyList()) { value = WeatherAlerts.load(prefs.weatherLat, prefs.weatherLon) }
+                alerts.take(3).forEach { a ->
+                    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(a.color).copy(alpha = 0.16f)).border(1.dp, Color(a.color).copy(alpha = 0.6f), RoundedCornerShape(12.dp)).padding(10.dp)) {
+                        Text("⚠ " + a.event, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(a.color))
+                        if (a.headline.isNotEmpty()) Text(a.headline, fontSize = 13.sp, color = Color.White.copy(alpha = 0.85f))
+                    }
+                }
+            }
             if (w == null) {
                 Text(t("Wetter lädt …", "Loading weather …"), fontSize = 16.sp, color = Color.White.copy(alpha = 0.7f))
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(weatherIcon(w.code, w.isDay), fontSize = 48.sp)
+                    WeatherGlyph(w.code, w.isDay, Modifier.size(54.dp))
                     Column {
                         Text("${w.temp}°  (${t("gefühlt", "feels like")} ${w.feels}°)", fontSize = 28.sp, fontWeight = FontWeight.W300, color = Color.White)
                         Text("${weatherText(w.code)} · Wind ${w.wind} ${if (w.fahrenheit) "mph" else "km/h"}", fontSize = 14.sp, color = Color.White.copy(alpha = 0.65f))
@@ -188,7 +219,7 @@ fun WeatherDialog(prefs: Prefs, w: WeatherInfo?, onPlace: () -> Unit, onClose: (
                 w.days.forEach { d ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text(d.label, fontSize = 16.sp, color = Color.White, modifier = Modifier.width(70.dp))
-                        Text(weatherIcon(d.code, true), fontSize = 20.sp)
+                        WeatherGlyph(d.code, true, Modifier.size(24.dp))
                         Text("${d.max}° / ${d.min}°", fontSize = 16.sp, color = Color.White, modifier = Modifier.width(110.dp))
                         Text("${t("Regen", "Rain")} ${d.rain} %", fontSize = 14.sp, color = Color.White.copy(alpha = 0.6f), modifier = Modifier.width(100.dp))
                     }
@@ -259,4 +290,53 @@ fun Prefs.is24(ctx: Context): Boolean = when (timeFormat) {
     0 -> true
     2 -> false
     else -> DateFormat.is24HourFormat(ctx)
+}
+
+
+fun clockStyleName(i: Int): String = when (i) {
+    1 -> "Minimal"; 2 -> t("Analog", "Analog"); 3 -> t("Flip-Uhr", "Flip clock"); 4 -> t("Wortuhr", "Word clock"); 5 -> "Neon"
+    else -> t("Digital", "Digital")
+}
+
+/** Wortuhr: „Es ist Viertel nach acht“ (auf 5 Minuten gerundet). */
+fun wordClock(now: LocalDateTime): String {
+    val de = listOf("zwölf", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun", "zehn", "elf")
+    val en = listOf("twelve", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven")
+    val m5 = ((now.minute + 2) / 5) * 5
+    val h = now.hour + if (m5 == 60) 1 else 0
+    val m = m5 % 60
+    fun hr(x: Int) = if (Lang.en) en[x % 12] else de[x % 12].let { if (it == "eins" && m == 0) "ein" else it }
+    return if (Lang.en) when (m) {
+        0 -> "It's ${hr(h)} o'clock"; 15 -> "It's quarter past ${hr(h)}"; 30 -> "It's half past ${hr(h)}"; 45 -> "It's quarter to ${hr(h + 1)}"
+        in 5..25 -> "It's $m past ${hr(h)}"; else -> "It's ${60 - m} to ${hr(h + 1)}"
+    } else when (m) {
+        0 -> "Es ist ${hr(h)} Uhr"; 5 -> "Es ist fünf nach ${hr(h)}"; 10 -> "Es ist zehn nach ${hr(h)}"; 15 -> "Es ist Viertel nach ${hr(h)}"
+        20 -> "Es ist zwanzig nach ${hr(h)}"; 25 -> "Es ist fünf vor halb ${hr(h + 1)}"; 30 -> "Es ist halb ${hr(h + 1)}"
+        35 -> "Es ist fünf nach halb ${hr(h + 1)}"; 40 -> "Es ist zwanzig vor ${hr(h + 1)}"; 45 -> "Es ist Viertel vor ${hr(h + 1)}"
+        50 -> "Es ist zehn vor ${hr(h + 1)}"; else -> "Es ist fünf vor ${hr(h + 1)}"
+    }
+}
+
+/** Flip-Uhr: jede Ziffer auf einer dunklen Karte mit Trennlinie; wechselnde Ziffern klappen weich um. */
+@Composable
+private fun FlipClock(now: LocalDateTime, is24: Boolean) {
+    val h = if (is24) now.hour else ((now.hour + 11) % 12 + 1)
+    val txt = "%02d%02d".format(h, now.minute)
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+        txt.forEachIndexed { i, ch ->
+            if (i == 2) Text(":", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.8f))
+            androidx.compose.animation.AnimatedContent(
+                ch, label = "flip$i",
+                transitionSpec = {
+                    (androidx.compose.animation.slideInVertically(tween(350)) { -it / 2 } + androidx.compose.animation.fadeIn(tween(350))) togetherWith
+                        (androidx.compose.animation.slideOutVertically(tween(350)) { it / 2 } + androidx.compose.animation.fadeOut(tween(250)))
+                },
+            ) { c ->
+                Box(Modifier.size(30.dp, 42.dp).background(Brush.verticalGradient(listOf(Color(0xFF2A2F3A), Color(0xFF15181F))), RoundedCornerShape(7.dp)), contentAlignment = Alignment.Center) {
+                    Text(c.toString(), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Box(Modifier.fillMaxWidth().height(1.dp).background(Color.Black.copy(alpha = 0.6f)))
+                }
+            }
+        }
+    }
 }

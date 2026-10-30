@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.File
 
-private class Aux(val inputs: List<InputSource>, val watch: List<WatchItem>, val now: List<NowItem>, val plugins: List<PluginRow>)
+private class Aux(val inputs: List<InputSource>, val watch: List<WatchItem>, val now: List<NowItem>)
 
 class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     private val repo = AppRepo(app)
@@ -41,7 +41,6 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     private val apps = MutableStateFlow<List<TvApp>>(emptyList())
     private val inputs = MutableStateFlow<List<InputSource>>(emptyList())
     private val watch = MutableStateFlow<List<WatchItem>>(emptyList())
-    private val plugins = MutableStateFlow<List<PluginRow>>(emptyList())
     val appList: StateFlow<List<TvApp>> = apps.asStateFlow()
     val inputList: StateFlow<List<InputSource>> = inputs.asStateFlow()
 
@@ -58,7 +57,7 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
         .flowOn(Dispatchers.Default)
         .distinctUntilChanged { a, b -> a.map { "${it.pkg}|${it.title}|${it.playing}" } == b.map { "${it.pkg}|${it.title}|${it.playing}" } }
 
-    private val aux = combine(inputs, watch, nowFlow, plugins) { i, w, n, p -> Aux(i, w, n, p) }
+    private val aux = combine(inputs, watch, nowFlow) { i, w, n -> Aux(i, w, n) }
 
     val state: StateFlow<HomeState> = combine(apps, _usage, prefs, aux, parental.state) { a, u, p, x, ps ->
         build(a, u, p, x, ps)
@@ -67,20 +66,45 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     val status: StateFlow<StatusInfo?> = flow { while (true) { emit(repo.status()); delay(15_000) } }
         .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    val wallpaper: StateFlow<Wall?> = combine(prefs.map { it.slideshowMin }.distinctUntilChanged(), wallTick) { m, _ -> m }
-        .flatMapLatest { minutes ->
+    val wallpaper: StateFlow<Wall?> = combine(prefs.map { it.slideshowMin to it.wxBg }.distinctUntilChanged(), wallTick) { m, _ -> m }
+        .flatMapLatest { (minutes, wx) ->
             flow {
                 val files = repo.wallFiles().shuffled()
                 if (files.isEmpty()) { emit(null); return@flow }
                 var i = 0
                 while (true) {
-                    emit(repo.wall(files[i % files.size]))
-                    if (minutes <= 0 || files.size == 1) break
-                    delay(minutes * 60_000L)
+                    // „Passend zu Tageszeit & Wetter“: Dateien mit passenden Wörtern im Namen bevorzugen (z. B. regen_see.jpg, nacht-stadt.png)
+                    val pool = if (wx) wallTags().let { tags -> files.filter { f -> tags.any { f.name.lowercase().contains(it) } } }.ifEmpty { files } else files
+                    emit(repo.wall(pool[i % pool.size]))
+                    if ((minutes <= 0 && !wx) || files.size == 1) break
+                    delay((if (minutes > 0) minutes else 30) * 60_000L)
                     i++
                 }
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Stichwörter für Wallpaper nach Uhrzeit und aktuellem Wetter. */
+    private fun wallTags(): Set<String> {
+        val h = java.time.LocalTime.now().hour
+        val p = prefs.value
+        val code = runCatching { weatherRepo.cached(p.weatherLat, p.weatherLon, p.tempF)?.code }.getOrNull()
+        val out = mutableSetOf<String>()
+        when {
+            h >= 21 || h < 6 -> out += listOf("nacht", "night")
+            h < 11 -> out += listOf("morgen", "morning")
+            h >= 17 -> out += listOf("abend", "evening", "sunset")
+            else -> out += listOf("tag", "day")
+        }
+        when (code) {
+            null -> {}
+            in 0..2 -> out += listOf("sonne", "sun", "sonnig", "sunny")
+            3, 45, 48 -> out += listOf("wolken", "cloud", "nebel", "fog")
+            in 71..77, 85, 86 -> out += listOf("schnee", "snow", "winter")
+            in 95..99 -> out += listOf("gewitter", "storm", "regen", "rain")
+            else -> out += listOf("regen", "rain")
+        }
+        return out
+    }
 
     private val weatherRepo = WeatherRepo(app)
 
@@ -126,7 +150,7 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
         val byPkg = visible.associateBy { it.pkg }
         val now = System.currentTimeMillis()
         val rows = p.rows.filter { it.visible }.flatMap<RowCfg, RowUi> { r ->
-            if (kids && r.kind in setOf(RowKind.WATCH, RowKind.PLAYING, RowKind.INPUTS, RowKind.PLUGINS, RowKind.RADIO, RowKind.WEB)) return@flatMap emptyList()
+            if (kids && r.kind in setOf(RowKind.WATCH, RowKind.PLAYING, RowKind.INPUTS, RowKind.RADIO, RowKind.WEB)) return@flatMap emptyList()
             when (r.kind) {
                 RowKind.WATCH -> listOfNotNull(x.watch.takeIf { it.isNotEmpty() }?.let { WatchRowUi(r.id, r.shownTitle(), it) })
                 RowKind.PLAYING -> listOfNotNull(x.now.takeIf { it.isNotEmpty() }?.let { NowRowUi(r.id, r.shownTitle(), it) })
@@ -144,9 +168,9 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
                         .takeIf { it.isNotEmpty() }?.let { AppRowUi(r.id, r.shownTitle(), it, false) }
                 )
                 RowKind.WEB -> p.webWidgets.filter { it.on }.let { ws -> if (ws.isNotEmpty()) listOf(WebRowUi(r.id, r.shownTitle(), ws)) else emptyList() }
+                RowKind.INFO -> p.widgets.kinds.let { k -> if (k.isNotEmpty()) listOf(InfoRowUi(r.id, r.shownTitle(), k)) else emptyList() }
                 RowKind.RADIO -> if (p.radioOn && p.radioRow) listOf(RadioRowUi(r.id, r.shownTitle(), p.stations)) else emptyList()
                 RowKind.INPUTS -> listOfNotNull(x.inputs.takeIf { it.isNotEmpty() }?.let { InputRowUi(r.id, r.shownTitle(), it) })
-                RowKind.PLUGINS -> x.plugins.map { WatchRowUi(it.id, it.title, it.items) }
                 RowKind.CUSTOM -> listOfNotNull(
                     r.pkgs.mapNotNull { byPkg[it] }.takeIf { it.isNotEmpty() }?.let { AppRowUi(r.id, r.shownTitle(), it, true) }
                 )
@@ -174,7 +198,6 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
             _usage.value = repo.usage()
             inputs.value = repo.inputs()
             watch.value = repo.watchNext()
-            plugins.value = repo.plugins()
         }
     }
 
@@ -210,6 +233,8 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     fun details(a: TvApp) = repo.showDetails(a.pkg)
     fun uninstall(a: TvApp) = repo.uninstall(a.pkg)
     fun assist() = repo.start(Intent(Intent.ACTION_ASSIST))
+    /** Laufende Medien-Sitzungen (für „Leistung“: spielende Apps nicht beenden). */
+    fun nowSessions(): List<NowItem> = repo.nowPlaying()
 
     // ---------- Von Service/Activity ----------
     fun lockedApp(pkg: String) {
@@ -293,6 +318,8 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     fun removeWidget(id: String) = store.update { p -> p.copy(webWidgets = p.webWidgets.filter { it.id != id }) }
     fun setWidgetRefresh(id: String, min: Int) = store.update { p -> p.copy(webWidgets = p.webWidgets.map { if (it.id == id) WebWidget(it.id, it.name, it.url, min, it.size, it.on) else it }) }
     fun removeStation(uuid: String) = store.update { p -> p.copy(stations = p.stations.filter { it.uuid != uuid }) }
+    fun addPodcast(p0: Podcast) = store.update { p -> if (p.podcasts.any { it.feed == p0.feed }) p else p.copy(podcasts = p.podcasts + p0) }
+    fun removePodcast(feed: String) = store.update { p -> p.copy(podcasts = p.podcasts.filter { it.feed != feed }) }
     fun deleteRow(id: String) = store.update { p -> p.copy(rows = p.rows.filter { it.id != id }) }
 
     // ---------- Export, Themes, Fonts, Root ----------

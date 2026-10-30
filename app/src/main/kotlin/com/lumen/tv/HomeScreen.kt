@@ -45,6 +45,7 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -88,6 +89,23 @@ fun HomeScreen(vm: HomeViewModel) {
     var weatherOpen by remember { mutableStateOf(false) }
     androidx.compose.runtime.SideEffect { iconPackGlobal = prefs.iconPack; focusStyleGlobal = prefs.focusStyle; menuThemeGlobal = prefs.menuTheme; tileAlphaGlobal = listOf(1f, 0.75f, 0.5f, 0.3f)[prefs.tileGlass.coerceIn(0, 3)] }
     var radioOpen by remember { mutableStateOf(false) }
+    var quickOpen by remember { mutableStateOf(false) }
+    // Farben des Wallpapers für die Menüfarbe „Aus dem Wallpaper“
+    LaunchedEffect(wall) {
+        val st = wall as? Wall.Still
+        wallColorsGlobal = if (st == null) null else kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            runCatching {
+                val p = androidx.palette.graphics.Palette.from(st.bmp.asAndroidBitmap()).maximumColorCount(16).generate()
+                val vib = p.getVibrantColor(p.getLightVibrantColor(p.getDominantColor(0xFF4FE3F0.toInt())))
+                val dark = p.getDarkMutedColor(p.getDarkVibrantColor(p.getDominantColor(0xFF1A2140.toInt())))
+                vib to dark
+            }.getOrNull()
+        }
+    }
+    var perfOpenHome by remember { mutableStateOf(false) }
+    var updateOpen by remember { mutableStateOf(false) }
+    val update by Updater.available.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) { delay(8_000); Updater.check() }
     var webOpen by remember { mutableStateOf<WebWidget?>(null) }
     var placeOpen by remember { mutableStateOf(false) }
     var idle by remember { mutableStateOf(false) }
@@ -181,7 +199,7 @@ fun HomeScreen(vm: HomeViewModel) {
     )
 
     val lc = LayoutCtx(
-        style = prefs.tile, scale = prefs.scaleF, vm = vm,
+        style = prefs.tile, scale = prefs.scaleF, gap = prefs.gapDp.dp, vm = vm,
         onHero = { hero.value = it },
         onMenu = { app, r -> menu = appMenu(app, r) },
         onRadioSearch = { radioOpen = true },
@@ -248,12 +266,15 @@ fun HomeScreen(vm: HomeViewModel) {
         if (!idle) AmbientHost(hero, vm, prefs, wall)
 
         val barBottom = prefs.barPos == 1
+        val onClockClick = { if (prefs.weather > 0) { if (hasPlace) weatherOpen = true else placeOpen = true } }
         val bar: @Composable () -> Unit = {
             FontScope(prefs.menuFont) { TopBar(
                 prefs = prefs, status = status, sleepUntil = sleepUntil, weather = weather,
-                onWidget = { if (prefs.weather > 0) { if (hasPlace) weatherOpen = true else placeOpen = true } },
+                onWidget = onClockClick,
                 onSearch = { vm.assist() },
                 onTimer = { menu = timerMenu() },
+                onQuick = { quickOpen = true },
+                hasUpdate = update != null,
                 onSettings = { vm.requirePinIfLocked { settingsOpen = true } },
                 onAndroid = { openAndroidSettings(homeCtx) },
                 onRadio = { radioOpen = true },
@@ -265,6 +286,7 @@ fun HomeScreen(vm: HomeViewModel) {
         }
         Column(Modifier.fillMaxSize().padding(top = 24.dp, bottom = if (barBottom) 16.dp else 0.dp)) {
             if (!barBottom) bar()
+            if (prefs.widgets.tickerPos == 1) NewsTicker(prefs.widgets, Modifier.padding(top = 6.dp))
             when (prefs.layout) {
                 Layout.SHELVES -> if (prefs.rowsPos == 1) {
                     Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -288,12 +310,27 @@ fun HomeScreen(vm: HomeViewModel) {
                     SidebarLayout(state.rows, lc, firstFocus, Modifier.weight(1f))
                 }
             }
+            if (prefs.widgets.tickerPos == 0) NewsTicker(prefs.widgets, Modifier.padding(top = 4.dp, bottom = 10.dp))
             if (barBottom) bar()
         }
 
         if (idle) { if (prefs.idleStyle == 2) NetScreensaver(wall, weather.value, prefs.weatherName, prefs.is24(homeCtx)) else IdleScreen(wall, prefs.idleStyle, prefs.is24(homeCtx)) }
         menu?.let { MenuDialog(it) { menu = null } }
         if (settingsOpen) SettingsDialog(vm, prefs, overrideOn, pst, appList, inputList) { settingsOpen = false }
+        // Uhr + Wetter in den unteren Ecken (über der Leiste, falls die unten liegt)
+        if (prefs.clockPos >= 2 && !idle) {
+            val right = prefs.clockPos == 3
+            Column(
+                Modifier.align(if (right) Alignment.BottomEnd else Alignment.BottomStart)
+                    .padding(start = 18.dp, end = 18.dp, bottom = if (barBottom) 118.dp else 18.dp),
+                horizontalAlignment = if (right) Alignment.End else Alignment.Start,
+            ) {
+                FontScope(prefs.menuFont) {
+                    if (prefs.npPos == 0) NowPlayingCard(prefs.radioOn, { radioOpen = true })
+                    ClockWeatherWidget(prefs, weather, onClockClick, right = right, bottom = true)
+                }
+            }
+        }
         if (prefs.npPos != 0 && !idle) {
             val (al, pad) = when (prefs.npPos) {
                 1 -> Alignment.TopCenter to Modifier.padding(top = 84.dp)
@@ -305,6 +342,7 @@ fun HomeScreen(vm: HomeViewModel) {
             }
             NowPlayingCard(prefs.radioOn, { radioOpen = true }, Modifier.align(al).then(pad))
         }
+        if (!idle) GoalBanner(Modifier.align(Alignment.TopCenter).padding(top = 90.dp))
         if (moving != null) Text(
             "◀ ▶  " + t("Mit den Pfeiltasten verschieben · OK = fertig", "Move with arrow keys · OK = done"),
             fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.Black,
@@ -320,6 +358,10 @@ fun HomeScreen(vm: HomeViewModel) {
         inputPlay.value?.let { InputPlayerDialog(it) { vm.closeInput() } }
         webOpen?.let { WebFullDialog(it) { webOpen = null } }
         if (radioOpen) RadioSearchDialog(vm, prefs) { radioOpen = false }
+        if (quickOpen) QuickPanel(vm, prefs, onRadio = { radioOpen = true }, onPerformance = { perfOpenHome = true }, onSettings = { vm.requirePinIfLocked { settingsOpen = true } }) { quickOpen = false }
+        if (perfOpenHome) PerformanceDialog(vm, prefs, appList) { perfOpenHome = false }
+        if (updateOpen) update?.let { u -> UpdateDialog(u) { updateOpen = false } }
+        if (!prefs.setupDone && appList.isNotEmpty()) SetupWizard(vm, appList) { }
         if (weatherOpen) WeatherDialog(prefs, weather.value, onPlace = { weatherOpen = false; placeOpen = true }) { weatherOpen = false }
         if (placeOpen) PlaceDialog(vm) { placeOpen = false }
         pin?.let { PinHost(it, vm) }
@@ -330,7 +372,7 @@ fun HomeScreen(vm: HomeViewModel) {
 private fun TopBar(
     prefs: Prefs, status: State<StatusInfo?>, sleepUntil: State<Long>, weather: State<WeatherInfo?>,
     onWidget: () -> Unit, onSearch: () -> Unit, onTimer: () -> Unit, onSettings: () -> Unit, onAndroid: () -> Unit,
-    onRadio: () -> Unit, onRestart: () -> Unit,
+    onRadio: () -> Unit, onRestart: () -> Unit, onQuick: () -> Unit = {}, hasUpdate: Boolean = false,
 ) {
     val now by produceState(System.currentTimeMillis()) { while (true) { value = System.currentTimeMillis(); delay(30_000) } }
     Row(
@@ -339,8 +381,10 @@ private fun TopBar(
         verticalAlignment = Alignment.Top,
     ) {
         Column {
-            ClockWeatherWidget(prefs, weather, onWidget)
-            if (prefs.npPos == 0) NowPlayingCard(prefs.radioOn, onRadio)
+            if (prefs.clockPos == 0) {
+                ClockWeatherWidget(prefs, weather, onWidget)
+                if (prefs.npPos == 0) NowPlayingCard(prefs.radioOn, onRadio)
+            }
         }
         Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -348,12 +392,17 @@ private fun TopBar(
                 if (prefs.radioOn) IconPill(Ico.RADIO, radioNow?.name ?: "Radio", active = radioNow != null, onClick = onRadio)
                 IconPill(Ico.SEARCH, t("Suche", "Search"), onClick = onSearch)
                 IconPill(Ico.TIMER, "Timer", onClick = onTimer)
-                IconPill(Ico.GEAR, t("Einstellungen", "Settings"), onClick = onSettings)
+                IconPill(Ico.GRID, t("Schnellmenü", "Quick menu"), onClick = onQuick)
+                IconPill(Ico.GEAR, if (hasUpdate) t("Einstellungen · Update!", "Settings · update!") else t("Einstellungen", "Settings"), active = hasUpdate, onClick = onSettings)
                 IconPill(Ico.PHONE, "Android", onClick = onAndroid)
                 if (prefs.restartBtn) IconPill(Ico.RESTART, t("Neustart", "Restart"), onClick = onRestart)
             }
             val left = ((sleepUntil.value - now) / 60_000L).toInt()
             StatusBar(if (prefs.showStatus) status.value else null, if (sleepUntil.value > 0 && left >= 0) left + 1 else 0)
+            if (prefs.clockPos == 1) {
+                ClockWeatherWidget(prefs, weather, onWidget, right = true)
+                if (prefs.npPos == 0) NowPlayingCard(prefs.radioOn, onRadio)
+            }
         }
     }
 }

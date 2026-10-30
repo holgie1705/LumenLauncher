@@ -17,6 +17,16 @@ class LumenApp : Application(), coil.ImageLoaderFactory {
         super.onCreate()
         // Sprache früh setzen, damit auch Service/Toasts die richtige Sprache nutzen.
         Lang.apply(loadPrefs(this).lang)
+        GoalWatch.start(this)
+    }
+
+    /** Wenn Android Speicher braucht: Bild-Cache freigeben (lädt bei Bedarf neu – keine schlechtere Qualität). */
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        // Ab „moderat“ (App im Hintergrund) oder laufender Speichernot den Bild-Cache leeren.
+        if (level >= TRIM_MEMORY_RUNNING_LOW || level >= TRIM_MEMORY_BACKGROUND) {
+            runCatching { coil.Coil.imageLoader(this).memoryCache?.clear() }
+        }
     }
 }
 

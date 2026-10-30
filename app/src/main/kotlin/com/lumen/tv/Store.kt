@@ -29,8 +29,15 @@ class SettingsStore(ctx: Context) {
         Lang.apply(_prefs.value.lang)
     }
 
-    private fun load(): Prefs =
-        runCatching { prefsFromJson(JSONObject(sp.getString("prefs", "{}") ?: "{}")) }.getOrDefault(Prefs())
+    private fun load(): Prefs {
+        val raw = sp.getString("prefs", null)
+        // Frische Installation (noch nie Prefs gespeichert): Sprachauswahl beim Erststart zeigen.
+        if (raw == null) return Prefs()
+        val o = runCatching { JSONObject(raw) }.getOrNull() ?: return Prefs()
+        val p = runCatching { prefsFromJson(o) }.getOrDefault(Prefs())
+        // Bestehende Installation ohne das Flag -> als „bereits gewählt" behandeln, damit kein Dialog aufpoppt.
+        return p.copy(langPicked = o.optBoolean("langPicked", true))
+    }
 
     fun update(f: (Prefs) -> Prefs) {
         val n = f(_prefs.value)
