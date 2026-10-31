@@ -12,6 +12,10 @@ A fast, lightweight, privacy-friendly Android TV launcher — no accounts, no ad
 - Optional **auto-send**: after a configurable pause (off / 2 / 3 / 5 s) the typed number is sent on its own, like a real number key — with a visible countdown. OK still sends instantly, Back cancels.
 - Target IP is configurable (empty = this box), with a built-in connection test. Needs "ADB over network" on the box and a one-time key approval.
 
+**Camera & 3D printer status (new)**
+- Web widgets can now play **live camera streams**: an `rtsp://` address (e.g. a Bambu Lab printer via go2rtc) or an `.m3u8` stream plays natively via ExoPlayer — as a tile and fullscreen, with automatic reconnect. Web widgets can now also be **edited** (name/address) afterwards.
+- New **Bambu Lab printer status** overlay: open the camera fullscreen and a sleek glass bar shows live job, stage, progress bar, ETA, nozzle/bed/chamber temps, layer, speed, part-cooling fan, Wi-Fi, AMS humidity, chamber light, hotend type and AMS spools (colour, material, remaining % and grams) — plus an error warning. Two ways to feed it: a local **status bridge** (HTTP JSON, works even in cloud mode) or the printer's **local MQTT** (LAN-only mode).
+
 **Wallpaper gallery**
 - Ten new themed collections from **Wallhaven** (Nature, Space & stars, Cities & architecture, Minimal, Abstract & patterns, Dark & neon, Animals, Cars & tech, Fantasy & digital art, Seasons) — no account, SFW only, at least 1920×1080.
 - Wallpapers can now be **removed again**: OK on a picture already added (marked ✓) takes it back out; OK on a new one adds it. The info line shows what OK will do.

@@ -356,7 +356,7 @@ fun HomeScreen(vm: HomeViewModel) {
                 .background(Color.White, RoundedCornerShape(20.dp)).padding(horizontal = 18.dp, vertical = 8.dp),
         )
         inputPlay.value?.let { InputPlayerDialog(it) { vm.closeInput() } }
-        webOpen?.let { WebFullDialog(it) { webOpen = null } }
+        webOpen?.let { WebFullDialog(it, prefs) { webOpen = null } }
         if (radioOpen) RadioSearchDialog(vm, prefs) { radioOpen = false }
         if (quickOpen) QuickPanel(vm, prefs, onRadio = { radioOpen = true }, onPerformance = { perfOpenHome = true }, onSettings = { vm.requirePinIfLocked { settingsOpen = true } }) { quickOpen = false }
         if (perfOpenHome) PerformanceDialog(vm, prefs, appList) { perfOpenHome = false }

@@ -170,6 +170,7 @@ fun SettingsDialog(
     var updOpen by remember { mutableStateOf(false) }
     var learnOpen by remember { mutableStateOf(false) }
     var keypadOpen by remember { mutableStateOf(false) }
+    var bambuOpen by remember { mutableStateOf(false) }
     var wizardOpen by remember { mutableStateOf(false) }
     var page by remember { mutableStateOf<String?>(null) }
     val first = remember { FocusRequester() }
@@ -515,6 +516,7 @@ fun SettingsDialog(
                         item { SettingLine(t("Bedienungshilfe „Lumen Home-Taste“", "Accessibility service “Lumen Home-Taste”"), if (a11y) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_ACCESSIBILITY_SETTINGS) } }
                         item { SettingLine(t("Zugriff auf laufende Medien (Reihe „Läuft gerade“)", "Access to playing media (row “Now playing”)"), if (notif) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS) } }
                         item { SettingLine(t("Ziffernblock (ADB) – Zahlen am TV eingeben", "Number pad (ADB) – enter numbers on TV"), "") { keypadOpen = true } }
+                        item { SettingLine(t("3D-Drucker (Bambu) – Kamerastatus", "3D printer (Bambu) – camera status"), "") { bambuOpen = true } }
                         item { SettingLine(t("Stock-Launcher einfrieren (Root)", "Freeze stock launcher (root)"), "") { vm.freezeStock(true) { ok -> note = if (ok) t("Stock-Launcher eingefroren.", "Stock launcher frozen.") else t("Fehlgeschlagen (kein Root?).", "Failed (no root?).") } } }
                         item { SettingLine(t("Stock-Launcher wieder aktivieren (Root)", "Re-enable stock launcher (root)"), "") { vm.freezeStock(false) { ok -> note = if (ok) t("Stock-Launcher aktiviert.", "Stock launcher enabled.") else t("Fehlgeschlagen (kein Root?).", "Failed (no root?).") } } }
                         item { SettingLine(t("Nach Updates suchen", "Check for updates"), "v$APP_VERSION") {
@@ -542,6 +544,7 @@ fun SettingsDialog(
             if (wizardOpen) SetupWizard(vm, apps) { wizardOpen = false }
             if (learnOpen) KeyLearnDialog(onKey = { code -> learnOpen = false; pickPress(code) }, onCancel = { learnOpen = false })
             if (keypadOpen) KeypadSettingsDialog(vm) { keypadOpen = false }
+            if (bambuOpen) BambuSettingsDialog(vm) { bambuOpen = false }
         }
         }
         }

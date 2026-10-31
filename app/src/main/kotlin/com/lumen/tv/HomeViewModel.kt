@@ -316,6 +316,7 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     fun setWidgetSize(id: String, size: Int) = store.update { p -> p.copy(webWidgets = p.webWidgets.map { if (it.id == id) WebWidget(it.id, it.name, it.url, it.refreshMin, size, it.on) else it }) }
     fun toggleWidget(id: String) = store.update { p -> p.copy(webWidgets = p.webWidgets.map { if (it.id == id) WebWidget(it.id, it.name, it.url, it.refreshMin, it.size, !it.on) else it }) }
     fun removeWidget(id: String) = store.update { p -> p.copy(webWidgets = p.webWidgets.filter { it.id != id }) }
+    fun updateWidget(id: String, name: String, url: String) = store.update { p -> p.copy(webWidgets = p.webWidgets.map { if (it.id == id) WebWidget(it.id, name, url, it.refreshMin, it.size, it.on) else it }) }
     fun setWidgetRefresh(id: String, min: Int) = store.update { p -> p.copy(webWidgets = p.webWidgets.map { if (it.id == id) WebWidget(it.id, it.name, it.url, min, it.size, it.on) else it }) }
     fun removeStation(uuid: String) = store.update { p -> p.copy(stations = p.stations.filter { it.uuid != uuid }) }
     fun addPodcast(p0: Podcast) = store.update { p -> if (p.podcasts.any { it.feed == p0.feed }) p else p.copy(podcasts = p.podcasts + p0) }
