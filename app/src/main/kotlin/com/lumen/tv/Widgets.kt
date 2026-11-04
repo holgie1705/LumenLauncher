@@ -214,6 +214,16 @@ val NEWS_SOURCES = listOf(
     Triple("t3n", "t3n", "https://t3n.de/rss.xml"),
     // International (englisch)
     Triple("bbc", "BBC World", "https://feeds.bbci.co.uk/news/world/rss.xml"),
+    // UK
+    Triple("guardian", "The Guardian", "https://www.theguardian.com/world/rss"),
+    Triple("skynews", "Sky News", "https://feeds.skynews.com/feeds/rss/world.xml"),
+    // USA
+    Triple("npr", "NPR News", "https://feeds.npr.org/1001/rss.xml"),
+    Triple("nyt", "New York Times", "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"),
+    Triple("cbs", "CBS News", "https://www.cbsnews.com/latest/rss/main"),
+    // Kanada
+    Triple("cbc", "CBC (Canada)", "https://www.cbc.ca/webfeed/rss/rss-topstories"),
+    Triple("ctv", "CTV News", "https://www.ctvnews.ca/rss/ctvnews-ca-top-stories-public-rss-1.822009"),
 )
 
 @Immutable class Headline(val source: String, val title: String)

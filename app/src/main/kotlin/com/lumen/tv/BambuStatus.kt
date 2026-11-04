@@ -10,8 +10,8 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.X509TrustManager
 
-/** Eine AMS-Spule (Material + Farbe + Restmenge in % + Spulengewicht in g). */
-class BambuTray(val type: String, val colorArgb: Long, val remain: Int, val weightG: Int = 0)
+/** Eine Spule (AMS-Slot oder externer Außenextruder): Id + Material + Farbe + Restmenge % + Gewicht g. */
+class BambuTray(val id: String, val type: String, val colorArgb: Long, val remain: Int, val weightG: Int = 0, val external: Boolean = false)
 
 /** Momentaufnahme des Druckerstatus. Felder sind leer/–1, solange nichts bekannt ist. */
 data class BambuState(
@@ -25,6 +25,7 @@ data class BambuState(
     val speed: Int = -1, val fan: Int = -1,
     val wifi: String = "", val amsHumidity: Int = -1,
     val printError: Int = 0, val hmsCount: Int = -1,
+    val activeTrayId: String = "",   // gerade verwendeter AMS-Slot (ams.tray_now)
     val nozzleType: String = "", val nozzleDia: String = "",
     val light: Int = -1,   // Kammerlicht: 1 an, 0 aus, -1 unbekannt
     val trays: List<BambuTray> = emptyList(),
@@ -161,20 +162,38 @@ fun bambuMergePrint(prev: BambuState, p: JSONObject): BambuState {
             (u.optString("humidity_raw", "").toIntOrNull())?.let { s = s.copy(amsHumidity = it) }
         }
     }
-    p.optJSONObject("ams")?.optJSONArray("ams")?.let { units ->
+    run {
+        val amsRoot = p.optJSONObject("ams")
+        val now = amsRoot?.optString("tray_now", s.activeTrayId) ?: s.activeTrayId
+        if (now.isNotEmpty()) s = s.copy(activeTrayId = now)
         val out = mutableListOf<BambuTray>()
-        for (i in 0 until units.length()) {
-            units.optJSONObject(i)?.optJSONArray("tray")?.let { trays ->
-                for (j in 0 until trays.length()) {
-                    val tr = trays.optJSONObject(j) ?: continue
-                    val type = tr.optString("tray_type", "")
-                    val remain = tr.optString("remain", "-1").toIntOrNull() ?: tr.optInt("remain", -1)
-                    if (type.isEmpty() || remain < 0) continue   // leere Slots überspringen
-                    val wg = tr.optString("tray_weight", "0").toIntOrNull() ?: 0
-                    out += BambuTray(type, bambuParseColor(tr.optString("tray_color", "")), remain, wg)
+        fun mk(tr: JSONObject, external: Boolean) {
+            val id = tr.optString("id", "")
+            val type = tr.optString("tray_type", ""); if (type.isEmpty()) return
+            val remain = tr.optString("remain", "-1").toIntOrNull() ?: tr.optInt("remain", -1)
+            val wg = tr.optString("tray_weight", "0").toIntOrNull() ?: 0
+            out += BambuTray(id, type, bambuParseColor(tr.optString("tray_color", "")), remain, wg, external)
+        }
+        // Alle physisch geladenen AMS-Slots zeigen (tray_exist_bits) – auch ohne RFID/Restmenge.
+        amsRoot?.let { root ->
+            val exist = root.optString("tray_exist_bits", "").toLongOrNull(16) ?: -1L
+            root.optJSONArray("ams")?.let { units ->
+                for (u in 0 until units.length()) {
+                    units.optJSONObject(u)?.optJSONArray("tray")?.let { trays ->
+                        for (j in 0 until trays.length()) {
+                            val tr = trays.optJSONObject(j) ?: continue
+                            if (tr.optString("tray_type", "").isEmpty()) continue
+                            val gidx = u * 4 + (tr.optString("id", "").toIntOrNull() ?: j)
+                            val present = exist < 0 || ((exist ushr gidx) and 1L) == 1L
+                            if (present || tr.optString("id", "") == now) mk(tr, false)
+                        }
+                    }
                 }
             }
         }
+        // Externer Außenextruder (geladen = Material gesetzt).
+        p.optJSONObject("vt_tray")?.let { if (it.optString("tray_type", "").isNotEmpty()) mk(it, true) }
+        p.optJSONArray("vir_slot")?.let { arr -> for (i in 0 until arr.length()) arr.optJSONObject(i)?.let { if (it.optString("tray_type", "").isNotEmpty()) mk(it, true) } }
         if (out.isNotEmpty()) s = s.copy(trays = out)
     }
     return s

@@ -1,6 +1,10 @@
 package com.lumen.tv
 
 import android.accessibilityservice.AccessibilityService
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.content.SharedPreferences
 import android.media.AudioManager
@@ -65,8 +69,10 @@ class OverrideService : AccessibilityService() {
      */
     private fun isLauncherHome(pkg: String, cls: String?): Boolean {
         if (pkg == packageName) return true
+        // waipu/exaring melden eigene Home-Activities, sind aber die App, in der das Overlay erscheinen SOLL -> nie als Launcher werten.
+        if (pkg.contains("waipu", true) || pkg.contains("exaring", true)) return false
         val acts = homeActivities()[pkg]
-        if (acts != null) return cls == null || cls in acts
+        if (acts != null) return cls != null && cls in acts
         return pkg in STOCK_PKGS || pkg == "com.amazon.tv.launcher"
     }
 
@@ -85,6 +91,10 @@ class OverrideService : AccessibilityService() {
     private var prefs = Prefs()
     private var lastKey = SystemClock.elapsedRealtime()
     private var lastLaunch = 0L
+    private var lastAppPkg = ""           // zuletzt im Vordergrund gewesene echte App (für Exit-Kill/Auto-Boost)
+    private var lastBoost = 0L            // Drosselung des Auto-Boosts
+    private var lastBambuStage = ""       // letzter bekannter Druckzustand (für Benachrichtigung)
+    private var bambuInit = false         // erster Bambu-Poll: nur merken, nicht melden
     private var standbyPending = false
     private val swallowed = mutableSetOf<Int>()
     private val longTimers = mutableMapOf<Int, Runnable>()
@@ -92,7 +102,7 @@ class OverrideService : AccessibilityService() {
     private val pendingStandby = Runnable { standbyPending = false; standbyNow() }
     private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> if (key == "prefs") loadPrefs() }
     private val tick = object : Runnable {
-        override fun run() { checkStandby(); handler.postDelayed(this, 30_000) }
+        override fun run() { checkStandby(); pollBambu(); handler.postDelayed(this, 30_000) }
     }
 
     companion object {
@@ -100,9 +110,15 @@ class OverrideService : AccessibilityService() {
     }
 
     /** Lumen ist im Vordergrund (Hauptmenü/Einstellungen/Schoner) -> Uhr/Wetter-Einblendung weg. */
-    fun lumenResumed() { lumenForeground = true; miniWanted = false; hideMini() }
+    fun lumenResumed() {
+        miniWanted = false; hideMini()
+        // Zurück im Hauptmenü: die gerade verlassene App gezielt räumen (Exit-Kill) und bei Bedarf Auto-Boost.
+        val left = lastAppPkg; lastAppPkg = ""
+        maybeExitKill(left, packageName)
+        maybeAutoBoost()
+    }
     /** Lumen ist in den Hintergrund gegangen (eine andere App ist vorn). Das Anzeigen übernimmt das Fenster-Event. */
-    fun lumenPaused() { lumenForeground = false }
+    fun lumenPaused() {}
 
     override fun onServiceConnected() {
         instance = this
@@ -117,6 +133,7 @@ class OverrideService : AccessibilityService() {
         }
         sp.registerOnSharedPreferenceChangeListener(prefListener)
         handler.postDelayed(tick, 30_000)
+        handler.postDelayed(overlayTick, 4_000)
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
@@ -263,11 +280,41 @@ class OverrideService : AccessibilityService() {
     private var miniClock: TextView? = null
     private var miniWeather: TextView? = null
     private var miniWanted = false
-    private var lumenForeground = false   // Lumen ist aktuell die Vordergrund-App -> kein Overlay
     private var miniMuteUntil = 0L        // kurz nach dem Booten das Overlay unterdrücken (Boot-Splash blitzt sonst durch)
     private var lastWeatherFetch = 0L
     private val miniTick = object : Runnable {
         override fun run() { updateMini(); handler.postDelayed(this, 15_000) }
+    }
+    // Wächter: gleicht das Overlay dauerhaft an die echte Vordergrund-App an und baut es neu auf,
+    // falls das System unser Fenster still verworfen hat. Läuft immer (unabhängig von Fenster-Events).
+    private val overlayTick = object : Runnable {
+        override fun run() { ensureOverlay(); handler.postDelayed(this, 4_000) }
+    }
+
+    /** Launcher-/Startbildschirm nur anhand des Pakets (für den Wächter, der keine Fensterklasse kennt). */
+    private fun isLauncherPkg(pkg: String): Boolean {
+        if (pkg == packageName) return true
+        if (pkg.contains("waipu", true) || pkg.contains("exaring", true)) return false
+        return homeActivities().containsKey(pkg) || pkg in STOCK_PKGS || pkg == "com.amazon.tv.launcher"
+    }
+
+    private fun ensureOverlay() {
+        if (!prefs.miniOverlay) { if (miniView != null) hideMini(); return }
+        // Soll-Zustand neu bestimmen – robust gegen verpasste Fenster-Events.
+        if (GoalWatch.foreground) {
+            miniWanted = false   // Lumen ist vorn
+        } else {
+            val pkg = runCatching { rootInActiveWindow?.packageName?.toString() }.getOrNull()
+            if (pkg != null && pkg != packageName) {
+                val transient = pkg.contains("systemui") || pkg.contains("inputmethod") || pkg.contains("keyboard")
+                if (!transient) miniWanted = !isLauncherPkg(pkg)
+            }
+        }
+        // Overlay an den Soll-Zustand angleichen.
+        if (miniWanted) {
+            val v = miniView
+            if (v == null) showMini() else if (!v.isAttachedToWindow) { hideMini(); showMini() }
+        } else if (miniView != null) hideMini()
     }
 
     private fun clockText(): String {
@@ -308,8 +355,7 @@ class OverrideService : AccessibilityService() {
 
     private fun showMini() {
         if (!prefs.miniOverlay) return
-        if (lumenForeground) return                                  // Lumen selbst ist vorn -> nie einblenden
-        if (SystemClock.elapsedRealtime() < miniMuteUntil) return    // Boot-Phase: noch nicht einblenden
+        if (SystemClock.elapsedRealtime() < miniMuteUntil) return    // Boot-Phase: noch nicht einblenden (gegen Flackern)
         if (miniView == null) {
             val d = resources.displayMetrics.density
             fun tv(size: Float, bold: Boolean) = TextView(this).apply {
@@ -498,11 +544,20 @@ class OverrideService : AccessibilityService() {
         // Ob Lumen im Vordergrund ist, steuert zuverlässig der Activity-Lebenszyklus (lumenResumed/lumenPaused).
         if (pkg == packageName) return
         val cls = e.className?.toString()
-        if (isLauncherHome(pkg, cls) || pkg.contains("systemui") || pkg.contains("inputmethod") || pkg.contains("keyboard")) {
-            // Fremder Launcher-/Startbildschirm (oder SystemUI/Tastatur): kein Uhr/Wetter-Overlay.
-            miniWanted = false; hideMini()
-        } else {
-            miniWanted = true; showMini()
+        // Flüchtige Fenster (Lautstärke-Leiste = SystemUI, Tastatur) dürfen das Overlay NICHT ausschalten –
+        // sonst verschwindet Uhr/Wetter mitten in einer App und kommt erst beim nächsten Fensterwechsel wieder.
+        val transient = pkg.contains("systemui") || pkg.contains("inputmethod") || pkg.contains("keyboard")
+        when {
+            transient -> { /* Zustand unverändert lassen */ }
+            isLauncherHome(pkg, cls) -> { miniWanted = false; hideMini() }
+            else -> {
+                miniWanted = true; showMini()
+                // Echter App-Wechsel: die vorher offene App gezielt aus dem Hintergrund räumen (Exit-Kill).
+                if (pkg != lastAppPkg) {
+                    maybeExitKill(lastAppPkg, pkg)
+                    lastAppPkg = pkg
+                }
+            }
         }
         if (parental.isBlocked(pkg)) {
             bringLumen { putExtra(EXTRA_LOCKED, pkg) }
@@ -661,6 +716,78 @@ class OverrideService : AccessibilityService() {
             Thread.sleep(150)
         }
         return false
+    }
+
+    // ---------- Auto-Boost & Exit-Kill (gezieltes RAM-Management) ----------
+    private fun musicActive() = runCatching { getSystemService(AudioManager::class.java)?.isMusicActive == true }.getOrDefault(false)
+
+    /** App, die gerade verlassen wurde, aus dem Hintergrund räumen – nur wenn aktiviert und kein Ton mehr läuft. */
+    private fun maybeExitKill(old: String, newPkg: String) {
+        if (!prefs.exitKill || old.isBlank() || old == newPkg) return
+        if (musicActive()) return   // noch Ton (Musik/Video-Audio) -> nicht beenden
+        Thread { runCatching { SysTools.killApp(this, old) } }.start()
+    }
+
+    /** Beim Zurückkehren ins Hauptmenü aufräumen – nur wenn RAM wirklich knapp ist (Schwelle) und gedrosselt. */
+    private fun maybeAutoBoost() {
+        if (!prefs.autoBoost) return
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastBoost < 30_000) return
+        if (musicActive()) return
+        Thread {
+            if (SysTools.usedPct(this) < prefs.autoBoostPct) return@Thread
+            lastBoost = SystemClock.elapsedRealtime()
+            runCatching { kotlinx.coroutines.runBlocking { SysTools.boost(this@OverrideService, emptyList(), prefs.boostExclude) } }
+        }.start()
+    }
+
+    // ---------- Bambu-Drucker: Benachrichtigung bei Druck fertig/Fehler (Hintergrund-Poll der Bridge) ----------
+    private fun pollBambu() {
+        if (!prefs.bambuNotify || prefs.bambuHttp.isBlank()) return
+        val url = prefs.bambuHttp.trim()
+        Thread {
+            val txt = runCatching {
+                val c = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply { connectTimeout = 5000; readTimeout = 5000 }
+                c.inputStream.bufferedReader().use { it.readText() }.also { runCatching { c.disconnect() } }
+            }.getOrNull() ?: return@Thread
+            val print = runCatching { JSONObject(txt).optJSONObject("print") }.getOrNull() ?: return@Thread
+            val stage = print.optString("gcode_state", "")
+            if (stage.isEmpty()) return@Thread
+            val job = print.optString("subtask_name", "").ifBlank { t("Druck", "Print") }
+            val prev = lastBambuStage
+            lastBambuStage = stage
+            if (!bambuInit) { bambuInit = true; return@Thread }   // erster Poll: nur Zustand merken
+            if (stage == prev) return@Thread
+            when {
+                stage == "FINISH" && prev != "FINISH" -> notifyBambu(t("✅ Druck fertig", "✅ Print finished"), job)
+                stage == "FAILED" && prev != "FAILED" -> notifyBambu(t("⚠️ Druckfehler", "⚠️ Print error"), job)
+            }
+        }.start()
+    }
+
+    private fun notifyBambu(title: String, body: String) {
+        handler.post {
+            runCatching {
+                val nm = getSystemService(NotificationManager::class.java) ?: return@runCatching
+                val chId = "bambu"
+                if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(chId) == null) {
+                    nm.createNotificationChannel(NotificationChannel(chId, t("Drucker", "Printer"), NotificationManager.IMPORTANCE_HIGH))
+                }
+                val name = prefs.bambuName.ifBlank { "Bambu" }
+                val tap = PendingIntent.getActivity(
+                    this, 0, Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                    PendingIntent.FLAG_IMMUTABLE,
+                )
+                val n = Notification.Builder(this, chId)
+                    .setSmallIcon(R.drawable.ic_lumen)
+                    .setContentTitle("$name · $title")
+                    .setContentText(body)
+                    .setAutoCancel(true)
+                    .setContentIntent(tap)
+                    .build()
+                nm.notify(4711, n)
+            }
+        }
     }
 
     // ---------- Standby ----------

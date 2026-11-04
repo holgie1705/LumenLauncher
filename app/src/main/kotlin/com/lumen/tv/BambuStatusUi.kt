@@ -125,7 +125,7 @@ fun BambuStatusBar(prefs: Prefs, modifier: Modifier = Modifier) {
                 Box(Modifier.size(7.dp).background(if (state.connected) Color(0xFF7CE0A3) else Color(0xFFE0A14F), CircleShape))
                 if (prefs.bambuName.isNotEmpty()) Text(prefs.bambuName, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 if (state.stage.isNotEmpty()) StagePill(state.stage)
-                if (state.printError != 0 || state.hmsCount > 0) Text(
+                if (state.stage.equals("FAILED", true)) Text(
                     t("⚠ Fehler", "⚠ Error"), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFE06A6A),
                 )
                 if (!state.connected) Text(
@@ -158,7 +158,8 @@ fun BambuStatusBar(prefs: Prefs, modifier: Modifier = Modifier) {
                 if (state.wifi.isNotEmpty()) Chip("WLAN", state.wifi)
                 if (state.amsHumidity in 0..100) Chip(t("Luftfeuchte", "Humidity"), "${state.amsHumidity}%")
                 if (state.light >= 0) Chip(t("Licht", "Light"), if (state.light == 1) t("an", "on") else t("aus", "off"))
-                state.trays.take(4).forEach { tr -> AmsChip(tr) }
+                state.trays.sortedByDescending { it.id == state.activeTrayId && state.activeTrayId.isNotEmpty() }.take(6)
+                    .forEach { tr -> AmsChip(tr, tr.id == state.activeTrayId && state.activeTrayId.isNotEmpty()) }
             }
         }
     }
@@ -176,14 +177,20 @@ private fun Chip(label: String, value: String) {
 }
 
 @Composable
-private fun AmsChip(tr: BambuTray) {
+private fun AmsChip(tr: BambuTray, active: Boolean) {
     Row(
-        Modifier.background(NeoCard, RoundedCornerShape(8.dp)).padding(horizontal = 7.dp, vertical = 4.dp),
+        Modifier.background(if (active) NeoGlassHi else NeoCard, RoundedCornerShape(8.dp))
+            .then(if (active) Modifier.border(1.5.dp, NeoCyan, RoundedCornerShape(8.dp)) else Modifier)
+            .padding(horizontal = 7.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         Box(Modifier.size(12.dp).background(Color(tr.colorArgb), CircleShape).border(1.dp, Color.White.copy(alpha = 0.4f), CircleShape))
-        val grams = if (tr.weightG > 0 && tr.remain in 0..100) " · ${tr.weightG * tr.remain / 100}g" else ""
-        Text(tr.type + (if (tr.remain in 0..100) " ${tr.remain}%" else "") + grams, fontSize = 11.sp, color = Color.White.copy(alpha = 0.9f))
+        val grams = if (tr.weightG > 0 && tr.remain in 1..100) " · ${tr.weightG * tr.remain / 100}g" else ""
+        Text(
+            (if (active) "▶ " else "") + (if (tr.external) t("Extern ", "Ext ") else "") + tr.type + (if (tr.remain in 1..100) " ${tr.remain}%" else "") + grams,
+            fontSize = 11.sp, fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+            color = if (active) Color.White else Color.White.copy(alpha = 0.9f),
+        )
     }
 }
 
@@ -238,6 +245,13 @@ fun BambuSettingsDialog(vm: HomeViewModel, onClose: () -> Unit) {
                 item { SettingLine(t("— oder direkt: Drucker-IP", "— or direct: Printer IP"), prefs.bambuIp.ifEmpty { "–" }) { text = prefs.bambuIp; editing = 1 } }
                 item { SettingLine(t("Seriennummer", "Serial number"), prefs.bambuSn.ifEmpty { "–" }) { text = prefs.bambuSn; editing = 2 } }
                 item { SettingLine(t("Access Code", "Access code"), if (prefs.bambuCode.isEmpty()) "–" else "••••••") { text = prefs.bambuCode; editing = 3 } }
+                item {
+                    SettingLine(
+                        t("Benachrichtigung bei Druck fertig/Fehler", "Notify on print finished/error"),
+                        if (prefs.bambuHttp.isBlank()) t("nur mit Bridge-URL", "needs bridge URL")
+                        else if (prefs.bambuNotify) t("An", "On") else t("Aus", "Off"),
+                    ) { if (prefs.bambuHttp.isNotBlank()) vm.update { it.copy(bambuNotify = !it.bambuNotify) } }
+                }
                 item {
                     Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp).fillMaxWidth().background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(14.dp)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(t("So geht's:", "How it works:"), fontSize = 14.sp, color = Color.White)

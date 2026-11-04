@@ -208,7 +208,7 @@ fun PhoneRemoteInfo(code: String, running: Boolean) {
             Text("Code: $code", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = NeoYellow)
             Text(
                 if (running) t("Steuerkreuz, Lautstärke, Text eintippen und Apps starten – vom Handy aus.", "D-pad, volume, typing text and launching apps – from your phone.")
-                else t("Startet, sobald die Bedienungshilfe „Lumen Home-Taste“ aktiv ist.", "Starts once the “Lumen Home-Taste” accessibility service is on."),
+                else t("Startet, sobald die Bedienungshilfe „Lumen Home-Taste“ aktiv ist.", "Starts once the “Lumen Home key” accessibility service is on."),
                 fontSize = 12.sp, color = Color.White.copy(alpha = 0.65f),
             )
         }

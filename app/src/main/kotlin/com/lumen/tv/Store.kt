@@ -57,7 +57,20 @@ class SettingsStore(ctx: Context) {
         sp.edit { putLong("sleep_until", untilMs) }
     }
 
-    fun export(): String = _prefs.value.toJson().toString(2)
+    /** Sicherung ohne Zugangsdaten (Bambu-Access-Code, Fernbedienungs-Code werden nie in die Datei geschrieben). */
+    fun export(): String = _prefs.value.toJson().apply {
+        remove("bambuCode"); remove("remoteCode")
+    }.toString(2)
 
-    fun import(s: String): Boolean = runCatching { update { prefsFromJson(JSONObject(s)) }; true }.getOrDefault(false)
+    /** Import: fehlende Zugangsdaten (aus der credential-freien Sicherung) nicht überschreiben, sondern beibehalten. */
+    fun import(s: String): Boolean = runCatching {
+        update { cur ->
+            val n = prefsFromJson(JSONObject(s))
+            n.copy(
+                bambuCode = n.bambuCode.ifBlank { cur.bambuCode },
+                remoteCode = n.remoteCode.ifBlank { cur.remoteCode },
+            )
+        }
+        true
+    }.getOrDefault(false)
 }

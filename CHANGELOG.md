@@ -1,5 +1,21 @@
 # Lumen Launcher – Changelog (Deutsch)
 
+## Neu in 2.02 – Leistung & Drucker
+- **„Beenden erzwingen" direkt im App-Menü** (Long-Press auf eine App): Lumen öffnet kurz die App-Info, klickt automatisch „Beenden erzwingen" + „OK" und kommt zurück – kein Umweg über die Android-Einstellungen.
+- **Uhr/Wetter-Overlay zuverlässiger**: flüchtige Fenster (Lautstärke-Leiste, Tastatur) blenden es nicht mehr aus, und ein Wächter baut es automatisch neu auf, falls das System es verwirft.
+- **Uhr/Wetter über der Kamera-Vollbildansicht** oben rechts, klein (wie das Overlay in Fremd-Apps).
+- **Radio**: Länderauswahl jetzt auch UK, US und Kanada (DE → AT → CH → UK → US → CA → Welt).
+- **News-Ticker**: zusätzliche englischsprachige Quellen – The Guardian, Sky News (UK), NPR, New York Times, CBS News (US), CBC, CTV News (Kanada); einzeln zuschaltbar.
+- Englische Oberfläche korrigiert (Bedienungshilfe-Name „Lumen Home key" statt deutschem Rest).
+
+- **Besserer RAM-Boost**: beendet jetzt den Hintergrund **aller** installierten Apps (auch iconlose Hintergrunddienste, die am meisten RAM halten), in zwei schnellen Durchläufen. Wichtige Kerndienste (System, SystemUI, Telefonie/Bluetooth, Tastatur, Play-Dienste, Launcher) bleiben immer geschützt.
+- **Auto-Boost** (Einstellungen → Leistung): räumt automatisch beim Zurückkehren ins Hauptmenü auf – aber nur, wenn die RAM-Last über der eingestellten Schwelle liegt (Standard 75 %). Abschaltbar.
+- **App beim Verlassen räumen** (Exit-Kill): verlässt du eine App, wird genau diese gezielt aus dem Hintergrund geräumt (nicht, solange noch Ton läuft). Abschaltbar.
+- **Drucker-Benachrichtigung**: bei „Druck fertig" und „Druckfehler" erscheint eine Benachrichtigung – auch wenn die Kamera-Kachel nicht offen ist (nur mit Bridge-URL). Einstellbar im Bambu-Dialog.
+- **Sicherung ohne Zugangsdaten**: Export der Einstellungen schreibt Access-Code und Fernbedienungs-Code nicht mehr in die Datei; beim Import bleiben die vorhandenen Codes erhalten.
+- **Bildschirmschoner aufgehübscht**: sanftes Einblenden, Uhr/Wetter wandern gegen Einbrennen in der Höhe, bessere Lesbarkeit (Scrim + Schatten), dezente Fortschrittslinie, zusätzlich NASA-Weltallbilder.
+
+
 ## Bauen & installieren
 1. Ordner in Android Studio (Koala oder neuer) öffnen, Gradle-Sync abwarten.
 2. `adb connect <TV-IP>` → Run.
@@ -398,6 +414,11 @@ Die Bilder gehören ihren Urhebern (Lizenz steht unter der Vorschau) – nur fü
 
 ## v1.99
 - Neu: TV-Ziffernblock (Einstellungen → System → „Ziffernblock (ADB)"). Per angelernter Taste ein-/ausschaltbar; Ziffern mit den Pfeiltasten wählen, mehrstellige Zahl (z. B. 155) sammeln, OK sendet sie – optional mit Enter – per ADB an die laufende App (z. B. waipu), genau wie atvtools. Ziel-IP einstellbar (leer = diese Box), Verbindungstest inklusive. Braucht „ADB über Netzwerk" an der Box und einmalige Bestätigung des Lumen-Schlüssels. Kein Root/Shizuku nötig.
+
+## v2.01
+- Neu: App-Auswähler für Favoriten (Einstellungen → Reihen → „Favoriten-Apps wählen …"). Jede installierte App lässt sich dort mit einem Tippen zu den Favoriten hinzufügen oder entfernen – inkl. Suche. Man muss dafür nicht mehr erst die „Alle Apps"-Reihe einblenden.
+- Fix: Web-Widget-Adressen mit `rtsp://` werden jetzt sauber übernommen – ein von der TV-Tastatur fälschlich vorangestelltes `https://` wird automatisch entfernt.
+- Fix: Uhr/Wetter-Overlay wurde in fremden Apps nicht mehr angezeigt (eine zu scharfe Vordergrund-Sperre aus 2.00 blockierte die Einblendung dauerhaft). Es erscheint jetzt wieder zuverlässig über fremden Apps und bleibt in Lumen selbst sowie auf Launcher-Startbildschirmen ausgeblendet; die Boot-Unterdrückung gegen das Aufblitzen bleibt erhalten.
 
 ## v2.00
 - Wallpaper-Galerie: zehn neue Themen-Sammlungen von Wallhaven (Natur, Weltall & Sterne, Städte & Architektur, Minimalistisch, Abstrakt & Muster, Dunkel & Neon, Tiere, Autos & Technik, Fantasy & Digital Art, Jahreszeiten) – ohne Konto, nur jugendfrei, mindestens 1920×1080.

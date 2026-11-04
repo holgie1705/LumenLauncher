@@ -136,6 +136,7 @@ data class Prefs(
     val bambuCode: String = "",              // Access Code = MQTT-Passwort (Nutzer bblp)
     val bambuHttp: String = "",              // Status-Bridge: HTTP-JSON-URL (z. B. http://192.168.0.189:8099/status); wenn gesetzt, statt direktem MQTT
     val bambuName: String = "",              // Modell-/Druckername (frei), erscheint in der Statusleiste
+    val bambuNotify: Boolean = true,         // Benachrichtigung bei Druck fertig/Fehler (nur mit Bridge-URL)
     val phoneRemote: Boolean = false,        // Handy als Fernbedienung (Webserver im Dienst)
     val remoteCode: String = "",
     val miniPos: Int = 0,            // Ecke der kleinen Uhr: 0 oben links, 1 oben rechts, 2 unten links, 3 unten rechts
@@ -167,6 +168,9 @@ data class Prefs(
     val hidden: Set<String> = emptySet(),
     val quickItems: List<String> = emptyList(),
     val boostExclude: Set<String> = emptySet(),   // Apps, die der RAM-Boost nie beendet
+    val autoBoost: Boolean = true,          // RAM-Boost automatisch beim Zurück ins Hauptmenü, wenn RAM-Last hoch
+    val autoBoostPct: Int = 75,             // nur auto-boosten, wenn RAM-Auslastung >= diesem Prozentwert
+    val exitKill: Boolean = true,           // beim Verlassen einer App diese gezielt aus dem Hintergrund räumen
     val widgets: WidgetCfg = WidgetCfg(),          // Info-Widgets und News-Ticker
     val rows: List<RowCfg> = DEFAULT_ROWS,
     val shortcuts: List<Shortcut> = emptyList(),
@@ -196,7 +200,7 @@ val TILE_GAPS = listOf(8, 14, 20, 26, 32)
 val Prefs.gapDp: Int get() = TILE_GAPS[tileGap.coerceIn(0, TILE_GAPS.lastIndex)]
 
 fun Prefs.toJson(): JSONObject = JSONObject().apply {
-    put("lookV", 2); put("focus", focusStyle); put("menuTheme", menuTheme); put("glass", tileGlass); put("freePos", JSONObject().also { j -> freePos.forEach { (k, v) -> j.put(k, JSONArray().put(v.first).put(v.second)) } }); put("iconPack", iconPack); put("mini", miniOverlay); put("miniPos", miniPos); put("phoneRemote", phoneRemote); put("remoteCode", remoteCode); put("adbHost", adbHost); put("adbPort", adbPort); put("keypadEnter", keypadEnter); put("keypadAutoSend", keypadAutoSend); put("bambuIp", bambuIp); put("bambuSn", bambuSn); put("bambuCode", bambuCode); put("bambuHttp", bambuHttp); put("bambuName", bambuName)
+    put("lookV", 2); put("focus", focusStyle); put("menuTheme", menuTheme); put("glass", tileGlass); put("freePos", JSONObject().also { j -> freePos.forEach { (k, v) -> j.put(k, JSONArray().put(v.first).put(v.second)) } }); put("iconPack", iconPack); put("mini", miniOverlay); put("miniPos", miniPos); put("phoneRemote", phoneRemote); put("remoteCode", remoteCode); put("adbHost", adbHost); put("adbPort", adbPort); put("keypadEnter", keypadEnter); put("keypadAutoSend", keypadAutoSend); put("bambuIp", bambuIp); put("bambuSn", bambuSn); put("bambuCode", bambuCode); put("bambuHttp", bambuHttp); put("bambuName", bambuName); put("bambuNotify", bambuNotify); put("autoBoost", autoBoost); put("autoBoostPct", autoBoostPct); put("exitKill", exitKill)
     put("look", look.name); put("tile", tile.name); put("layout", layout.name)
     put("clock", clockStyle); put("timeFmt", timeFormat); put("weather", weather)
     put("wName", weatherName); put("wLat", weatherLat); put("wLon", weatherLon); put("wAlerts", weatherAlerts)
@@ -277,7 +281,8 @@ fun prefsFromJson(o: JSONObject): Prefs {
         miniPos = o.optInt("miniPos", d.miniPos).coerceIn(0, 3),
         phoneRemote = o.optBoolean("phoneRemote", d.phoneRemote), remoteCode = o.optString("remoteCode", d.remoteCode),
         adbHost = o.optString("adbHost", d.adbHost), adbPort = o.optInt("adbPort", d.adbPort), keypadEnter = o.optBoolean("keypadEnter", d.keypadEnter), keypadAutoSend = o.optInt("keypadAutoSend", d.keypadAutoSend),
-        bambuIp = o.optString("bambuIp", d.bambuIp), bambuSn = o.optString("bambuSn", d.bambuSn), bambuCode = o.optString("bambuCode", d.bambuCode), bambuHttp = o.optString("bambuHttp", d.bambuHttp), bambuName = o.optString("bambuName", d.bambuName),
+        bambuIp = o.optString("bambuIp", d.bambuIp), bambuSn = o.optString("bambuSn", d.bambuSn), bambuCode = o.optString("bambuCode", d.bambuCode), bambuHttp = o.optString("bambuHttp", d.bambuHttp), bambuName = o.optString("bambuName", d.bambuName), bambuNotify = o.optBoolean("bambuNotify", d.bambuNotify),
+        autoBoost = o.optBoolean("autoBoost", d.autoBoost), autoBoostPct = o.optInt("autoBoostPct", d.autoBoostPct).coerceIn(50, 95), exitKill = o.optBoolean("exitKill", d.exitKill),
         tile = runCatching { TileStyle.valueOf(o.getString("tile")) }.getOrDefault(d.tile),
         layout = runCatching { Layout.valueOf(o.getString("layout")) }.getOrDefault(d.layout),
         clockStyle = o.optInt("clock", d.clockStyle).coerceIn(0, 5),

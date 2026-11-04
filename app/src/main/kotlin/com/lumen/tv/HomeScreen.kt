@@ -182,6 +182,22 @@ fun HomeScreen(vm: HomeViewModel) {
         items += MenuItemSpec(if (app.pkg in pst.allowed) t("Für Kinder entfernen", "Remove from kids mode") else t("Für Kinder freigeben", "Allow for kids")) {
             closeMenu(); vm.requirePin(t("Kindersicherung", "Parental controls")) { vm.toggleAllowed(app.pkg) }
         }
+        items += MenuItemSpec(t("Beenden erzwingen", "Force stop")) {
+            closeMenu()
+            val svc = OverrideService.instance
+            if (svc == null) {
+                Toast.makeText(homeCtx, t("Dafür die Bedienungshilfe „Lumen Home-Taste“ einschalten.", "Turn on the “Lumen Home key” accessibility service for this."), Toast.LENGTH_LONG).show()
+                vm.details(app)
+            } else {
+                Toast.makeText(homeCtx, t("Beende ${app.label} …", "Stopping ${app.label} …"), Toast.LENGTH_SHORT).show()
+                svc.forceStop(listOf(app.pkg), { _, _, _ -> }) { ok ->
+                    Toast.makeText(homeCtx,
+                        if (ok > 0) t("${app.label} beendet.", "${app.label} stopped.")
+                        else t("${app.label} lief nicht im Hintergrund (oder nicht möglich).", "${app.label} wasn't running (or not possible)."),
+                        Toast.LENGTH_LONG).show()
+                }
+            }
+        }
         items += MenuItemSpec(t("App-Info", "App info")) { closeMenu(); vm.details(app) }
         if (app.system) items += MenuItemSpec(t("App deaktivieren (Root/ADB)", "Disable app (root/ADB)")) {
             closeMenu(); vm.disableApp(app) { msg -> Toast.makeText(homeCtx, msg, Toast.LENGTH_LONG).show() }

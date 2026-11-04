@@ -1,3 +1,33 @@
+## Lumen Launcher 2.02
+
+Performance & printer polish for weak boxes.
+
+### What's new
+
+**Quality-of-life**
+- **Force stop right from the app menu** (long-press an app): Lumen opens the app info, auto-taps "Force stop" + "OK" and returns — no detour through Android settings.
+- The **clock/weather overlay** in other apps is now reliable: transient windows (volume bar, keyboard) no longer hide it, and a watchdog rebuilds it if the system drops it.
+- **Clock/weather over the fullscreen camera**, small, top-right.
+- **Radio**: country picker now also offers UK, US and Canada.
+- **News ticker**: extra English-language sources — The Guardian, Sky News (UK), NPR, New York Times, CBS News (US), CBC, CTV News (Canada); each toggleable.
+- English UI fixes (accessibility service shown as "Lumen Home key").
+
+**Smarter RAM management**
+- The **RAM boost** now clears the background of **every** installed app — including icon-less background services that hold the most memory — in two quick passes. Core system services (framework, SystemUI, telephony/Bluetooth, keyboard, Play services, launchers) stay protected at all times.
+- New **Auto-boost** (Settings → Performance): automatically clears the background when you return to the home menu, but only when RAM usage is above a threshold you set (default 75 %). Optional.
+- New **Clear app on leaving** (exit-kill): when you leave an app, that specific app is cleared from the background (never while audio is still playing). Optional.
+
+**3D printer notifications**
+- New: a notification on **print finished** and **print error**, even when the camera tile isn't open (requires the bridge URL). Toggle it in the Bambu dialog.
+
+**Backup without credentials**
+- Settings export no longer writes the printer access code or remote code to the file; importing keeps your existing codes.
+
+**Screensaver polish**
+- Smooth fade-in, clock/weather drift vertically to avoid burn-in, better legibility (scrim + shadow), a subtle progress line, and extra NASA space imagery in the rotation.
+
+---
+
 ## Lumen Launcher 2.00
 
 A fast, lightweight, privacy-friendly Android TV launcher — no accounts, no ads, no tracking. Open source (GPL-3.0), Kotlin + Jetpack Compose for TV.

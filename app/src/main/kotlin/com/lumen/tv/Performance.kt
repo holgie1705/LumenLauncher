@@ -122,22 +122,54 @@ object SysTools {
             .any { pkg == it || pkg.startsWith(it) || pkg.contains(".$it") }
 
     /**
-     * Leert den Hintergrund aller Apps (auch vorinstallierter System-Apps wie Netflix/YouTube/waipu) – nur
-     * Launcher, Tastatur, Bedienungshilfen, VPN, Lumen, Ausnahmen und gerade spielende Apps bleiben unberührt.
-     * killBackgroundProcesses ist ungefährlich: aktive Vordergrund-Apps und echte Systemdienste kann es gar nicht beenden.
+     * Harte Kernschutzliste: System-Framework, SystemUI, Telefonie/Bluetooth/NFC, Eingabe, Play-Dienste und
+     * Launcher werden NIE angefasst – das sind die wichtigen Dienste, die laufen müssen.
+     */
+    private val coreKeep = listOf(
+        "android", "com.android.systemui", "com.android.phone", "com.android.bluetooth",
+        "com.android.nfc", "com.android.se", "com.android.settings",
+        "com.android.providers.", "com.android.server.", "com.android.keychain",
+        "com.android.networkstack", "com.android.cellbroadcast",
+        "com.google.android.gms", "com.google.android.gsf", "com.google.android.ims",
+        "com.google.android.webview", "com.android.webview", "com.android.vending",
+        "com.google.android.tvlauncher", "com.google.android.apps.tv.launcherx",
+    )
+    private fun isCore(p: String) = coreKeep.any { p == it || p.startsWith("$it.") || p.startsWith(it) } ||
+        p.contains("inputmethod") || p.contains(".ime") || p.endsWith(".tts")
+
+    /**
+     * Leert den Hintergrund ALLER installierten Apps – nicht nur der startbaren mit Icon, sondern auch
+     * der iconlosen Hintergrunddienste (Sync, Updater, Messaging …), die den meisten RAM halten.
+     * Geschützt bleiben: Kerndienste (coreKeep), Launcher/Tastatur/Bedienungshilfen/VPN/Benachrichtigungen
+     * (protectedPkgs), Lumen, Ausnahmen und gerade spielende Apps.
+     * killBackgroundProcesses ist ungefährlich: Vordergrund-Apps und echte Systemdienste kann es gar nicht beenden.
+     * Zwei schnelle Durchläufe, weil Android manche Prozesse sofort neu startet – der zweite fängt die Nachzügler.
      * Gibt (freigegebene MB, Anzahl bearbeiteter Apps) zurück.
      */
     suspend fun boost(ctx: Context, pkgs: List<String>, keep: Set<String>): Pair<Int, Int> = withContext(Dispatchers.Default) {
         val am = ctx.getSystemService(ActivityManager::class.java)
+        val pm = ctx.packageManager
         val prot = protectedPkgs(ctx)
-        // Kandidaten: die (startbaren) Apps – auch vorinstallierte System-Apps wie Netflix/YouTube/waipu – ohne Geschützte/Ausnahmen
-        val candidates = pkgs.distinct().filter { it != ctx.packageName && it !in keep && it !in prot }
+        val installed = runCatching { pm.getInstalledApplications(0).map { it.packageName } }.getOrDefault(emptyList())
+        val candidates = (pkgs + installed).distinct()
+            .filter { it != ctx.packageName && it !in keep && it !in prot && !isCore(it) }
         val before = read(ctx).ramAvail
         var n = 0
-        candidates.forEach { p -> runCatching { am.killBackgroundProcesses(p); n++ } }
-        delay(1800)
+        repeat(2) { round ->
+            candidates.forEach { p -> runCatching { am.killBackgroundProcesses(p); if (round == 0) n++ } }
+            delay(600)
+        }
         val after = read(ctx).ramAvail
         (((after - before) / (1024 * 1024)).toInt().coerceAtLeast(0)) to n
+    }
+
+    /** RAM-Auslastung in Prozent (für den Auto-Boost). */
+    fun usedPct(ctx: Context): Int = read(ctx).ramUsedPct
+
+    /** Ein einzelnes Paket aus dem Hintergrund räumen – nie Lumen, Kerndienste oder Geschützte. Für den Exit-Kill. */
+    fun killApp(ctx: Context, pkg: String): Boolean {
+        if (pkg.isBlank() || pkg == ctx.packageName || isCore(pkg) || pkg in protectedPkgs(ctx)) return false
+        return runCatching { ctx.getSystemService(ActivityManager::class.java).killBackgroundProcesses(pkg); true }.getOrDefault(false)
     }
 
     /** Eigenen Cache von Lumen leeren (Bilder, Logos, Vorschauen). Gibt freigegebene MB zurück. */
@@ -247,6 +279,25 @@ fun PerformanceDialog(vm: HomeViewModel, prefs: Prefs, apps: List<TvApp>, onClos
                         modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp)).padding(14.dp))
                 }
                 item { SheetSection(t("Einstellungen", "Settings")) }
+                item {
+                    SettingLine(
+                        t("Auto-Boost beim Zurück ins Menü", "Auto-boost when returning to menu"),
+                        if (prefs.autoBoost) t("An · ab ${prefs.autoBoostPct}% RAM-Last", "On · from ${prefs.autoBoostPct}% RAM used") else t("Aus", "Off"),
+                    ) { vm.update { it.copy(autoBoost = !it.autoBoost) } }
+                }
+                if (prefs.autoBoost) item {
+                    SettingLine(t("RAM-Schwelle für Auto-Boost", "RAM threshold for auto-boost"), "${prefs.autoBoostPct}%") {
+                        val steps = listOf(60, 70, 75, 80, 85, 90)
+                        val nextV = steps[(steps.indexOf(prefs.autoBoostPct).let { if (it < 0) 2 else it } + 1) % steps.size]
+                        vm.update { it.copy(autoBoostPct = nextV) }
+                    }
+                }
+                item {
+                    SettingLine(
+                        t("App beim Verlassen räumen", "Clear app on leaving"),
+                        if (prefs.exitKill) t("An", "On") else t("Aus", "Off"),
+                    ) { vm.update { it.copy(exitKill = !it.exitKill) } }
+                }
                 item { SettingLine(t("Ausnahmen für den RAM-Boost", "RAM boost exceptions"), t("${prefs.boostExclude.size} Apps ausgenommen", "${prefs.boostExclude.size} apps excepted")) { excludeOpen = true } }
                 item { SettingLine(t("Android-Speicherverwaltung öffnen", "Open Android storage settings"), "") { openSettingsPage(ctx, Settings.ACTION_INTERNAL_STORAGE_SETTINGS)?.let { toast(it) } } }
                 // ---------- Systeminfos ----------

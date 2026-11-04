@@ -5,6 +5,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,10 +26,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
@@ -60,6 +63,8 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.compose.ui.platform.LocalContext
 import java.net.URL
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.delay
 
 /** Erkennt eine Video-/Kamera-Adresse (RTSP oder HLS), die nativ per ExoPlayer läuft statt im WebView. */
@@ -171,6 +176,38 @@ fun WebFullDialog(w: WebWidget, prefs: Prefs, onClose: () -> Unit) {
             if (isStreamUrl(w.url) && bambuConfigured(prefs)) {
                 BambuStatusBar(prefs, Modifier.align(androidx.compose.ui.Alignment.BottomCenter))
             }
+            // Uhr + Wetter klein oben rechts – der Startbildschirm ist verdeckt, hier soll sie weiter sichtbar sein.
+            CamClock(prefs, Modifier.align(Alignment.TopEnd).padding(horizontal = 18.dp, vertical = 14.dp))
+        }
+    }
+}
+
+/** Kompakte Uhr + Wetter für die Kamera-Vollbildansicht (der Startbildschirm mit der großen Uhr ist dort verdeckt). */
+@Composable
+private fun CamClock(prefs: Prefs, modifier: Modifier) {
+    val ctx = LocalContext.current
+    val now by produceState(LocalDateTime.now()) { while (true) { value = LocalDateTime.now(); delay(10_000) } }
+    val weather by produceState<WeatherInfo?>(null, prefs.weather, prefs.weatherLat, prefs.weatherLon) {
+        if (prefs.weather == 0 || (prefs.weatherLat == 0.0 && prefs.weatherLon == 0.0)) { value = null; return@produceState }
+        val repo = WeatherRepo(ctx)
+        value = repo.cached(prefs.weatherLat, prefs.weatherLon, prefs.tempF)
+        runCatching { repo.fetch(prefs.weatherLat, prefs.weatherLon, prefs.tempF) }.getOrNull()?.let { value = it }
+    }
+    val is24 = prefs.is24(ctx)
+    // Größe wie das Mini-Overlay in Fremd-Apps (Uhr ~17, Wetter ~13).
+    Row(
+        modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.38f))
+            .border(1.dp, Color.White.copy(alpha = 0.14f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 11.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp),
+    ) {
+        Text(
+            now.format(DateTimeFormatter.ofPattern(if (is24) "HH:mm" else "h:mm", Lang.locale)),
+            fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = Color.White,
+        )
+        weather?.let { w ->
+            WeatherGlyph(w.code, w.isDay, Modifier.size(16.dp))
+            Text("${w.temp}°", fontSize = 13.sp, fontWeight = FontWeight.Normal, color = Color.White)
         }
     }
 }
@@ -190,8 +227,11 @@ fun WebWidgetsDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
     LaunchedEffect(editing) { if (editing != 0) { delay(80); runCatching { field.requestFocus() } } }
 
     fun add() {
-        val u = url.trim()
+        var u = url.trim()
         if (u.isEmpty()) { msg = t("Bitte zuerst eine Adresse eingeben.", "Please enter an address first."); return }
+        // Manche TV-Tastaturen stellen bei URL-Feldern automatisch http(s):// voran – vor einem rtsp:// alles davor wegschneiden.
+        val si = u.indexOf("rtsps://", ignoreCase = true).let { if (it >= 0) it else u.indexOf("rtsp://", ignoreCase = true) }
+        if (si > 0) u = u.substring(si)
         val keepScheme = listOf("http://", "https://", "rtsp://", "rtsps://").any { u.startsWith(it, ignoreCase = true) }
         val full = if (keepScheme) u else "https://$u"
         val nm = name.trim().ifEmpty { runCatching { if (isStreamUrl(full)) Uri.parse(full).host ?: full else URL(full).host }.getOrDefault(full) }
@@ -223,7 +263,7 @@ fun WebWidgetsDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
                     singleLine = true,
                     textStyle = TextStyle(color = Color.White, fontSize = 20.sp),
                     cursorBrush = SolidColor(Color.White),
-                    keyboardOptions = KeyboardOptions(keyboardType = if (editing == 2) KeyboardType.Uri else KeyboardType.Text, imeAction = ImeAction.Done),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { editing = 0 }),
                     modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.10f), RoundedCornerShape(12.dp)).padding(14.dp).focusRequester(field),
                 )

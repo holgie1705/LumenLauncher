@@ -171,6 +171,7 @@ fun SettingsDialog(
     var learnOpen by remember { mutableStateOf(false) }
     var keypadOpen by remember { mutableStateOf(false) }
     var bambuOpen by remember { mutableStateOf(false) }
+    var favPickOpen by remember { mutableStateOf(false) }
     var wizardOpen by remember { mutableStateOf(false) }
     var page by remember { mutableStateOf<String?>(null) }
     val first = remember { FocusRequester() }
@@ -444,7 +445,8 @@ fun SettingsDialog(
                                 if (r.kind == RowKind.CUSTOM && r.id != "favs") Pill(t("Löschen", "Delete")) { vm.deleteRow(r.id) }
                             }
                         }
-                        item { Hint(t("Favoriten und eigene Reihen legst du per langem Druck auf eine App an.", "Create favorites and your own rows by long-pressing an app.")) }
+                        item { SettingLine(t("Favoriten-Apps wählen …", "Choose favorite apps …"), "") { favPickOpen = true } }
+                        item { Hint(t("Favoriten-Apps wählst du oben direkt aus der Liste – oder per langem Druck auf eine App auf dem Startbildschirm. Eigene Reihen legst du per langem Druck auf eine App an.", "Pick favorite apps from the list above – or long-press an app on the home screen. Create your own rows by long-pressing an app.")) }
                         item {
                             val granted = androidx.core.content.ContextCompat.checkSelfPermission(ctx, "android.permission.READ_TV_LISTINGS") == android.content.pm.PackageManager.PERMISSION_GRANTED
                             SettingLine(t("Weiter ansehen: Zugriff erlauben", "Continue watching: allow access"), if (granted) t("erteilt", "granted") else t("anfragen", "request")) {
@@ -468,7 +470,7 @@ fun SettingsDialog(
                         item {
                             SettingLine("📱 " + t("Handy als Fernbedienung", "Phone as remote"), onOff(prefs.phoneRemote)) {
                                 vm.update { it.copy(phoneRemote = !it.phoneRemote, remoteCode = it.remoteCode.ifEmpty { (1000..9999).random().toString() }) }
-                                if (!prefs.phoneRemote && OverrideService.instance == null) note = t("Dafür die Bedienungshilfe „Lumen Home-Taste“ einschalten.", "Turn on the “Lumen Home-Taste” accessibility service for this.")
+                                if (!prefs.phoneRemote && OverrideService.instance == null) note = t("Dafür die Bedienungshilfe „Lumen Home-Taste“ einschalten.", "Turn on the “Lumen Home key” accessibility service for this.")
                             }
                         }
                         if (prefs.phoneRemote && prefs.remoteCode.isNotEmpty()) item { PhoneRemoteInfo(prefs.remoteCode, OverrideService.instance != null) }
@@ -513,7 +515,7 @@ fun SettingsDialog(
                         } }
                         item { SettingLine(t("Als Standard-Launcher festlegen", "Set as default launcher"), "") { requestHomeRole() } }
                         item { SettingLine(t("Stock-Launcher überschreiben", "Override stock launcher"), onOff(overrideOn)) { vm.setOverride(!overrideOn) } }
-                        item { SettingLine(t("Bedienungshilfe „Lumen Home-Taste“", "Accessibility service “Lumen Home-Taste”"), if (a11y) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_ACCESSIBILITY_SETTINGS) } }
+                        item { SettingLine(t("Bedienungshilfe „Lumen Home-Taste“", "Accessibility service “Lumen Home key”"), if (a11y) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_ACCESSIBILITY_SETTINGS) } }
                         item { SettingLine(t("Zugriff auf laufende Medien (Reihe „Läuft gerade“)", "Access to playing media (row “Now playing”)"), if (notif) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS) } }
                         item { SettingLine(t("Ziffernblock (ADB) – Zahlen am TV eingeben", "Number pad (ADB) – enter numbers on TV"), "") { keypadOpen = true } }
                         item { SettingLine(t("3D-Drucker (Bambu) – Kamerastatus", "3D printer (Bambu) – camera status"), "") { bambuOpen = true } }
@@ -545,6 +547,7 @@ fun SettingsDialog(
             if (learnOpen) KeyLearnDialog(onKey = { code -> learnOpen = false; pickPress(code) }, onCancel = { learnOpen = false })
             if (keypadOpen) KeypadSettingsDialog(vm) { keypadOpen = false }
             if (bambuOpen) BambuSettingsDialog(vm) { bambuOpen = false }
+            if (favPickOpen) FavAppsDialog(vm, prefs, apps) { favPickOpen = false }
         }
         }
         }

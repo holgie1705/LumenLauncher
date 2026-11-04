@@ -253,8 +253,14 @@ fun RadioSearchDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
                     )
                     androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item {
-                            Pill(when (country) { "DE" -> "🇩🇪 DE"; "AT" -> "🇦🇹 AT"; "CH" -> "🇨🇭 CH"; else -> "🌍 " + t("Welt", "World") }, selected = true) {
-                                country = when (country) { "DE" -> "AT"; "AT" -> "CH"; "CH" -> ""; else -> "DE" }
+                            Pill(when (country) {
+                                "DE" -> "🇩🇪 DE"; "AT" -> "🇦🇹 AT"; "CH" -> "🇨🇭 CH"
+                                "GB" -> "🇬🇧 UK"; "US" -> "🇺🇸 US"; "CA" -> "🇨🇦 CA"
+                                else -> "🌍 " + t("Welt", "World")
+                            }, selected = true) {
+                                country = when (country) {
+                                    "DE" -> "AT"; "AT" -> "CH"; "CH" -> "GB"; "GB" -> "US"; "US" -> "CA"; "CA" -> ""; else -> "DE"
+                                }
                                 if (genre.isNotEmpty()) browse(genre)
                             }
                         }
