@@ -250,6 +250,7 @@ fun RadioSearchDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
                         "pop" to "Pop", "rock" to "Rock", "schlager" to "Schlager", "news" to t("Nachrichten", "News"),
                         "80s" to "80er", "90s" to "90er", "dance" to t("Dance/Elektro", "Dance"), "jazz" to "Jazz",
                         "classical" to t("Klassik", "Classical"), "oldies" to "Oldies", "hip hop" to "Hip-Hop", "country" to "Country",
+                        "punk" to "Punk",
                     )
                     androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item {
@@ -297,7 +298,7 @@ fun RadioSearchDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
                                         .onFailure { runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://www.youtube.com/results?search_query=$q")).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) } }
                                 },
                                 shape = ClickableSurfaceDefaults.shape(shape = RoundedCornerShape(12.dp)),
-                                colors = ClickableSurfaceDefaults.colors(containerColor = NeoCard, focusedContainerColor = NeoGlassHi),
+                                colors = ClickableSurfaceDefaults.colors(containerColor = NeoCard, focusedContainerColor = NeoFocusFill),
                                 border = ClickableSurfaceDefaults.border(focusedBorder = Border(BorderStroke(2.dp, NeoYellow), shape = RoundedCornerShape(12.dp))),
                             ) {
                                 Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {

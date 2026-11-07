@@ -249,6 +249,7 @@ fun PanelSection(title: String) {
 /** Zeile der Hauptliste: Glaskarte, buntes Symbol im Kreis, im Fokus gelber Ring. */
 @Composable
 fun PanelRow(icon: Ico, label: String, value: String = "", modifier: Modifier = Modifier, onClick: () -> Unit) {
+    if (spatialGlobal) { SpatialSettingLine(label, value, modifier, icon = icon, onClick = onClick); return }
     val shape = RoundedCornerShape(18.dp)
     val tint = icoTint(icon)
     Surface(
@@ -257,7 +258,7 @@ fun PanelRow(icon: Ico, label: String, value: String = "", modifier: Modifier = 
         shape = ClickableSurfaceDefaults.shape(shape = shape),
         colors = ClickableSurfaceDefaults.colors(
             containerColor = NeoCard,
-            focusedContainerColor = NeoGlassHi,
+            focusedContainerColor = NeoFocusFill,
         ),
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1.02f),
         border = ClickableSurfaceDefaults.border(
@@ -344,6 +345,7 @@ fun PanelTile(icon: Ico, label: String, info: String, modifier: Modifier = Modif
 @Composable
 fun NeoSheet(
     icon: Ico, title: String, subtitle: String = "", width: androidx.compose.ui.unit.Dp = 840.dp,
+    solid: Boolean = false,
     content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit,
 ) {
     val tint = icoTint(icon)
@@ -354,7 +356,9 @@ fun NeoSheet(
     ) {
         Column(
             Modifier.width(width).fillMaxHeight(0.92f)
-                .clip(RoundedCornerShape(32.dp)).background(NeoPanelBrush)
+                .clip(RoundedCornerShape(32.dp))
+                .then(if (solid) Modifier.background(Color(0xFF0A0C14)) else Modifier)
+                .background(NeoPanelBrush)
                 .border(1.dp, NeoLine, RoundedCornerShape(32.dp))
                 .padding(horizontal = 26.dp, vertical = 22.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -379,5 +383,6 @@ fun NeoSheet(
 /** Kleine Abschnitts-Überschrift in Unterdialogen. */
 @Composable
 fun SheetSection(title: String) {
+    if (spatialGlobal) { Text(title.uppercase(Lang.locale), fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 3.sp, color = Color.White.copy(alpha = 0.7f), modifier = Modifier.padding(start = 22.dp, top = 16.dp, bottom = 4.dp)); return }
     Text(title.uppercase(Lang.locale), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.6.sp, color = NeoCyan, modifier = Modifier.padding(start = 14.dp, top = 12.dp, bottom = 2.dp))
 }

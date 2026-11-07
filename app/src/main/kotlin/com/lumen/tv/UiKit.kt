@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -139,6 +140,7 @@ fun Pill(text: String, modifier: Modifier = Modifier, selected: Boolean = false,
 /** Einstellungs-Zeile als Glaskarte; der Wert steht als kleine Cyan-Kapsel rechts. */
 @Composable
 fun SettingLine(label: String, value: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    if (spatialGlobal) { SpatialSettingLine(label, value, modifier, onClick = onClick); return }
     val shape = RoundedCornerShape(16.dp)
     Surface(
         onClick = onClick,
@@ -146,7 +148,7 @@ fun SettingLine(label: String, value: String, modifier: Modifier = Modifier, onC
         shape = ClickableSurfaceDefaults.shape(shape = shape),
         colors = ClickableSurfaceDefaults.colors(
             containerColor = NeoCard,
-            focusedContainerColor = NeoGlassHi,
+            focusedContainerColor = NeoFocusFill,
         ),
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1.02f),
         border = ClickableSurfaceDefaults.border(
@@ -248,6 +250,12 @@ private fun mix(a: Int, b: Int, f: Float): Long {
 var menuThemeGlobal by androidx.compose.runtime.mutableIntStateOf(0)
 private val curTheme: MenuTheme
     get() {
+        if (spatialGlobal) {
+            // Glas: durchscheinend (dahinter unscharf), Akzent = Farbe der gewählten App, weißer Fokusring
+            val acc = spatialAccentGlobal.toArgb()
+            val accent = (0xFFL shl 24) or (mix(acc, 0xFFFFFFFF.toInt(), 0.30f) and 0xFFFFFFL)
+            return MenuTheme("", "", 0xC8161A26, 0xC8121520, 0xCC0C0F17, accent, 0xFFFFFFFF, (0xFFL shl 24) or (acc.toLong() and 0xFFFFFFL))
+        }
         val i = menuThemeGlobal.coerceIn(0, MENU_THEMES.lastIndex)
         val wc = wallColorsGlobal
         if (i != THEME_FROM_WALL || wc == null) return MENU_THEMES[i]
@@ -266,6 +274,8 @@ val NeoYellow: Color get() = Color(curTheme.focus)
 val NeoViolet: Color get() = Color(curTheme.accent2)
 val NeoGlass = Color(0x1FFFFFFF)
 val NeoGlassHi = Color(0x33FFFFFF)
+/** Füllung fokussierter Zeilen: im Spatial-Look in der Akzentfarbe, sonst helles Glas. */
+val NeoFocusFill: Color get() = if (spatialGlobal) NeoViolet.copy(alpha = 0.55f) else NeoGlassHi
 val NeoCard = Color(0x12FFFFFF)
 val NeoLine = Color(0x26FFFFFF)
 /** Hintergrund der schwebenden Panels. */

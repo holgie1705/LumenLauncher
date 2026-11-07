@@ -44,10 +44,13 @@ fun LanguagePick(vm: HomeViewModel) {
             Image(painterResource(R.drawable.ic_lumen), contentDescription = "Lumen", modifier = Modifier.size(96.dp))
             Text("Lumen Launcher", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.White)
             // Sprachneutral, da noch keine Sprache feststeht:
-            Text("Sprache wählen · Choose your language", fontSize = 16.sp, color = Color.White.copy(alpha = 0.7f))
+            Text("Sprache wählen · Choose your language · Scegli la lingua · Choisis ta langue · Elige tu idioma", fontSize = 16.sp, color = Color.White.copy(alpha = 0.7f))
             Row(Modifier.padding(top = 18.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Pill("Deutsch", Modifier.focusRequester(first)) { vm.update { it.copy(lang = 0, langPicked = true) } }
                 Pill("English") { vm.update { it.copy(lang = 1, langPicked = true) } }
+                Pill("Italiano") { vm.update { it.copy(lang = 3, langPicked = true) } }
+                Pill("Français") { vm.update { it.copy(lang = 4, langPicked = true) } }
+                Pill("Español") { vm.update { it.copy(lang = 5, langPicked = true) } }
             }
         }
     }

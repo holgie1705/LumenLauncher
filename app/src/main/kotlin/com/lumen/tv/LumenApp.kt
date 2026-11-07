@@ -16,6 +16,7 @@ class LumenApp : Application(), coil.ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         // Sprache früh setzen, damit auch Service/Toasts die richtige Sprache nutzen.
+        Lang.init(this)
         Lang.apply(loadPrefs(this).lang)
         GoalWatch.start(this)
     }

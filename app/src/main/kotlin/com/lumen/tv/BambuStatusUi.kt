@@ -230,7 +230,7 @@ fun BambuSettingsDialog(vm: HomeViewModel, onClose: () -> Unit) {
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         NeoSheet(Ico.INFO, t("3D-Drucker (Bambu)", "3D printer (Bambu)"), t("Live-Status über das lokale Netzwerk (MQTT) – ganz ohne Cloud", "Live status over the local network (MQTT) – no cloud"), width = 860.dp) {
             if (editing != 0) BasicTextField(
                 value = text, onValueChange = { text = it }, singleLine = true,

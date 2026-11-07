@@ -97,6 +97,33 @@ class OverrideService : AccessibilityService() {
     private var bambuInit = false         // erster Bambu-Poll: nur merken, nicht melden
     private var standbyPending = false
     private val swallowed = mutableSetOf<Int>()
+
+    // Schnellwechsel: die letzten beiden echten Apps (ohne Lumen/Launcher)
+    private var curApp = ""
+    private var prevApp = ""
+    private var inRealApp = false
+    private var lastHomeDown = 0L
+    private var homeTarget = ""
+    private var swallowHomeUp = false
+
+    // Einblendungen über anderen Apps
+    private val volOsd by lazy { VolumeOsd(this) }
+    private var lastOwnVol = 0L       // eigene Änderung (Nachtmodus-Begrenzung) – Meldung dazu nicht doppelt auswerten
+
+    /**
+     * Auf dieser Art Box verarbeitet Android die Lautstärketasten selbst, bevor eine Bedienungshilfe sie sieht.
+     * Deshalb hört Lumen auf die System-Meldung „Lautstärke geändert" und zeigt daraufhin die eigene Anzeige.
+     */
+    private val volReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(c: android.content.Context, i: Intent) {
+            if (!prefs.volOsd && !prefs.volNight) return
+            val stream = i.getIntExtra("android.media.EXTRA_VOLUME_STREAM_TYPE", AudioManager.STREAM_MUSIC)
+            if (stream != AudioManager.STREAM_MUSIC) return
+            if (SystemClock.elapsedRealtime() - lastOwnVol < 350) return
+            handler.post { runCatching { volumeChanged() } }
+        }
+    }
+    private val goalOverlay by lazy { GoalOverlay(this) }
     private val longTimers = mutableMapOf<Int, Runnable>()
 
     private val pendingStandby = Runnable { standbyPending = false; standbyNow() }
@@ -132,6 +159,12 @@ class OverrideService : AccessibilityService() {
             longArrayOf(800, 1_600, 3_000, 5_000).forEach { d -> handler.postDelayed({ bringLumen(force = true) }, d) }
         }
         sp.registerOnSharedPreferenceChangeListener(prefListener)
+        runCatching {
+            val f = android.content.IntentFilter().apply {
+                addAction("android.media.VOLUME_CHANGED_ACTION"); addAction("android.media.STREAM_MUTE_CHANGED_ACTION")
+            }
+            androidx.core.content.ContextCompat.registerReceiver(this, volReceiver, f, androidx.core.content.ContextCompat.RECEIVER_EXPORTED)
+        }
         handler.postDelayed(tick, 30_000)
         handler.postDelayed(overlayTick, 4_000)
     }
@@ -141,6 +174,8 @@ class OverrideService : AccessibilityService() {
         sp.unregisterOnSharedPreferenceChangeListener(prefListener)
         handler.removeCallbacksAndMessages(null)
         hideMini()
+        runCatching { unregisterReceiver(volReceiver) }
+        runCatching { volOsd.remove(); goalOverlay.remove() }
         phone?.stop(); phone = null
         closeKeypad(); runCatching { svcScope.cancel() }
         return super.onUnbind(intent)
@@ -148,8 +183,12 @@ class OverrideService : AccessibilityService() {
 
     private fun loadPrefs() {
         val oldPos = prefs.miniPos
+        val oldLayout = prefs.layout
+        val oldGlass = prefs.miniGlass
         prefs = runCatching { prefsFromJson(JSONObject(sp.getString("prefs", "{}") ?: "{}")) }.getOrDefault(Prefs())
         if (oldPos != prefs.miniPos && miniView != null) hideMini()   // neue Ecke: Overlay neu aufbauen
+        if (oldLayout != prefs.layout && miniView != null) hideMini()  // anderer Look (Spatial-Pille): neu aufbauen
+        if (oldGlass != prefs.miniGlass && miniView != null) hideMini() // Glas <-> transparent: neu aufbauen
         if (!prefs.miniOverlay) hideMini() else if (miniWanted) showMini()
         syncPhoneRemote()
     }
@@ -279,6 +318,21 @@ class OverrideService : AccessibilityService() {
     private var miniView: LinearLayout? = null
     private var miniClock: TextView? = null
     private var miniWeather: TextView? = null
+    private var miniLine: View? = null          // Spatial: feine Leuchtlinie in der Farbe der laufenden App
+    private val accentCache = HashMap<String, Int>()
+
+    /** Kräftige Farbe aus Banner bzw. Icon einer App (für die Leuchtlinie der Uhr-Pille). */
+    private fun appAccent(pkg: String): Int = accentCache.getOrPut(pkg) {
+        runCatching {
+            val dr = packageManager.getApplicationBanner(pkg) ?: packageManager.getApplicationIcon(pkg)
+            val bmp = androidx.core.graphics.drawable.DrawableCompat.wrap(dr).let { d ->
+                val b = android.graphics.Bitmap.createBitmap(96, 54, android.graphics.Bitmap.Config.ARGB_8888)
+                val cv = android.graphics.Canvas(b); d.setBounds(0, 0, 96, 54); d.draw(cv); b
+            }
+            val p = androidx.palette.graphics.Palette.from(bmp).generate()
+            p.getVibrantColor(p.getLightVibrantColor(p.getDominantColor(0xFF4C6FFF.toInt())))
+        }.getOrDefault(0xFF4C6FFF.toInt())
+    }
     private var miniWanted = false
     private var miniMuteUntil = 0L        // kurz nach dem Booten das Overlay unterdrücken (Boot-Splash blitzt sonst durch)
     private var lastWeatherFetch = 0L
@@ -328,6 +382,13 @@ class OverrideService : AccessibilityService() {
 
     private fun updateMini() {
         miniClock?.text = clockText()
+        miniLine?.let { line ->
+            val c = appAccent(curApp)
+            line.background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(c and 0x00FFFFFF, c, c and 0x00FFFFFF),
+            )
+        }
         if (prefs.weather == 0) { miniWeather?.visibility = View.GONE; return }
         if (prefs.weatherLat == 0.0 && prefs.weatherLon == 0.0) { miniWeather?.visibility = View.GONE; return }
         val repo = WeatherRepo(this)
@@ -356,22 +417,30 @@ class OverrideService : AccessibilityService() {
     private fun showMini() {
         if (!prefs.miniOverlay) return
         if (SystemClock.elapsedRealtime() < miniMuteUntil) return    // Boot-Phase: noch nicht einblenden (gegen Flackern)
-        if (miniView == null) {
+        if (miniView == null) {   // immer die neue Glas-Pille (unabhängig vom Layout)
+            // Spatial: Glas-Pille mit Uhr | Wetter und Leuchtlinie, gleitet von oben/unten ein
             val d = resources.displayMetrics.density
-            fun tv(size: Float, bold: Boolean) = TextView(this).apply {
-                setTextColor(Color.WHITE); textSize = size
-                typeface = if (bold) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
-                setShadowLayer(6f * d, 0f, 1f * d, Color.argb(200, 0, 0, 0))
-            }
-            val clock = tv(17f, true)
-            val weather = tv(13f, false)
             val right = prefs.miniPos == 1 || prefs.miniPos == 3
             val bottom = prefs.miniPos >= 2
-            if (right) { clock.gravity = Gravity.END; weather.gravity = Gravity.END }
+            val font = jakartaFace(this)
+            val clock = TextView(this).apply { setTextColor(Color.WHITE); textSize = 15f; typeface = font; runCatching { setFontVariationSettings(wght(400)) } }
+            val weather = TextView(this).apply { setTextColor(Color.WHITE); textSize = 12f; typeface = font; runCatching { setFontVariationSettings(wght(700)) } }
+            val sep = View(this).apply { setBackgroundColor(0x38FFFFFF) }
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+                setPadding((13 * d).toInt(), 0, (12 * d).toInt(), 0)
+                addView(clock)
+                addView(sep, LinearLayout.LayoutParams((1 * d).toInt(), (14 * d).toInt()).apply { leftMargin = (9 * d).toInt(); rightMargin = (9 * d).toInt() })
+                addView(weather)
+            }
+            val line = View(this)
             val box = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                gravity = if (right) Gravity.END else Gravity.START
-                addView(clock); addView(weather)
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    cornerRadius = 17 * d; setColor(0x8C0A0C12.toInt()); setStroke((1 * d).toInt(), 0x29FFFFFF)
+                }
+                addView(row, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, (32 * d).toInt()))
+                addView(line, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (2 * d).toInt()).apply { leftMargin = (14 * d).toInt(); rightMargin = (14 * d).toInt(); bottomMargin = (2 * d).toInt() })
             }
             val lp = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
@@ -381,11 +450,21 @@ class OverrideService : AccessibilityService() {
                 PixelFormat.TRANSLUCENT,
             ).apply {
                 gravity = (if (bottom) Gravity.BOTTOM else Gravity.TOP) or (if (right) Gravity.END else Gravity.START)
-                x = (26 * d).toInt(); y = ((if (bottom) 22 else 18) * d).toInt()
+                x = (26 * d).toInt(); y = ((if (bottom) 22 else 20) * d).toInt()
             }
             val ok = runCatching { (getSystemService(WINDOW_SERVICE) as WindowManager).addView(box, lp) }.isSuccess
             if (!ok) return
-            miniView = box; miniClock = clock; miniWeather = weather
+            if (!prefs.miniGlass) {
+                // Transparent: kein Glas, keine Farblinie – nur Schrift mit weichem Schatten
+                box.background = null
+                line.visibility = View.GONE
+                listOf(clock, weather).forEach { it.setShadowLayer(6f * d, 0f, 1f * d, Color.argb(200, 0, 0, 0)) }
+                sep.setBackgroundColor(0x66FFFFFF)
+            }
+            miniView = box; miniClock = clock; miniWeather = weather; miniLine = if (prefs.miniGlass) line else null
+            box.alpha = 0f; box.translationY = (if (bottom) 16 else -16) * d
+            box.animate().alpha(1f).translationY(0f).setDuration(420).start()
+            handler.postDelayed({ if (miniView != null) updateMini() }, 400)   // Farbe der gerade geöffneten App nachziehen
         }
         updateMini()
         handler.removeCallbacks(miniTick)
@@ -395,7 +474,7 @@ class OverrideService : AccessibilityService() {
     private fun hideMini() {
         handler.removeCallbacks(miniTick)
         miniView?.let { v -> runCatching { (getSystemService(WINDOW_SERVICE) as WindowManager).removeView(v) } }
-        miniView = null; miniClock = null; miniWeather = null
+        miniView = null; miniClock = null; miniWeather = null; miniLine = null
     }
 
     // ---------- Ziffernblock-Overlay (sendet Zahlen per ADB an die laufende App, z. B. waipu) ----------
@@ -549,9 +628,11 @@ class OverrideService : AccessibilityService() {
         val transient = pkg.contains("systemui") || pkg.contains("inputmethod") || pkg.contains("keyboard")
         when {
             transient -> { /* Zustand unverändert lassen */ }
-            isLauncherHome(pkg, cls) -> { miniWanted = false; hideMini() }
+            isLauncherHome(pkg, cls) -> { miniWanted = false; hideMini(); inRealApp = false }
             else -> {
                 miniWanted = true; showMini()
+                inRealApp = true
+                if (pkg != curApp) { if (curApp.isNotEmpty()) prevApp = curApp; curApp = pkg }
                 // Echter App-Wechsel: die vorher offene App gezielt aus dem Hintergrund räumen (Exit-Kill).
                 if (pkg != lastAppPkg) {
                     maybeExitKill(lastAppPkg, pkg)
@@ -602,6 +683,10 @@ class OverrideService : AccessibilityService() {
             if (e.action == KeyEvent.ACTION_DOWN) { KeyLearn.waiting.value = false; swallowed += code; KeyLearn.captured.value = code }
             return true
         }
+        if (code == KeyEvent.KEYCODE_HOME && prefs.homeDouble) return homeKey(e)
+        if ((prefs.volOsd || prefs.volNight) && (code == KeyEvent.KEYCODE_VOLUME_UP || code == KeyEvent.KEYCODE_VOLUME_DOWN || code == KeyEvent.KEYCODE_VOLUME_MUTE)) {
+            if (volumeKey(e)) return true
+        }
         val mine = prefs.shortcuts.filter { it.keyCode == code }
         if (mine.isEmpty()) return e.action == KeyEvent.ACTION_UP && swallowed.remove(code)
         val long = mine.firstOrNull { it.long }
@@ -624,6 +709,96 @@ class OverrideService : AccessibilityService() {
         }
         return false
     }
+
+    // ---------- Schnellwechsel zur letzten App ----------
+    /** Ziel des Wechsels: aus einer App heraus die vorherige, aus Lumen heraus die zuletzt benutzte. */
+    private fun switchTarget(): String =
+        if (!GoalWatch.foreground && inRealApp && curApp.isNotEmpty()) prevApp else curApp
+
+    private fun openApp(pkg: String) {
+        if (pkg.isBlank()) return
+        if (parental.isBlocked(pkg)) { bringLumen(force = true) { putExtra(EXTRA_LOCKED, pkg) }; return }
+        val i = packageManager.getLeanbackLaunchIntentForPackage(pkg) ?: packageManager.getLaunchIntentForPackage(pkg)
+        if (i == null) { toast(t("Keine App zum Wechseln.", "No app to switch to.")); return }
+        runCatching { startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)) }
+    }
+
+    fun switchApp() {
+        val target = switchTarget()
+        if (target.isBlank()) toast(t("Noch keine andere App geöffnet.", "No other app opened yet.")) else openApp(target)
+    }
+
+    /** Home: erster Druck geht ganz normal durch, ein zweiter innerhalb von 0,45 s wechselt zur letzten App. */
+    private fun homeKey(e: KeyEvent): Boolean {
+        when (e.action) {
+            KeyEvent.ACTION_DOWN -> {
+                if (e.repeatCount > 0) return swallowHomeUp
+                val now = SystemClock.elapsedRealtime()
+                if (now - lastHomeDown < 450 && homeTarget.isNotEmpty()) {
+                    lastHomeDown = 0L; swallowHomeUp = true
+                    val target = homeTarget; homeTarget = ""
+                    handler.postDelayed({ openApp(target) }, 120)
+                    return true
+                }
+                lastHomeDown = now; homeTarget = switchTarget(); swallowHomeUp = false
+                return false
+            }
+            KeyEvent.ACTION_UP -> { if (swallowHomeUp) { swallowHomeUp = false; return true }; return false }
+        }
+        return false
+    }
+
+    // ---------- Eigene Lautstärke-Anzeige + Nachtmodus ----------
+    private fun nightNow(): Boolean {
+        if (!prefs.volNight) return false
+        val h = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        val from = prefs.volNightFrom; val to = prefs.volNightTo
+        return if (from == to) true else if (from < to) h in from until to else h >= from || h < to
+    }
+
+    /** true = Taste erledigt. Bei fester Lautstärke (HDMI/TV regelt selbst) bleibt alles beim System. */
+    private fun volumeKey(e: KeyEvent): Boolean {
+        val am = getSystemService(AudioManager::class.java) ?: return false
+        if (am.isVolumeFixed) return false
+        val code = e.keyCode
+        if (e.action == KeyEvent.ACTION_UP) return true
+        if (e.action != KeyEvent.ACTION_DOWN) return false
+        val stream = AudioManager.STREAM_MUSIC
+        val max = am.getStreamMaxVolume(stream).coerceAtLeast(1)
+        // Ohne eigene Anzeige den Android-Balken weiter zeigen, nur begrenzen.
+        val flags = if (prefs.volOsd) 0 else AudioManager.FLAG_SHOW_UI
+        when (code) {
+            KeyEvent.KEYCODE_VOLUME_UP -> am.adjustStreamVolume(stream, AudioManager.ADJUST_RAISE, flags)
+            KeyEvent.KEYCODE_VOLUME_DOWN -> am.adjustStreamVolume(stream, AudioManager.ADJUST_LOWER, flags)
+            else -> if (e.repeatCount == 0) am.adjustStreamVolume(stream, AudioManager.ADJUST_TOGGLE_MUTE, flags)
+        }
+        lastOwnVol = SystemClock.elapsedRealtime()
+        volumeChanged(own = true)
+        return true
+    }
+
+    /** Nach jeder Änderung: Nachtmodus durchsetzen und die Neon-Anzeige zeigen. */
+    private fun volumeChanged(own: Boolean = false) {
+        val am = getSystemService(AudioManager::class.java) ?: return
+        val stream = AudioManager.STREAM_MUSIC
+        val max = am.getStreamMaxVolume(stream).coerceAtLeast(1)
+        var capHit = false
+        val night = nightNow()
+        val capVol = if (night) (max * prefs.volNightMax + 99) / 100 else max
+        if (night && am.getStreamVolume(stream) > capVol) {
+            lastOwnVol = SystemClock.elapsedRealtime()
+            am.setStreamVolume(stream, capVol, if (prefs.volOsd || !own) 0 else AudioManager.FLAG_SHOW_UI)
+            capHit = true
+        }
+        if (prefs.volOsd) {
+            val muted = runCatching { am.isStreamMute(stream) }.getOrDefault(false)
+            val pct = am.getStreamVolume(stream) * 100 / max
+            volOsd.show(pct, muted, if (night) prefs.volNightMax else null, capHit)
+        }
+    }
+
+    // ---------- Tor-Alarm über anderen Apps ----------
+    fun showGoal(e: GoalEvent) = handler.post { runCatching { goalOverlay.show(e) } }
 
     private fun onInput() {
         lastKey = SystemClock.elapsedRealtime()
@@ -659,6 +834,7 @@ class OverrideService : AccessibilityService() {
             }
             ActionType.ASSIST -> runCatching { startActivity(Intent(Intent.ACTION_ASSIST).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
             ActionType.KEYPAD -> handler.post { toggleKeypad() }
+            ActionType.SWITCH -> switchApp()
         }
     }
 

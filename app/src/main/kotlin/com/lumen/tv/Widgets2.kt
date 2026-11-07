@@ -615,8 +615,21 @@ object GoalWatch {
         }
     }
 
+    /** Probe-Tor für die Einstellungen: zeigt das Banner über allen Fenstern (braucht die Bedienungshilfe). */
+    fun test(cfg: WidgetCfg): Boolean {
+        val svc = OverrideService.instance ?: return false
+        val me = FbTeam(cfg.teamId, cfg.teamName, cfg.teamName, "")
+        val other = FbTeam(-1, t("Gegner", "Opponent"), t("Gegner", "Opponent"), "")
+        val m = FbMatch(-1, LocalDateTime.now(), me, other, false, 1, 0, "", t("Probe-Alarm", "Test alert"))
+        svc.showGoal(GoalEvent(m, true, System.currentTimeMillis()))
+        return true
+    }
+
     private fun fire(ctx: Context, e: GoalEvent) {
         event.value = e
+        // Über anderen Apps: großes Banner über die Bedienungshilfe; nur ohne sie die kleine Android-Meldung.
+        val svc = if (!foreground) OverrideService.instance else null
+        if (svc != null) { svc.showGoal(e); return }
         if (!foreground) Handler(Looper.getMainLooper()).post {
             val m = e.match
             val txt = (if (e.forMine) "⚽ TOR! " else "⚽ " + t("Gegentor: ", "Goal against: ")) + "${m.home.short} ${m.g1}:${m.g2} ${m.away.short}" + (if (m.lastGoal.isNotEmpty()) " – ${m.lastGoal}" else "")

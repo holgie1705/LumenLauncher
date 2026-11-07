@@ -56,10 +56,10 @@ class LayoutCtx(
     val onWebOpen: (WebWidget) -> Unit = {}, val onWebMenu: (WebWidget) -> Unit = {},
 )
 
-private fun focusMod(i: Int, r: FocusRequester?) = if (i == 0 && r != null) Modifier.focusRequester(r) else Modifier
+internal fun focusMod(i: Int, r: FocusRequester?) = if (i == 0 && r != null) Modifier.focusRequester(r) else Modifier
 
 @Composable
-private fun AppCell(a: TvApp, row: AppRowUi, c: LayoutCtx, mod: Modifier) = AppTile(
+internal fun AppCell(a: TvApp, row: AppRowUi, c: LayoutCtx, mod: Modifier) = AppTile(
     a, c.style, c.scale, c.vm, mod,
     onFocus = { c.onHero(HeroInfo(a.pkg, a.label, app = a)) },
     onClick = { c.vm.open(a) },
@@ -67,17 +67,17 @@ private fun AppCell(a: TvApp, row: AppRowUi, c: LayoutCtx, mod: Modifier) = AppT
 )
 
 @Composable
-private fun InputCell(s: InputSource, c: LayoutCtx, mod: Modifier) = InputTile(
+internal fun InputCell(s: InputSource, c: LayoutCtx, mod: Modifier) = InputTile(
     s, c.style, c.scale, mod, onFocus = { c.onHero(HeroInfo(s.id, s.label, t("Eingang", "Input"))) }, onClick = { c.vm.openInput(s) },
 )
 
 @Composable
-private fun WatchCell(w: WatchItem, row: WatchRowUi, i: Int, c: LayoutCtx, mod: Modifier) = WatchTile(
+internal fun WatchCell(w: WatchItem, row: WatchRowUi, i: Int, c: LayoutCtx, mod: Modifier) = WatchTile(
     w, c.style, c.scale, mod, onFocus = { c.onHero(HeroInfo("w:${row.id}:$i", w.title, row.title)) }, onClick = { c.vm.openWatch(w) },
 )
 
 @Composable
-private fun NowCell(n: NowItem, c: LayoutCtx, mod: Modifier) = NowTile(
+internal fun NowCell(n: NowItem, c: LayoutCtx, mod: Modifier) = NowTile(
     n, c.style, c.scale, mod,
     onFocus = { c.onHero(HeroInfo("n:${n.pkg}", n.title, n.subtitle)) },
     onClick = { c.vm.toggleNow(n) },
@@ -85,7 +85,7 @@ private fun NowCell(n: NowItem, c: LayoutCtx, mod: Modifier) = NowTile(
 )
 
 @Composable
-private fun RadioCell(s: Station, c: LayoutCtx, mod: Modifier) {
+internal fun RadioCell(s: Station, c: LayoutCtx, mod: Modifier) {
     val ctx = androidx.compose.ui.platform.LocalContext.current
     RadioTile(
         s, c.style, c.scale, mod,
@@ -96,7 +96,7 @@ private fun RadioCell(s: Station, c: LayoutCtx, mod: Modifier) {
 }
 
 @Composable
-private fun WebCell(w: WebWidget, c: LayoutCtx, mod: Modifier) = WebTile(
+internal fun WebCell(w: WebWidget, c: LayoutCtx, mod: Modifier) = WebTile(
     w, tileDims(c.style, c.scale).first * listOf(1f, 1.6f, 2.4f)[w.size.coerceIn(0, 2)], tileDims(c.style, c.scale).second * listOf(1f, 1.6f, 2.4f)[w.size.coerceIn(0, 2)], mod,
     onFocus = { c.onHero(HeroInfo("web:${w.id}", w.name, t("Widget · OK öffnet groß, lang drücken für Optionen", "Widget · OK opens it large, long-press for options"))) },
     onClick = { c.onWebOpen(w) },
@@ -104,7 +104,7 @@ private fun WebCell(w: WebWidget, c: LayoutCtx, mod: Modifier) = WebTile(
 )
 
 @Composable
-private fun RadioAddCell(c: LayoutCtx, mod: Modifier) = RadioAddTile(
+internal fun RadioAddCell(c: LayoutCtx, mod: Modifier) = RadioAddTile(
     c.style, c.scale, mod,
     onFocus = { c.onHero(HeroInfo("r:add", t("Radiosender suchen", "Find radio stations"), t("Tausende Sender, z. B. SWR3, SR1 – OK zum Suchen", "Thousands of stations – OK to search"))) },
     onClick = { c.onRadioSearch() },

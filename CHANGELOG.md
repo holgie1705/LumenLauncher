@@ -1,5 +1,42 @@
 # Lumen Launcher – Changelog (Deutsch)
 
+## Neu in 2.08 – Neues Design „Spatial“, drei neue Sprachen & aufgeräumte Einstellungen
+- **Neues Spatial-Design**: Die gewählte Reihe wölbt sich als 3D-Bogen mit Tiefe, Spiegelung und weichem Leuchten um die Fokus-Kachel. Neue Kopfzeile mit großer, dünner Uhr, Datum & Wetter, feinen Linien-Symbolen und Glas-Statusanzeige (WLAN, VPN, RAM, freier Speicher). Neues Glas-Einstellungsmenü rechts mit Kategorien und Unterseiten, Glas-Menü bei langem OK und die neue Schrift Plus Jakarta Sans überall.
+- **Das neue Design gilt für jedes Layout** – Reihen, Raster, Seitenleiste und Frei ändern nur die Anordnung der Kacheln; Menüs, Kopfzeile und Hintergrund bleiben im neuen Design.
+- **Aufgeräumter Startbildschirm**: Es ist nur die gewählte Reihe zu sehen – mit „runter“ kommt die nächste (Einstellungen → Aussehen → „Nur gewählte Reihe zeigen“). Position der Kacheln oben / Mitte / unten einstellbar, Standard ist unten direkt über dem News-Ticker.
+- **Alle Kacheln gleich groß** in jeder Reihe (Weiter ansehen, Radio, Widgets, Infos). Radiosender sind jetzt Kacheln mit Logo und Name.
+- **Kacheln im 3D-Bogen**: Glas-Kacheln wie im Entwurf oder der eigene Kachel-Stil (Banner, Icons, Poster …) inkl. Abstände.
+- **Uhr & Wetter in anderen Apps** als kleine Glas-Pille – wahlweise ganz transparent (nur Schrift).
+- **Ruhiger Hintergrund**: Die Einfärbung nach der gewählten App und die aufsteigenden Lichtpunkte sind jetzt standardmäßig aus und einzeln einschaltbar.
+- **Neue Sprachen**: Italiano, Français, Español (Einstellungen → Werkzeuge → Sprache).
+- **Aufgeräumt**: Einstellungen ohne Wirkung im neuen Design sind entfernt (Position der Kopfzeile, Uhr-Stil, Menüfarbe, Schriftwahl), ebenso die Hinweise „OK startet · lange drücken für Optionen“ auf dem Startbildschirm.
+
+## Neu in 2.07 – Neon-Lautstärke & Box-Temperatur
+- **Neon-Lautstärke**: Die eigene Lautstärke-Anzeige ist jetzt ein leuchtender Ring aus 32 Segmenten (Cyan → Violett → Pink) mit großem Wert in der Mitte, rechts am Rand; poppt kurz auf und glüht weich aus. Sie reagiert jetzt auf jede Lautstärkeänderung – auch auf Boxen, auf denen Android die Tasten selbst verarbeitet (z. B. waipu-Box). Der Nachtmodus begrenzt auch dort.
+- **Box-Temperatur**: Sind die Temperaturdateien gesperrt (wie auf der waipu-Box), fragt Lumen den Temperaturdienst von Android über ADB ab und zeigt die echte Gradzahl unter Leistung. Beim ersten Mal fragt die Box einmal nach, ob Lumen per ADB zugreifen darf – „Immer erlauben" wählen.
+- **Startanimation entfernt** – Lumen startet wieder direkt mit dem Startbildschirm.
+
+## Neu in 2.06 – Schnellwechsel, Lautstärke, Startanimation & Tor-Banner
+- **Schnellwechsel zur letzten App**: Zweimal kurz hintereinander Home drücken wechselt zur zuletzt benutzten App – wie Alt-Tab, z. B. zwischen waipu und YouTube hin und her (Einstellungen → Fernbedienung). Zusätzlich gibt es die Aktion „Zur letzten App wechseln" für jede Taste.
+- **Eigene Lautstärke-Anzeige** im Lumen-Stil statt des Android-Balkens, unten mittig mit Symbol und Prozent. Dazu ein **Nachtmodus**, der die Lautstärke abends begrenzt (z. B. 22–7 Uhr auf höchstens 40 %). Regelt der Fernseher die Lautstärke selbst, bleibt alles wie bisher.
+- **Startanimation**: Beim Einschalten der Box leuchtet kurz das Lumen-Logo auf, bevor der Startbildschirm erscheint; eine Autostart-App öffnet sich danach. Abschaltbar und als Vorschau unter Einstellungen → System.
+- **Tor-Alarm als großes Banner** auch über anderen Apps (waipu, Netflix …): Wappen, Ergebnis und pulsierender Rahmen statt der kleinen Android-Meldung. Mit „Tor-Alarm testen" unter Info-Widgets → Fußball.
+
+## Neu in 2.05 – Einstellungen übertragen & Updates über GitHub
+- **Einstellungen per WLAN übertragen** (Einstellungen → System): Auf der Ziel-Box „Einstellungen von anderer Box empfangen" öffnen, auf der eigenen Box „Einstellungen an andere Box senden" – die Ziel-Box wird automatisch gefunden (oder per IP), dort mit OK bestätigen, fertig. Übertragen werden Layout, Reihen, Favoriten, Widgets, Radio, Podcasts, Farben und Schrift. PIN, Kindersicherung, VPN-Dot, Drucker und Fernbedienungs-Code bleiben auf jeder Box getrennt; den Wetter-Ort kann man beim Empfangen mitnehmen oder behalten.
+- **Updates über GitHub**: Neue Versionen werden als GitHub-Release veröffentlicht; jede Box mit Lumen meldet sich dann von selbst mit „Update verfügbar" und installiert auf Knopfdruck.
+
+## Neu in 2.04 – Info aufgeräumt, Fußball repariert
+- **Info-Menü neu gestaltet**: ruhige App-Karte (Logo, ein Satz, Version · Android · Speicher in einer Zeile), Entwickler-Karte und darunter einheitliche Link-Zeilen für **Telegram, E-Mail, GitHub und Buy me a coffee**. Datenschutz und Haftungsausschluss sind eingeklappt und lassen sich bei Bedarf aufklappen. Der Dialog ist jetzt deckend, das Menü dahinter scheint nicht mehr durch.
+- **Fußball-Widget**: Vereine der ausländischen Ligen (England, Spanien, Italien, Frankreich – je 1. und 2. Liga) laden wieder. Die Daten kommen jetzt von der öffentlichen ESPN-Schnittstelle (kostenlos, ohne Schlüssel, mit Vereinslogos) statt TheSportsDB, deren Gratis-Zugang die Vereinsliste nicht mehr liefert. Deutsche Ligen bleiben bei OpenLigaDB.
+
+## Neu in 2.03 – Dateimanager, Fußball & aufgeräumte Menüs
+- **Menüs aufgeräumt**: Die Einstellungen-Startseite ist jetzt schlank – vier klare Kategorien (Aussehen, Reihen, Standby, Fernbedienung, **Werkzeuge**, Kindersicherung, System, Info). Alle Werkzeuge (Dateimanager, Leistung, Info-/Web-Widgets, VPN-Dot, 3D-Drucker, Ziffernblock, Sprache + Android-Schnelllinks) sind in der neuen Unterseite **Werkzeuge** gebündelt; die System-Seite ist dadurch ebenfalls schlanker.
+- **Dateimanager** (Einstellungen → Dateimanager): Ordner durchblättern, **Kopieren / Ausschneiden / Einfügen**, Umbenennen, Löschen (mit Rückfrage), neuen Ordner anlegen, Dateien öffnen und **APKs direkt installieren**. Schnellziele für internen Speicher, Downloads, SD-Karte/USB und den Lumen-Ordner. Für Vollzugriff ab Android 11 oben einmal „Zugriff auf alle Dateien" erlauben. OK öffnet (Ordner) bzw. zeigt Aktionen (Datei), langes OK öffnet die Aktionen überall.
+- **Radio**: Genre **Punk** ergänzt.
+- **Fußball-Widget**: ausländische Ligen dazu – **Premier League & Championship (England), La Liga & La Liga 2 (Spanien), Serie A & Serie B (Italien), Ligue 1 & Ligue 2 (Frankreich)**, jeweils mit Vereinsauswahl, Tabelle und Spielen. Deutsche Ligen laufen weiter über OpenLigaDB, die ausländischen über TheSportsDB (kostenlos). Liga-IDs werden automatisch über Land + Name aufgelöst.
+
+
 ## Neu in 2.02 – Leistung & Drucker
 - **„Beenden erzwingen" direkt im App-Menü** (Long-Press auf eine App): Lumen öffnet kurz die App-Info, klickt automatisch „Beenden erzwingen" + „OK" und kommt zurück – kein Umweg über die Android-Einstellungen.
 - **Uhr/Wetter-Overlay zuverlässiger**: flüchtige Fenster (Lautstärke-Leiste, Tastatur) blenden es nicht mehr aus, und ein Wächter baut es automatisch neu auf, falls das System es verwirft.

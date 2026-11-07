@@ -48,7 +48,7 @@ fun FavAppsDialog(vm: HomeViewModel, prefs: Prefs, apps: List<TvApp>, onClose: (
         .sortedWith(compareByDescending<TvApp> { it.pkg in favs }.thenBy { it.label.lowercase() })
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         NeoSheet(Ico.GRID, t("Favoriten-Apps", "Favorite apps"), t("App antippen = zu Favoriten hinzufügen oder entfernen. Sie erscheinen in der Favoriten-Reihe.", "Tap an app to add or remove it from favorites. They appear in the Favorites row."), width = 900.dp) {
             SettingLine(t("Suche", "Search"), query.ifEmpty { "—" }, Modifier.focusRequester(first)) { editing = true }
             if (editing) BasicTextField(

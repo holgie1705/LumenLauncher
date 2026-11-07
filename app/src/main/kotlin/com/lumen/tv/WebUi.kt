@@ -247,7 +247,7 @@ fun WebWidgetsDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         NeoSheet(Ico.GLOBE, "Web-Widgets", t("Webseiten als Live-Kacheln", "Web pages as live tiles"), width = 800.dp) {
             Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(

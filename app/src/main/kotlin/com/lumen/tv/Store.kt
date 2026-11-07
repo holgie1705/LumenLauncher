@@ -57,6 +57,9 @@ class SettingsStore(ctx: Context) {
         sp.edit { putLong("sleep_until", untilMs) }
     }
 
+    /** Aktuelle Einstellungen als JSON (für die WLAN-Übertragung, inkl. gerätespezifischer Werte zum Zusammenführen). */
+    fun currentJson(): JSONObject = _prefs.value.toJson()
+
     /** Sicherung ohne Zugangsdaten (Bambu-Access-Code, Fernbedienungs-Code werden nie in die Datei geschrieben). */
     fun export(): String = _prefs.value.toJson().apply {
         remove("bambuCode"); remove("remoteCode")

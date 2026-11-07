@@ -12,6 +12,11 @@
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <!-- RAM-Boost: alle installierten Apps sehen (auch iconlose Hintergrunddienste) -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <!-- Dateimanager: Vollzugriff auf den Speicher (ab Android 11), zusätzlich Alt-Berechtigungen -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
     <!-- Update-Hinweis: neue Lumen-Version von GitHub installieren -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA" />

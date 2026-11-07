@@ -225,7 +225,7 @@ private fun ShowCard(pc: Podcast, compact: Boolean, onClick: () -> Unit, onFav: 
         onClick = onClick, onLongClick = onFav,
         modifier = Modifier.fillMaxWidth().height(if (compact) 56.dp else 72.dp),
         shape = ClickableSurfaceDefaults.shape(shape = shape),
-        colors = ClickableSurfaceDefaults.colors(containerColor = NeoCard, focusedContainerColor = NeoGlassHi),
+        colors = ClickableSurfaceDefaults.colors(containerColor = NeoCard, focusedContainerColor = NeoFocusFill),
         border = ClickableSurfaceDefaults.border(focusedBorder = Border(BorderStroke(2.dp, NeoYellow), shape = shape)),
     ) {
         Row(Modifier.fillMaxSize().padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {

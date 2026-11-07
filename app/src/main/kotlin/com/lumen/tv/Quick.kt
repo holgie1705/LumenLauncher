@@ -130,7 +130,7 @@ fun QuickPanel(vm: HomeViewModel, prefs: Prefs, onRadio: () -> Unit, onPerforman
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.45f)), startX = 900f))) {
             Column(
                 Modifier.align(Alignment.TopEnd).padding(top = 104.dp, end = 32.dp, bottom = 40.dp).width(460.dp)
@@ -173,7 +173,7 @@ private fun QuickEditDialog(vm: HomeViewModel, actions: List<Pair<String, String
         vm.update { it.copy(quickItems = rebuild(members)) }
     }
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         NeoSheet(Ico.GRID, t("Schnellmenü anpassen", "Customize quick menu"), t("Aktionen und Apps für das Schnellmenü wählen", "Choose actions and apps for the quick menu"), width = 720.dp) {
             LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 item { SheetSection(t("Aktionen", "Actions")) }
@@ -293,7 +293,7 @@ fun UpdateDialog(u: UpdateInfo, onClose: () -> Unit) {
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { delay(120); runCatching { first.requestFocus() } }
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         NeoSheet(Ico.DOWNLOAD, t("Update verfügbar", "Update available"), "Lumen Launcher ${u.version} · " + t("installiert", "installed") + " $APP_VERSION", width = 760.dp) {
             LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 item { Text(u.notes.ifEmpty { t("Keine Beschreibung.", "No release notes.") }, fontSize = 14.sp, color = Color.White.copy(alpha = 0.85f)) }
@@ -343,6 +343,9 @@ fun SetupWizard(vm: HomeViewModel, apps: List<TvApp>, onDone: () -> Unit) {
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Pill("Deutsch", Modifier.focusRequester(first), selected = prefs.lang == 0) { vm.update { it.copy(lang = 0) } }
                             Pill("English", selected = prefs.lang == 1) { vm.update { it.copy(lang = 1) } }
+                            Pill("Italiano", selected = prefs.lang == 3) { vm.update { it.copy(lang = 3) } }
+                            Pill("Français", selected = prefs.lang == 4) { vm.update { it.copy(lang = 4) } }
+                            Pill("Español", selected = prefs.lang == 5) { vm.update { it.copy(lang = 5) } }
                         }
                     }
                     1 -> {
@@ -365,10 +368,9 @@ fun SetupWizard(vm: HomeViewModel, apps: List<TvApp>, onDone: () -> Unit) {
                     }
                     3 -> {
                         Text(t("Dein Look", "Your look"), fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        SettingLine(t("Farbe der Menüs", "Menu color"), MENU_THEMES[prefs.menuTheme.coerceIn(0, MENU_THEMES.lastIndex)].label, Modifier.focusRequester(first)) { vm.update { it.copy(menuTheme = (it.menuTheme + 1) % MENU_THEMES.size) } }
+                        SettingLine("Layout", prefs.layout.label, Modifier.focusRequester(first)) { vm.update { it.copy(layout = it.layout.next()) } }
                         SettingLine(t("Kachel-Stil", "Tile style"), prefs.tile.label) { vm.update { it.copy(tile = it.tile.next()) } }
                         SettingLine(t("Fokus-Stil", "Focus style"), focusStyleName(prefs.focusStyle)) { vm.update { it.copy(focusStyle = (it.focusStyle + 1) % 5) } }
-                        SettingLine(t("Uhr", "Clock"), clockStyleName(prefs.clockStyle)) { vm.update { it.copy(clockStyle = (it.clockStyle + 1) % 6) } }
                     }
                     else -> {
                         Text(t("Fertig! 🎉", "All set! 🎉"), fontSize = 32.sp, fontWeight = FontWeight.Bold, color = Color.White)

@@ -307,9 +307,9 @@ class AppRepo(private val ctx: Context) {
         val mi = ActivityManager.MemoryInfo()
         ctx.getSystemService(ActivityManager::class.java).getMemoryInfo(mi)
         val ram = if (mi.totalMem > 0) (mi.availMem * 100 / mi.totalMem).toInt() else 0
-        val st = runCatching { StatFs(Environment.getDataDirectory().path) }.getOrNull()
-        val gb = st?.let { it.availableBytes / 1e9f } ?: 0f
-        val freePct = st?.let { if (it.totalBytes > 0) (it.availableBytes * 100 / it.totalBytes).toInt() else 0 } ?: 0
+        val (stTotal, stFree) = SysTools.storageBytes(ctx)
+        val gb = stFree / 1e9f
+        val freePct = if (stTotal > 0) (stFree * 100 / stTotal).toInt() else 0
         @Suppress("DEPRECATION")
         val level = runCatching {
             val wm = ctx.applicationContext.getSystemService(WifiManager::class.java)

@@ -1,0 +1,851 @@
+Verbunden mit $host ✓	Connesso a $host ✓
+Antwort: $it	Risposta: $it
+Keine Verbindung zu $host. ADB-Netzwerk an der Box aktiv? Schlüssel bestätigt?	Nessuna connessione a $host. ADB in rete attivo? Chiave confermata?
+Sternenhimmel	Cielo stellato
+Polarlicht	Aurora boreale
+Farbfluss	Flusso di colori
+Regen	Pioggia
+Schnee	Neve
+Weihnachten	Natale
+Silvester	Capodanno
+Ostern	Pasqua
+Aus	Off
+Deaktiviert: $pkg (rückgängig: pm enable $pkg)	Disattivato: $pkg (annulla: pm enable $pkg)
+Kein Root. Befehl gespeichert (debloat.bat) – am PC ausführen: $dis	Nessun root. Comando salvato (debloat.bat) – eseguilo sul PC: $dis
+Keine Antwort (TLS?) – prüfe Code/Modus	Nessuna risposta (TLS?) – controlla codice/modalità
+Zugangscode falsch?	Codice di accesso errato?
+Timeout – erreichbar?	Timeout – raggiungibile?
+Druckt	In stampa
+Pause	In pausa
+Fertig	Finito
+Fehler	Errore
+Vorbereiten	Preparazione
+Bereit	Pronto
+Bridge nicht erreichbar	Bridge non raggiungibile
+⚠ Fehler	⚠ Errore
+verbinde …	connessione …
+Düse	Ugello
+Bett	Piatto
+Kammer	Camera
+Schicht	Strato
+Fertig um	Finito alle
+Tempo	Velocità
+Lüfter	Ventola
+Luftfeuchte	Umidità
+Licht	Luce
+an	on
+aus	off
+Extern 	Est. 
+3D-Drucker (Bambu)	Stampante 3D (Bambu)
+Live-Status über das lokale Netzwerk (MQTT) – ganz ohne Cloud	Stato live tramite rete locale (MQTT) – senza cloud
+Modell / Name	Modello / nome
+Bridge-URL (empfohlen)	URL bridge (consigliato)
+— oder direkt: Drucker-IP	— oppure diretto: IP stampante
+Seriennummer	Numero di serie
+Access Code	Codice di accesso
+Benachrichtigung bei Druck fertig/Fehler	Notifica a stampa finita/errore
+nur mit Bridge-URL	solo con URL bridge
+An	On
+So geht's:	Come funziona:
+Empfohlen (auch im Cloud-Modus): die Status-Bridge. Trag oben die Bridge-URL ein, z. B. http://192.168.0.189:8099/status – dann holt Lumen alle Werte von dort. Alternativ direkt vom Drucker per IP + Seriennummer + Access Code – das funktioniert aber nur im „Nur LAN"-Modus. Der Status erscheint über dem Kamerabild, wenn du die Kamera-Kachel groß öffnest.	Consigliato (anche in modalità cloud): il bridge di stato. Inserisci sopra l'URL del bridge, ad es. http://192.168.0.189:8099/status – Lumen legge tutti i valori da lì. In alternativa direttamente dalla stampante tramite IP + numero di serie + codice di accesso – ma funziona solo in modalità "Solo LAN". Lo stato appare sopra l'immagine della telecamera quando apri il riquadro a schermo intero.
+Favoriten-Apps	App preferite
+App antippen = zu Favoriten hinzufügen oder entfernen. Sie erscheinen in der Favoriten-Reihe.	Seleziona un'app per aggiungerla o toglierla dai preferiti. Compaiono nella riga Preferiti.
+Suche	Cerca
+★ Favorit	★ Preferito
++ hinzufügen	+ aggiungi
+Interner Speicher	Memoria interna
+Downloads	Download
+SD-Karte / USB	Scheda SD / USB
+Lumen-Ordner	Cartella Lumen
+Erst 'Apps aus dieser Quelle zulassen' aktivieren.	Prima attiva 'Consenti app da questa fonte'.
+Installation fehlgeschlagen.	Installazione non riuscita.
+Keine App zum Öffnen gefunden.	Nessuna app trovata per aprirlo.
+Öffnen	Apri
+APK installieren	Installa APK
+Öffnen mit …	Apri con …
+Kopieren	Copia
+Ausschneiden	Taglia
+Umbenennen	Rinomina
+Löschen	Elimina
+'${f.name}' löschen?	Eliminare '${f.name}'?
+Ja, löschen	Sì, elimina
+Abbrechen	Annulla
+Dateimanager	File manager
+Vollzugriff auf alle Dateien erlauben	Consenti l'accesso a tutti i file
+öffnen	apri
+Hoch	Su
+Ordner	Cartella
+Aktualisieren	Aggiorna
+Einfügen	Incolla
+Ordner ist leer.	La cartella è vuota.
+Schließen	Chiudi
+Einträge	elementi
+APK	APK
+Neue Reihe	Nuova riga
+Zu Reihe hinzufügen	Aggiungi alla riga
+Frei verschieben (Pfeiltasten)	Sposta liberamente (frecce)
+Position zurücksetzen	Ripristina posizione
+Aus Favoriten entfernen	Rimuovi dai preferiti
+Zu Favoriten hinzufügen	Aggiungi ai preferiti
+Verschieben (Pfeiltasten)	Sposta (frecce)
+Aus Reihe entfernen	Rimuovi dalla riga
+Zu Reihe hinzufügen …	Aggiungi alla riga …
+Als Autostart-App festlegen	Imposta come app di avvio
+Sperrzeit aufheben	Togli dall'orario di blocco
+In Sperrzeit sperren	Blocca nell'orario di blocco
+Kindersicherung	Controllo genitori
+Für Kinder entfernen	Rimuovi per bambini
+Für Kinder freigeben	Consenti ai bambini
+Beenden erzwingen	Forza arresto
+Dafür die Bedienungshilfe „Lumen Home-Taste“ einschalten.	Per questo attiva il servizio di accessibilità “Lumen tasto Home”.
+Beende ${app.label} …	Chiusura di ${app.label} …
+${app.label} beendet.	${app.label} chiusa.
+${app.label} lief nicht im Hintergrund (oder nicht möglich).	${app.label} non era attiva (o non possibile).
+App-Info	Info app
+App deaktivieren (Root/ADB)	Disattiva app (root/ADB)
+Ausblenden	Nascondi
+Deinstallieren	Disinstalla
+Einschlaf-Timer	Timer di spegnimento
+Min.	min
+Groß öffnen	Apri in grande
+Widget entfernen	Rimuovi widget
+Abspielen / Stopp	Riproduci / stop
+Gerät neu starten?	Riavviare il dispositivo?
+Ja, neu starten	Sì, riavvia
+Mit den Pfeiltasten verschieben · OK = fertig	Sposta con le frecce · OK = fatto
+Schnellmenü	Menu rapido
+Einstellungen · Update!	Impostazioni · aggiornamento!
+Einstellungen	Impostazioni
+Neustart	Riavvia
+Gesperrt	Bloccato
+Neue PIN festlegen	Imposta nuovo PIN
+Auf diesem Gerät gibt es keine App zum Öffnen. Adresse: 	Su questo dispositivo non c'è un'app per aprirlo. Indirizzo: 
+Über Lumen Launcher	Informazioni su Lumen Launcher
+Entwickler	Sviluppatore
+Kontakt & Links	Contatti & link
+E-Mail	E-mail
+Kaffee spendieren	Offrimi un caffè
+Rechtliches	Note legali
+Datenschutz & Online-Dienste	Privacy & servizi online
+Lumen hat keine Konten, keine Werbung und keine Analyse. Online-Dienste werden nur von den Funktionen angefragt, die du selbst einschaltest – z. B. Wetter (Open-Meteo), Fußball (OpenLigaDB, ESPN), Radio und Wallpaper-Galerie sowie ipapi.co für das Land der öffentlichen IP im VPN-Dot-Menü. Alle Einstellungen bleiben auf dem Gerät.	Lumen non ha account, pubblicità né analisi. I servizi online vengono contattati solo dalle funzioni che attivi tu – ad es. meteo (Open-Meteo), calcio (OpenLigaDB, ESPN), radio e galleria sfondi, oltre a ipapi.co per il paese del tuo IP pubblico nel menu VPN-Dot. Tutte le impostazioni restano sul dispositivo.
+Haftungsausschluss	Esclusione di responsabilità
+Lumen Launcher ist ein privates, kostenloses Hobbyprojekt und wird ohne jede Gewährleistung bereitgestellt, so „wie er ist“. Die Nutzung erfolgt auf eigene Gefahr. Soweit gesetzlich zulässig, übernimmt der Entwickler keine Haftung für Schäden, Datenverlust, Fehlfunktionen oder sonstige Folgen der Nutzung. Unberührt bleibt die Haftung für Vorsatz und grobe Fahrlässigkeit, für Schäden an Leben, Körper und Gesundheit sowie nach zwingenden gesetzlichen Vorschriften.\n\nFunktionen wie Root-/ADB-Deaktivierung von Apps, Neustart greifen in dein Gerät ein; nutze sie nur, wenn du die Folgen kennst. Für Inhalte Dritter (Radiostreams, Webseiten in Web-Widgets, heruntergeladene Dateien, Wallpaper) ist allein der Nutzer verantwortlich, ebenso für die Einhaltung von Urheberrecht und Nutzungsbedingungen. Die Kindersicherung ist eine Hilfe und kein garantierter Schutz.\n\nLumen Launcher steht in keiner Verbindung zu Google, Amazon, AFTVnews, Projectivy, Netflix, Disney+, ESPN oder anderen genannten Marken; alle Namen und Marken gehören ihren jeweiligen Inhabern.	Lumen Launcher è un progetto hobbistico privato e gratuito, fornito senza alcuna garanzia, “così com'è”. Lo usi a tuo rischio. Nei limiti consentiti dalla legge, lo sviluppatore non si assume alcuna responsabilità per danni, perdita di dati, malfunzionamenti o altre conseguenze dell'uso. Resta salva la responsabilità per dolo e colpa grave, per danni alla vita, al corpo o alla salute e secondo le norme di legge inderogabili.\n\nFunzioni come la disattivazione di app via root/ADB o il riavvio intervengono sul dispositivo; usale solo se ne conosci le conseguenze. Per i contenuti di terzi (stream radio, pagine web nei widget web, file scaricati, sfondi) è responsabile solo l'utente, così come per il rispetto del diritto d'autore e delle condizioni d'uso. Il controllo genitori è un aiuto, non una protezione garantita.\n\nLumen Launcher non è affiliato a Google, Amazon, AFTVnews, Projectivy, Netflix, Disney+, ESPN o altri marchi citati; tutti i nomi e marchi appartengono ai rispettivi proprietari.
+Schneller, schlanker Launcher für Android TV	Launcher veloce e leggero per Android TV
+Ohne Konten · ohne Werbung · ohne Tracking	Senza account · senza pubblicità · senza tracciamento
+Version	Versione
+Speicher	Memoria
+Entwickler von Lumen und VPN-Dot	Sviluppatore di Lumen e VPN-Dot
+Anzeigen	Mostra
+Verbinde …	Connessione …
+Eingang konnte nicht geöffnet werden.	Impossibile aprire l'ingresso.
+Verbindung getrennt.	Connessione interrotta.
+Puffert …	Buffering …
+Kein Signal am Eingang „	Nessun segnale sull'ingresso “
+Zurück = schließen	Indietro = chiudi
+Ziffernblock (ADB)	Tastierino numerico (ADB)
+Zahlen auf dem TV eingeben – auch ohne Nummerntasten auf der Fernbedienung	Inserisci numeri sulla TV – anche senza tasti numerici sul telecomando
+IP der Box (leer = diese Box selbst)	IP del box (vuoto = questo box)
+Ziel-IP	IP di destinazione
+diese Box	questo box
+Nach der Zahl automatisch OK senden	Invia OK dopo il numero
+Automatisch senden (ohne OK)	Invia automaticamente (senza OK)
+Verbindung testen	Prova connessione
+Teste …	Test in corso …
+1. An der Box "ADB über Netzwerk/Debugging" einschalten (Entwickleroptionen).\n2. Oben "Verbindung testen" – beim ersten Mal fragt die Box, ob sie Lumen erlauben soll → "Immer erlauben".\n3. Unter Fernbedienung eine Taste anlernen und ihr die Aktion "Ziffernblock ein/aus" geben.\n4. In einer App (z. B. waipu) die Taste drücken, Zahl mit den Pfeiltasten wählen, OK = senden. Zurück schließt. Mit "Automatisch senden" geht's auch ohne OK – einfach kurz warten.	1. Sul box attiva "ADB in rete/debug" (opzioni sviluppatore).\n2. Sopra premi "Prova connessione" – la prima volta il box chiede se consentire Lumen → "Consenti sempre".\n3. In Telecomando apprendi un tasto e assegnagli l'azione "Tastierino numerico on/off".\n4. In un'app (ad es. waipu) premi quel tasto, scegli le cifre con le frecce, OK = invia. Indietro chiude. Con "Invia automaticamente" funziona anche senza OK – basta attendere un attimo.
+Eingang	Ingresso
+Radio · OK zum Abspielen, lang drücken für Optionen	Radio · OK per ascoltare, premi a lungo per le opzioni
+Widget · OK öffnet groß, lang drücken für Optionen	Widget · OK apre in grande, premi a lungo per le opzioni
+Radiosender suchen	Cerca stazioni radio
+Tausende Sender, z. B. SWR3, SR1 – OK zum Suchen	Migliaia di stazioni – OK per cercare
+Falsche PIN	PIN errato
+PINs stimmen nicht überein	I PIN non coincidono
+Neue PIN eingeben	Inserisci nuovo PIN
+PIN wiederholen	Ripeti PIN
+Std.	h
+Lumen ist bereits Standard-Launcher.	Lumen è già il launcher predefinito.
+App wählen	Scegli app
+Keine Eingänge gefunden	Nessun ingresso trovato
+Zurück	Indietro
+Eingang wählen	Scegli ingresso
+Aktion	Azione
+Kurzer Druck	Pressione breve
+Langer Druck	Pressione lunga
+Taste wählen	Scegli tasto
+Aussehen	Aspetto
+Standby & Energie	Standby & energia
+Reihen	Righe
+Fernbedienung	Telecomando
+Werkzeuge	Strumenti
+Layout, Kacheln, Farben & Schrift	Layout, riquadri, colori & carattere
+Bildschirmschoner, Timer & Standby	Salvaschermo, timer & standby
+Reihen ein-/ausblenden & sortieren	Mostra, nascondi & ordina righe
+Tasten & Shortcuts	Tasti & scorciatoie
+Dateien, Leistung, Widgets & Drucker	File, prestazioni, widget & stampante
+Sperrzeiten, PIN & Kindermodus	Orari di blocco, PIN & modalità bambini
+Launcher, Dienste & Sicherung	Launcher, servizi & backup
+Update verfügbar	Aggiornamento disponibile
+jetzt installieren	installa ora
+Layout, Farben, Schrift	Layout, colori, carattere
+Ein-/ausblenden, sortieren	Mostra, nascondi, ordina
+Standby	Standby
+Schoner, Timer, Energie	Salvaschermo, timer, energia
+Dateien, Leistung, Widgets, Drucker	File, prestazioni, widget, stampante
+PIN & Sperrzeiten	PIN & orari di blocco
+Launcher & Dienste	Launcher & servizi
+Text zur App (Titel & Info)	Testo dell'app (titolo & info)
+Klein	Piccolo
+Groß	Grande
+Position der Kacheln	Posizione dei riquadri
+Oben	In alto
+Unten	In basso
+Position der Kopfzeile	Posizione della barra superiore
+Icon-Pack	Icon pack
+Standard	Predefinito
+Standard (App-Icons)	Predefinito (icone app)
+Keine Icon-Packs installiert	Nessun icon pack installato
+Oben links	In alto a sinistra
+Oben rechts	In alto a destra
+Unten links	In basso a sinistra
+Unten rechts	In basso a destra
+Uhr & Wetter in Apps	Orologio & meteo nelle app
+Kachel-Transparenz	Trasparenza riquadri
+Fokus-Stil der Kacheln	Stile focus dei riquadri
+Animierter Hintergrund	Sfondo animato
+Saisonale Themes (Halloween, Weihnachten, Silvester, Ostern)	Temi stagionali (Halloween, Natale, Capodanno, Pasqua)
+Hintergrund nach Tageszeit & Wetter	Sfondo in base a ora & meteo
+Farbe der Menüs	Colore dei menu
+Akzentfarbe	Colore d'accento
+Kachel-Stil	Stile riquadri
+Kachel-Größe	Dimensione riquadri
+Abstände	Spaziatura
+Spatial-Effekte (Spiegelung, Glanz, Lichtpunkte)	Effetti Spatial (riflesso, brillio, particelle)
+Voll	Pieno
+Ruhig	Calmo
+Frei: zeigt deine Favoriten (sonst die erste App-Reihe). Lange auf eine Kachel drücken → „Frei verschieben“.	Libero: mostra i tuoi preferiti (altrimenti la prima riga di app). Premi a lungo un riquadro → “Sposta liberamente”.
+Freie Anordnung zurücksetzen	Ripristina disposizione libera
+Zurückgesetzt.	Ripristinato.
+Uhr-Stil	Stile orologio
+Uhr & Wetter Position	Posizione orologio & meteo
+Zeitformat	Formato ora
+24 Stunden	24 ore
+12 Stunden (AM/PM)	12 ore (AM/PM)
+Wetter	Meteo
+Kompakt	Compatto
+Mit Vorschau	Con previsioni
+Wetter-Ort	Località meteo
+nicht gesetzt	non impostato
+Unwetterwarnungen (DWD)	Allerte meteo (DWD)
+Temperatur-Einheit	Unità di temperatura
+Schriftart	Carattere
+Hintergrund abdunkeln	Scurisci sfondo
+Hintergrund-Unschärfe	Sfocatura sfondo
+Leicht	Leggero
+Mittel	Medio
+Stark	Forte
+Wallpaper-Wechsel	Cambio sfondo
+Wallpaper herunterladen (Galerie)	Scarica sfondi (galleria)
+Wallpaper-Ordner neu einlesen	Rileggi cartella sfondi
+Wallpaper neu geladen.	Sfondi ricaricati.
+Statusleiste	Barra di stato
+Neustart-Knopf in der Kopfzeile	Pulsante riavvio nella barra superiore
+Radio-Reihe auf Startseite	Riga radio nella home
+Unter der Uhr	Sotto l'orologio
+Oben Mitte	In alto al centro
+Mitte	Centro
+Unten Mitte	In basso al centro
+Radio-Anzeige Position	Posizione display radio
+Radio-Player	Lettore radio
+Alle Apps sortieren nach	Ordina tutte le app per
+Zuletzt genutzt	Usate di recente
+Häufigkeit	Frequenza
+Eigene Reihenfolge	Ordine personalizzato
+Aktuelles Aussehen als Theme speichern	Salva l'aspetto attuale come tema
+Gespeichert	Salvato
+Theme laden	Carica tema
+Keine Themes in /Android/data/com.lumen.tv/files/themes/ gefunden.	Nessun tema trovato in /Android/data/com.lumen.tv/files/themes/.
+Theme geladen.	Tema caricato.
+Theme ungültig.	Tema non valido.
+Menü-Schrift	Carattere menu
+wie Schriftart	come il carattere
+Menü-Schriftgröße	Dimensione testo menu
+Normal	Normale
+Sehr groß	Molto grande
+Eigene Schriften (ttf/otf) kopierst du nach /Android/data/com.lumen.tv/files/fonts/ – danach erscheinen sie in der Schriftart-Auswahl. Die Menü-Schrift gilt für dieses Menü und die Kopfzeile.	Copia i tuoi caratteri (ttf/otf) in /Android/data/com.lumen.tv/files/fonts/ – poi compaiono nell'elenco dei caratteri. Il carattere menu vale per questo menu e la barra superiore.
+Bildschirmschoner nach	Salvaschermo dopo
+Bildschirmschoner	Salvaschermo
+Uhr (OLED-schonend)	Orologio (adatto OLED)
+Eigene Fotos	Foto personali
+Galerie aus dem Netz + Uhr & Wetter	Galleria web + orologio & meteo
+Auto-Standby des TV nach	Standby automatico TV dopo
+Auto-Standby und Einschlaf-Timer brauchen die Bedienungshilfe. Läuft Ton, wird nicht abgeschaltet. Ob der TV dabei wirklich in Standby geht, hängt vom Gerät ab.	Lo standby automatico e il timer di spegnimento richiedono il servizio di accessibilità. Se c'è audio in riproduzione non si spegne nulla. Se la TV entra davvero in standby dipende dal dispositivo.
+Runter	Giù
+Favoriten-Apps wählen …	Scegli app preferite …
+Favoriten-Apps wählst du oben direkt aus der Liste – oder per langem Druck auf eine App auf dem Startbildschirm. Eigene Reihen legst du per langem Druck auf eine App an.	Scegli le app preferite dall'elenco sopra – oppure premi a lungo un'app nella schermata Home. Crea righe personali premendo a lungo un'app.
+Weiter ansehen: Zugriff erlauben	Continua a guardare: consenti accesso
+erteilt	concesso
+anfragen	richiedi
+Zugriff ist schon erteilt – Liste wird neu geladen.	Accesso già concesso – ricarico l'elenco.
+Anfrage nicht möglich. Per ADB: pm grant com.lumen.tv android.permission.READ_TV_LISTINGS	Richiesta non possibile. Via ADB: pm grant com.lumen.tv android.permission.READ_TV_LISTINGS
+„Weiter ansehen“ zeigt nur etwas, wenn Android TV Einträge dafür freigibt. Auf manchen Boxen darf nur der System-Launcher diese Liste lesen, dann bleibt die Reihe leer und wird ausgeblendet.	“Continua a guardare” mostra qualcosa solo se Android TV condivide le voci. Su alcuni box solo il launcher di sistema può leggere questo elenco; allora la riga resta vuota e viene nascosta.
+ · lang	 · lunga
+ · kurz	 · breve
+Handy als Fernbedienung	Telefono come telecomando
+Neuen Code erzeugen (alte Handys abmelden)	Nuovo codice (disconnetti vecchi telefoni)
+Zweimal Home: zur letzten App wechseln	Premi Home due volte: passa all'ultima app
+Eigene Lautstärke-Anzeige	Indicatore volume personalizzato
+Nachtmodus: Lautstärke begrenzen	Modalità notte: limita volume
+Nachts höchstens	Di notte al massimo
+Nachtmodus von	Modalità notte dalle
+${prefs.volNightFrom} Uhr	${prefs.volNightFrom}:00
+Nachtmodus bis	Modalità notte fino alle
+${prefs.volNightTo} Uhr	${prefs.volNightTo}:00
+Braucht die Bedienungshilfe „Lumen Home-Taste“. Lautstärke: Auf vielen Boxen verarbeitet Android die Tasten selbst – dann erscheint die Neon-Anzeige zusätzlich zum Android-Balken, ausblenden lässt der sich nicht.	Richiede il servizio di accessibilità “Lumen tasto Home”. Volume: su molti box Android gestisce i tasti da sé – allora il display neon appare in aggiunta alla barra di Android, che non si può nascondere.
+Taste anlernen – einfach auf der Fernbedienung drücken	Apprendi un tasto – premilo sul telecomando
+Neue Tastenbelegung aus Liste …	Nuova assegnazione tasto dall'elenco …
+Erkannt: 	Rilevato: 
+Fernbedienung: 	Telecomando: 
+Sondertasten: 	Tasti speciali: 
+keine gemeldet – „Taste anlernen“ nutzen	nessuno segnalato – usa “Apprendi un tasto”
+Empfohlene Belegung für die Farbtasten übernehmen	Applica assegnazione consigliata dei tasti colorati
+Übernommen: Rot = Lumen, Grün = Schlaftimer, Gelb = Standby, Blau = Sprachsuche.	Applicato: rosso = Lumen, verde = timer di spegnimento, giallo = standby, blu = ricerca vocale.
+Shortcuts brauchen die Bedienungshilfe (siehe System). Belegte Tasten verlieren ihre normale Funktion.	Le scorciatoie richiedono il servizio di accessibilità (vedi Sistema). I tasti assegnati perdono la loro funzione normale.
+Dateien, APKs	File, APK
+Leistung	Prestazioni
+RAM, Speicher, Boost	RAM, memoria, boost
+Info-Widgets	Widget info
+Fußball, News …	Calcio, notizie …
+aktiv	attivo
+Kamerastatus	stato telecamera
+Zahlen am TV	numeri sulla TV
+Sprache	Lingua
+Netzwerk	Rete
+Ton	Audio
+verwalten	gestisci
+Sperrzeit	Orario di blocco
+Gesperrt von	Bloccato dalle
+Gesperrt bis	Bloccato fino alle
+Kindermodus (nur freigegebene Apps)	Modalità bambini (solo app consentite)
+PIN ändern	Cambia PIN
+gesetzt	impostato
+Apps sperrst du oder gibst sie für Kinder frei per langem Druck auf die App. Durchgesetzt wird das auch außerhalb von Lumen – dafür muss die Bedienungshilfe aktiv sein.	Blocca le app o consentile ai bambini premendo a lungo l'app. Vale anche fuori da Lumen – serve il servizio di accessibilità attivo.
+Ausgeblendete Apps wieder anzeigen	Mostra di nuovo le app nascoste
+Lumen beim Systemstart öffnen	Apri Lumen all'avvio del sistema
+Autostart-App (beim Start von Lumen)	App di avvio (all'avvio di Lumen)
+Autostart-App	App di avvio
+Aus (keine App)	Off (nessuna app)
+Als Standard-Launcher festlegen	Imposta come launcher predefinito
+Stock-Launcher überschreiben	Sostituisci launcher di sistema
+Bedienungshilfe „Lumen Home-Taste“	Servizio di accessibilità “Lumen tasto Home”
+Zugriff auf laufende Medien (Reihe „Läuft gerade“)	Accesso ai media in riproduzione (riga “In riproduzione”)
+Stock-Launcher einfrieren (Root)	Congela launcher di sistema (root)
+Stock-Launcher eingefroren.	Launcher di sistema congelato.
+Fehlgeschlagen (kein Root?).	Non riuscito (niente root?).
+Stock-Launcher wieder aktivieren (Root)	Riattiva launcher di sistema (root)
+Stock-Launcher aktiviert.	Launcher di sistema attivato.
+Nach Updates suchen	Cerca aggiornamenti
+Lumen ist aktuell.	Lumen è aggiornato.
+Einrichtungs-Assistent erneut starten	Riavvia l'assistente di configurazione
+Einstellungen an andere Box senden (WLAN)	Invia impostazioni a un altro box (Wi-Fi)
+Einstellungen von anderer Box empfangen	Ricevi impostazioni da un altro box
+Einstellungen exportieren	Esporta impostazioni
+Einstellungen importieren	Importa impostazioni
+Importiert.	Importato.
+Keine gültige lumen-settings.json gefunden.	Nessun lumen-settings.json valido trovato.
+Ordner (unter /Android/data/com.lumen.tv/files/): wallpapers (Bild, GIF, Video), fonts (ttf/otf), themes (json).	Cartelle (in /Android/data/com.lumen.tv/files/): wallpapers (immagine, GIF, video), fonts (ttf/otf), themes (json).
+Rote Taste	Tasto rosso
+Grüne Taste	Tasto verde
+Gelbe Taste	Tasto giallo
+Blaue Taste	Tasto blu
+Menü	Menu
+TV-Eingang	Ingresso TV
+Lesezeichen	Segnalibro
+Kanal +	Canale +
+Kanal –	Canale –
+Taste $code	Tasto $code
+Favoriten	Preferiti
+Streaming	Streaming
+Spiele	Giochi
+Musik	Musica
+Tools	Strumenti
+Kinder	Bambini
+Banner	Banner
+Breit	Largo
+Icons	Icone
+Rund	Rotondo
+Poster (hoch)	Poster (verticale)
+Karte	Scheda
+Raster	Griglia
+Seitenleiste	Barra laterale
+Frei	Libero
+Spatial (3D)	Spatial (3D)
+Wallpaper pur	Solo sfondo
+Aurora	Aurora
+Glas	Vetro
+Midnight	Midnight
+OLED-Schwarz	Nero OLED
+Lumen öffnen	Apri Lumen
+App öffnen …	Apri app …
+Eingang wechseln …	Cambia ingresso …
+Einschlaf-Timer +30 Min.	Timer di spegnimento +30 min
+Sprachsuche	Ricerca vocale
+Ziffernblock ein/aus	Tastierino numerico on/off
+Zur letzten App wechseln	Passa all'ultima app
+STUMM	MUTO
+Gegentor	Gol subito
+Kein Eingabefeld am TV gefunden – erst ein Textfeld auswählen.	Nessun campo di testo sulla TV – selezionane prima uno.
+Dieses Feld nimmt keinen Text an.	Questo campo non accetta testo.
+App nicht gefunden.	App non trovata.
+Unbekannte Aktion	Azione sconosciuta
+sendet in ${left / 1000 + 1}s · OK sofort · Zurück bricht ab	invio tra ${left / 1000 + 1}s · OK subito · Indietro annulla
+Pfeiltasten wählen · OK übernimmt · Zurück schließt	Frecce scelgono · OK conferma · Indietro chiude
+Konnte die Zahl nicht senden – ADB-Netzwerk/Einstellungen prüfen.	Impossibile inviare il numero – controlla rete ADB/impostazioni.
+Keine App zum Wechseln.	Nessuna app a cui passare.
+Noch keine andere App geöffnet.	Nessun'altra app ancora aperta.
+Standby abgebrochen	Standby annullato
+Einschlaf-Timer: +30 Minuten	Timer di spegnimento: +30 minuti
+Druck	Stampa
+✅ Druck fertig	✅ Stampa completata
+⚠️ Druckfehler	⚠️ Errore di stampa
+Drucker	Stampante
+Standby in 60 Sekunden – beliebige Taste zum Abbrechen	Standby tra 60 secondi – premi un tasto qualsiasi per annullare
+Diese Unterseite gibt es auf dieser Box nicht – ich habe die Android-Einstellungen geöffnet.	Questa pagina non esiste su questo box – ho aperto le impostazioni Android.
+Android-Einstellungen geöffnet.	Impostazioni Android aperte.
+Die Android-Einstellungen konnten nicht geöffnet werden.	Impossibile aprire le impostazioni Android.
+RAM-Boost läuft …	RAM boost in corso …
+⚡ Hintergrund von $n Apps geleert · $mb MB frei geworden	⚡ Background di $n app liberato · liberati $mb MB
+⚡ Hintergrund von $n Apps geleert · es lief kaum etwas im Hintergrund	⚡ Background di $n app liberato · c'era poco in background
+Räume auf …	Pulizia …
+🧹 Caches aller Apps geleert (Root) · Lumen: $own MB	🧹 Cache di tutte le app svuotate (root) · Lumen: $own MB
+🧹 Lumen-Cache geleert ($own MB). Für alle Apps am PC: adb shell pm trim-caches 999G	🧹 Cache di Lumen svuotata ($own MB). Per tutte le app dal PC: adb shell pm trim-caches 999G
+RAM, Speicher & System auf einen Blick	RAM, memoria & sistema a colpo d'occhio
+Arbeitsspeicher	Memoria RAM
+${gb(info.ramAvail)} GB frei	${gb(info.ramAvail)} GB liberi
+${gb(info.storFree)} GB frei	${gb(info.storFree)} GB liberi
+normal	normale
+leicht warm	leggermente caldo
+warm	caldo
+heiß – drosselt	molto caldo – rallenta
+kritisch!	critico!
+unbekannt	sconosciuto
+Temperatur	Temperatura
+alles kühl	tutto fresco
+heiß!	caldo!
+Wärme	Calore
+bis zur Drosselung	fino al rallentamento
+Wärmestatus von Android	Stato termico Android
+RAM-Boost	RAM boost
+Beendet sofort alle Hintergrund-Apps · ${prefs.boostExclude.size} Ausnahmen	Chiude subito tutte le app in background · ${prefs.boostExclude.size} eccezioni
+Aufräumen	Pulisci
+Caches & Restdaten löschen	Elimina cache & residui
+Auto-Boost beim Zurück ins Menü	Auto-boost al ritorno al menu
+An · ab ${prefs.autoBoostPct}% RAM-Last	On · da ${prefs.autoBoostPct}% di RAM usata
+RAM-Schwelle für Auto-Boost	Soglia RAM per auto-boost
+App beim Verlassen räumen	Libera l'app all'uscita
+Ausnahmen für den RAM-Boost	Eccezioni RAM boost
+${prefs.boostExclude.size} Apps ausgenommen	${prefs.boostExclude.size} app escluse
+Android-Speicherverwaltung öffnen	Apri gestione memoria Android
+System	Sistema
+Gerät	Dispositivo
+Kerne	core
+Bildschirm	Schermo
+Läuft seit	Attivo da
+Lumen braucht	Lumen usa
+Geschützt sind immer: Launcher, Tastatur, Bedienungshilfen, VPN-Apps, Lumen selbst, deine Ausnahmen und gerade spielende Apps. Alles andere – auch vorinstallierte Apps wie Netflix oder waipu – wird im Hintergrund beendet. „Beenden erzwingen“ gibt es nicht ohne Root; Android startet Apps bei Bedarf selbst wieder. Caches anderer Apps lassen sich ohne Root nur per adb vom PC leeren.	Sempre protetti: launcher, tastiera, servizi di accessibilità, app VPN, Lumen stesso, le tue eccezioni e le app in riproduzione. Tutto il resto — anche app preinstallate come Netflix o waipu — viene chiuso in background. “Forza arresto” non è possibile senza root; Android riavvia le app quando servono. Le cache delle altre app si possono svuotare solo con root o via adb dal PC.
+Ausnahmen	Eccezioni
+„An“ = diese App beendet der RAM-Boost nie · System-Apps sind immer geschützt	“On” = il RAM boost non chiude mai questa app · le app di sistema sono sempre protette
+Ausgenommen	Esclusa
+Alle Apps	Tutte le app
+Mit dem Handy scannen (gleiches WLAN)	Scansiona con il telefono (stessa Wi-Fi)
+Steuerkreuz, Lautstärke, Text eintippen und Apps starten – vom Handy aus.	Frecce, volume, digitazione e avvio app – dal telefono.
+Startet, sobald die Bedienungshilfe „Lumen Home-Taste“ aktiv ist.	Si avvia appena il servizio di accessibilità “Lumen tasto Home” è attivo.
+Diese Folge lässt sich gerade nicht abspielen.	Questo episodio non si può riprodurre ora.
+Stopp	Stop
+Lade Folgen …	Caricamento episodi …
+Keine Folgen gefunden.	Nessun episodio trovato.
+Suche …	Ricerca …
+Nichts gefunden.	Nessun risultato.
+Suchen, abonnieren, weiterhören	Cerca, iscriviti, riprendi
+Nichts aktiv	Niente in riproduzione
+Wähle rechts eine Folge.	Scegli un episodio a destra.
+Abonniert	Iscrizioni
+Noch keine – rechts suchen und mit ★ abonnieren.	Ancora nessuna – cerca a destra e iscriviti con ★.
+Podcast suchen …	Cerca podcast …
+Abonnieren	Iscriviti
+weiter bei ${it / 60}:${"%02d".format(it % 60)}	riprendi da ${it / 60}:${"%02d".format(it % 60)}
+App nicht gefunden	App non trovata
+Leiser	Volume −
+Lauter	Volume +
+Schlaftimer	Timer di spegnimento
+jetzt	ora
+belegt	usato
+⚡ Hintergrund von $n Apps geleert · $mb MB frei	⚡ Liberate $n app · $mb MB liberi
+⚡ Hintergrund von $n Apps geleert	⚡ Background di $n app liberato
+Geräte	dispositivi
+Details	dettagli
+App öffnen	Apri app
+Anpassen	Personalizza
+Kacheln wählen	scegli riquadri
+Schnellmenü anpassen	Personalizza menu rapido
+Aktionen und Apps für das Schnellmenü wählen	Scegli azioni e app per il menu rapido
+Aktionen	Azioni
+Apps	App
+installiert	installato
+Keine Beschreibung.	Nessuna descrizione.
+Lade herunter … $pct %	Download … $pct %
+Jetzt installieren	Installa ora
+Fehler: 	Errore: 
+Später	Più tardi
+Beim ersten Mal fragt Android, ob Lumen Apps installieren darf – einmal erlauben. Einstellungen bleiben erhalten.	La prima volta Android chiede se Lumen può installare app – consentilo una volta. Le impostazioni restano.
+Willkommen bei Lumen Launcher	Benvenuto in Lumen Launcher
+In fünf kurzen Schritten ist alles eingerichtet. Du kannst alles später in den Einstellungen ändern.	Cinque brevi passaggi e sei pronto. Puoi cambiare tutto in seguito nelle impostazioni.
+Wo bist du?	Dove ti trovi?
+Für Wetter und Bildschirmschoner.	Per meteo e salvaschermo.
+Ort	Località
+auswählen	scegli
+Deine Lieblings-Apps	Le tue app preferite
+Sie erscheinen ganz oben in der Reihe „Favoriten“.	Compaiono nella riga “Preferiti”.
+Dein Look	Il tuo stile
+Fokus-Stil	Stile focus
+Uhr	Orologio
+Fertig! 🎉	Fatto! 🎉
+Tipp: Lange auf eine Kachel drücken öffnet Optionen. Info-Widgets (Fußball, News, Countdown …) schaltest du unter Einstellungen → Info-Widgets ein. Damit Lumen immer startet: Home-Taste drücken und Lumen Launcher als „Immer“ wählen.	Suggerimento: premi a lungo un riquadro per le opzioni. Attiva i widget info (calcio, notizie, conto alla rovescia …) in Impostazioni → Widget info. Per avere sempre Lumen: premi Home e scegli Lumen Launcher “Sempre”.
+Los geht's	Si parte
+Weiter ›	Avanti ›
+Überspringen	Salta
+Dieser Sender lässt sich gerade nicht abspielen.	Questa stazione non si può riprodurre ora.
+Radio	Radio
+Lade beliebte deutsche Sender …	Caricamento stazioni tedesche popolari …
+Nichts gefunden – oder der Senderdienst ist gerade nicht erreichbar.	Nessun risultato – oppure il servizio stazioni non è raggiungibile.
+Lade …	Caricamento …
+Keine Sender gefunden.	Nessuna stazione trovata.
+Aus Favoriten entfernt: 	Rimossa dai preferiti: 
+Gespeichert: 	Salvata: 
+Live-Sender aus aller Welt	Stazioni live da tutto il mondo
+Gerade läuft nichts	Niente in riproduzione
+Wähle rechts einen Sender.	Scegli una stazione a destra.
+Favorit	Preferito
+Speichern	Salva
+Timer	Timer
+Verlauf	Cronologia
+OK spielt einen Sender ab – auch weiter, wenn du eine andere App öffnest.\nLange drücken = als Favorit speichern oder entfernen.	OK riproduce una stazione – continua anche quando apri un'altra app.\nPressione lunga = salva o rimuovi dai preferiti.
+Beliebt	Popolari
+Sender suchen …	Cerca stazioni …
+Nachrichten	Notizie
+Dance/Elektro	Dance/Elettronica
+Klassik	Classica
+Welt	Mondo
+Noch keine Favoriten – wähle „Beliebt“ oder suche einen Sender und drück lange zum Speichern.	Ancora nessun preferito – scegli “Popolari” o cerca e premi a lungo per salvare.
+Deine gespeicherten Sender	Le tue stazioni salvate
+Ergebnisse für „$query“	Risultati per “$query”
+Beliebte Sender	Stazioni popolari
+Zuletzt gehört – OK sucht den Titel auf YouTube	Ascoltati di recente – OK cerca il brano su YouTube
+Drück jetzt die Taste	Premi ora il tasto
+Lumen erkennt die Taste auf deiner Fernbedienung automatisch. Pfeiltasten und OK bleiben frei. Zurück bricht ab.	Lumen riconosce automaticamente il tasto del telecomando. Frecce e OK restano liberi. Indietro annulla.
+Neustart wird ausgelöst …	Riavvio in corso …
+Neustart nicht möglich: Bedienungshilfe „Lumen“ aktivieren (Einstellungen → System) oder Gerät rooten.	Riavvio non possibile: attiva il servizio di accessibilità Lumen (Impostazioni → Sistema) o esegui il root del dispositivo.
+EEEE, d. MMMM	EEEE d MMMM
+OK startet · lange drücken für Optionen	OK apre · pressione lunga per le opzioni
+WLAN	Wi-Fi
+kein VPN	niente VPN
+frei	liberi
+EINSTELLUNGEN	IMPOSTAZIONI
+Schmal	Stretto
+Läuft	In riproduzione
+Pausiert	In pausa
+Auf der Ziel-Box abgelehnt.	Rifiutato sul box di destinazione.
+Die Ziel-Box ist gerade beschäftigt.	Il box di destinazione è occupato.
+Keine Verbindung. Ist auf der Ziel-Box „Einstellungen empfangen“ geöffnet?	Nessuna connessione. Sul box di destinazione è aperto “Ricevi impostazioni”?
+Einstellungen empfangen	Ricevi impostazioni
+Diese Box	Questo box
+Empfang konnte nicht gestartet werden (Port ${Transfer.PORT} belegt?). Dialog schließen und erneut öffnen.	Impossibile avviare la ricezione (porta ${Transfer.PORT} occupata?). Chiudi e riapri la finestra.
+Einstellungen von „${i.from}“ übernehmen?	Applicare le impostazioni da “${i.from}”?
+Layout, Reihen, Favoriten, Widgets, Radio, Podcasts, Farben und Schrift werden ersetzt. PIN, Kindersicherung, VPN-Dot, Drucker und Fernbedienungs-Code dieser Box bleiben unverändert.	Layout, righe, preferiti, widget, radio, podcast, colori e carattere verranno sostituiti. PIN, controllo genitori, VPN-Dot, stampante e codice telecomando di questo box restano invariati.
+Wetter-Ort übernehmen	Adotta località meteo
+Übernehmen	Applica
+✓ Einstellungen von „${i.from}“ übernommen.	✓ Impostazioni da “${i.from}” applicate.
+Die Sicherung war ungültig.	Il backup non era valido.
+Ablehnen	Rifiuta
+Bereit – warte auf eine andere Lumen-Box …	Pronto – in attesa di un altro box Lumen …
+Auf der anderen Box: Einstellungen → System → „Einstellungen senden“ und dort „$name“ wählen. Wird diese Box nicht gefunden, dort die IP $ip eingeben.	Sull'altro box: Impostazioni → Sistema → “Invia impostazioni” e scegli “$name”. Se questo box non viene trovato, inserisci lì l'IP $ip.
+Gesendet an „$label“ – bitte dort mit OK bestätigen …	Inviato a “$label” – conferma lì con OK …
+✓ „$label“ hat die Einstellungen übernommen.	✓ “$label” ha applicato le impostazioni.
+Einstellungen senden	Invia impostazioni
+An eine andere Lumen-Box im WLAN	A un altro box Lumen nella tua Wi-Fi
+Auf der Ziel-Box zuerst Einstellungen → System → „Einstellungen empfangen“ öffnen.	Sul box di destinazione apri prima Impostazioni → Sistema → “Ricevi impostazioni”.
+Gefundene Boxen	Box trovati
+Keine Box gefunden. „Erneut suchen“ oder die IP eingeben.	Nessun box trovato. “Cerca di nuovo” o inserisci l'IP.
+Erneut suchen	Cerca di nuovo
+IP-Adresse eingeben	Inserisci indirizzo IP
+Übertragen werden Layout, Reihen, Favoriten, Widgets, Radio, Podcasts, Farben und Schrift. Nicht übertragen: PIN, Kindersicherung, VPN-Dot, Drucker, Fernbedienungs-Code. Wallpaper-Dateien bleiben auf der jeweiligen Box.	Vengono trasferiti: layout, righe, preferiti, widget, radio, podcast, colori e carattere. Non trasferiti: PIN, controllo genitori, VPN-Dot, stampante, codice telecomando. I file degli sfondi restano su ogni box.
+Neon-Leuchten	Bagliore neon
+Anheben (3D)	Sollevamento (3D)
+Unterstrich	Sottolineato
+Rahmen	Cornice
+Nachtblau	Blu notte
+Graphit	Grafite
+Mokka & Weiß	Moka & bianco
+Violett	Viola
+Smaragd	Smeraldo
+Bordeaux	Bordeaux
+Mitternacht	Mezzanotte
+Aus dem Wallpaper	Dallo sfondo
+VPN-Statusanzeige läuft	Indicatore stato VPN attivo
+Sek.	s
+Zeigt dir in jeder App, ob dein VPN läuft	Mostra in ogni app se la tua VPN è attiva
+VPN verbunden	VPN connessa
+Kein VPN	Nessuna VPN
+Land wird ermittelt …	Ricerca paese …
+Land nicht ermittelbar	Paese non determinabile
+Der Punkt ist ausgeschaltet.	Il punto è disattivato.
+Berechtigung fehlt – siehe rechts.	Autorizzazione mancante – vedi a destra.
+Grün = VPN aktiv · Rot = kein VPN	Verde = VPN attiva · Rosso = niente VPN
+Allgemein	Generale
+VPN-Dot aktiv	VPN-Dot attivo
+Autostart nach dem Booten	Avvio automatico dopo il boot
+Über anderen Apps einblenden	Mostra sopra le altre app
+Darstellung	Aspetto
+Punktgröße	Dimensione punto
+Position	Posizione
+Blinkintervall	Intervallo lampeggio
+Anzeigedauer	Durata visualizzazione
+Punkt testen	Prova punto
+Das Land wird über die öffentliche IP (ipapi.co) ermittelt – nur solange dieses Menü offen und ein VPN aktiv ist. GPS wird nicht benutzt.	Il paese viene determinato tramite l'IP pubblico (ipapi.co) – solo mentre questo menu è aperto e una VPN è attiva. Il GPS non viene usato.
+Foto	Foto
+Bing Tagesbild	Immagine del giorno Bing
+Wikimedia (Qualitätsbilder)	Wikimedia (immagini in evidenza)
+NASA (Weltall)	NASA (spazio)
+Fotos (Unsplash)	Foto (Unsplash)
+Natur	Natura
+Weltall & Sterne	Spazio & stelle
+Städte & Architektur	Città & architettura
+Minimalistisch	Minimalista
+Abstrakt & Muster	Astratto & motivi
+Dunkel & Neon	Scuro & neon
+Tiere	Animali
+Autos & Technik	Auto & tecnologia
+Fantasy & Digital Art	Fantasy & arte digitale
+Jahreszeiten	Stagioni
+picsum_$id	https://picsum.photos/id/$id/320/180
+Keine Bilder geladen – ist der TV online? Quelle kurz nicht erreichbar? Probier eine andere Quelle.	Nessuna immagine caricata – la TV è online? Fonte momentaneamente non raggiungibile? Prova un'altra fonte.
+Lade herunter …	Download …
+Gespeichert – wird jetzt als Wallpaper verwendet (Wechsel siehe Wallpaper-Wechsel).	Salvata – ora fa parte dei tuoi sfondi (vedi cambio sfondo).
+Download fehlgeschlagen.	Download non riuscito.
+Entferne …	Rimozione …
+Entfernt – wird nicht mehr als Wallpaper genutzt.	Rimossa – non più usata come sfondo.
+Konnte nicht entfernt werden.	Impossibile rimuoverla.
+Wallpaper-Galerie	Galleria sfondi
+Bing, NASA, Wikimedia & mehr	Bing, NASA, Wikimedia & altro
+Lade Bilder …	Caricamento immagini …
+✓ aktiv · OK = entfernen  ·  	✓ attivo · OK = rimuovi  ·  
+OK = hinzufügen  ·  	OK = aggiungi  ·  
+‹ Zurück	‹ Indietro
+OK fügt ein Bild hinzu – bei einem Bild mit ✓ nimmt OK es wieder heraus. Bilder gehören ihren Urhebern (Lizenz siehe Zeile oben) – gedacht für den privaten Gebrauch auf diesem TV.	OK aggiunge un'immagine – su una con ✓ la toglie di nuovo. Le immagini appartengono ai loro autori (licenza nella riga sopra) – pensate per l'uso privato su questa TV.
+Heute	Oggi
+Deutschland	Germania
+München	Monaco di Baviera
+Köln	Colonia
+Nürnberg	Norimberga
+Wien	Vienna
+Österreich	Austria
+Zürich	Zurigo
+Schweiz	Svizzera
+Klar	Sereno
+Überwiegend klar	Prevalentemente sereno
+Teils bewölkt	Parzialmente nuvoloso
+Bedeckt	Coperto
+Nebel	Nebbia
+Nieselregen	Pioviggine
+Gefrierender Nieselregen	Pioviggine gelata
+Leichter Regen	Pioggia leggera
+Starker Regen	Pioggia forte
+Gefrierender Regen	Pioggia gelata
+Schneefall	Nevicata
+Schneegriesel	Neve granulosa
+Regenschauer	Rovesci di pioggia
+Schneeschauer	Rovesci di neve
+Gewitter	Temporale
+Gewitter mit Hagel	Temporale con grandine
+Wetter einrichten	Configura meteo
+Wetter lädt …	Caricamento meteo …
+gefühlt	percepita
+Sonnenaufgang	Alba
+Sonnenuntergang	Tramonto
+Ort ändern	Cambia località
+Beliebte Städte – oder oben einen Ort eintippen.	Città popolari – oppure digita una località sopra.
+Ort für das Wetter	Località per il meteo
+Suchen	Cerca
+Beliebte Städte	Città popolari
+Analog	Analogico
+Flip-Uhr	Orologio a palette
+Wortuhr	Orologio a parole
+Digital	Digitale
+wie Apps	come le app
+nie	mai
+alle $min Min.	ogni $min min
+Bitte zuerst eine Adresse eingeben.	Inserisci prima un indirizzo.
+Gespeichert.	Salvato.
+Hinzugefügt – die Reihe „Widgets“ steht auf dem Startbildschirm.	Aggiunto – la riga “Widget” è nella schermata Home.
+Webseiten als Live-Kacheln	Pagine web come riquadri live
+Jede Webadresse wird als Kachel in der Reihe „Widgets“ live angezeigt (z. B. Home Assistant, Grafana, Wetterradar, Börsenticker). Auch Kamera-Streams gehen: eine rtsp://-Adresse (z. B. 3D-Drucker über go2rtc) oder ein .m3u8-Stream wird direkt als Video abgespielt. OK auf der Kachel öffnet sie groß. Jedes Widget braucht Arbeitsspeicher – wenige reichen.	Qualsiasi indirizzo web viene mostrato live come riquadro nella riga “Widget” (ad es. Home Assistant, Grafana, radar meteo, ticker di borsa). Funzionano anche gli stream delle telecamere: un indirizzo rtsp:// (ad es. stampante 3D tramite go2rtc) o uno stream .m3u8 viene riprodotto direttamente come video. OK sul riquadro lo apre in grande. Ogni widget usa memoria – ne bastano pochi.
+Name (optional)	Nome (facoltativo)
+Adresse	Indirizzo
+Hinzufügen	Aggiungi
+[aus] 	[off] 
+Bearbeiten (Name/Adresse)	Modifica (nome/indirizzo)
+Aktualisieren: 	Aggiorna: 
+(umschalten)	(cambia)
+Größe: 	Dimensione: 
+Einblenden	Mostra
+Entfernen	Rimuovi
+Download fehlgeschlagen (	Download non riuscito (
+Top – mehrere 4K-Streams gleichzeitig möglich	Ottimo – più stream 4K contemporaneamente
+Sehr gut – 4K-Streaming läuft flüssig	Molto buono – streaming 4K fluido
+Gut – Full-HD problemlos, 4K grenzwertig	Buono – Full HD senza problemi, 4K al limite
+Reicht für HD	Sufficiente per HD
+Knapp – nur SD-Qualität flüssig	Al limite – solo SD fluido
+Neumond	Luna nuova
+Zunehmende Sichel	Falce crescente
+Erstes Viertel	Primo quarto
+Zunehmender Mond	Gibbosa crescente
+Vollmond	Luna piena
+Abnehmender Mond	Gibbosa calante
+Letztes Viertel	Ultimo quarto
+Abnehmende Sichel	Falce calante
+Sonne & Mond	Sole & luna
+Ort im Wetter einstellen	Imposta una località nel meteo
+Dein Ort	La tua località
+Sonne heute	Sole oggi
+Tageslänge	Durata del giorno
+Goldene Stunde	Ora d'oro
+Morgen	Domani
+Keine Daten – Ort im Wetter einstellen.	Nessun dato – imposta una località nel meteo.
+Mond	Luna
+Beleuchtet	Illuminata
+Nächster Vollmond	Prossima luna piena
+Nächster Neumond	Prossima luna nuova
+Keine passenden Sender in der Programmdatei	Nessun canale corrispondente nel file della guida
+Jetzt im TV	Ora in TV
+Lade Programm …	Caricamento guida …
+Kein Programm – OK für Details	Nessuna guida – OK per dettagli
+Danach 	Dopo 
+TV-Programm	Guida TV
+Jetzt & gleich · OK öffnet waipu.tv	Ora & dopo · OK apre waipu.tv
+Lade Programm … (beim ersten Mal bis zu einer Minute)	Caricamento guida … (la prima volta fino a un minuto)
+Kein Programm gefunden.	Nessuna guida trovata.
+Erneut laden	Ricarica
+waipu.tv ist nicht installiert.	waipu.tv non è installato.
+Keine Daten	Nessun dato
+noch 	ancora 
+ Min.	 min
+Programmdaten: epgshare01 (XMLTV). Sender wählst du unter Info-Widgets.	Dati guida: epgshare01 (XMLTV). Scegli i canali in Widget info.
+Gegner	Avversario
+Probe-Alarm	Allarme di prova
+Gegentor: 	Gol subito: 
+Fußball	Calcio
+OK für Spielplan & Tabelle	OK per calendario & classifica
+OK für Regenradar & Stundenwerte	OK per radar pioggia & ore
+OK zum Bearbeiten	OK per modificare
+Notiz	Nota
+OK zum Bearbeiten – auch am Handy	OK per modificare – anche dal telefono
+Heimnetz	Rete domestica
+OK für Speedtest & Gerätesuche	OK per speed test & ricerca dispositivi
+OK für das Programm aller Sender	OK per la guida completa
+OK für Details	OK per dettagli
+EE dd.MM. · HH:mm	EE dd/MM · HH:mm
+Lade Spiele …	Caricamento partite …
+Keine Spiele – Verein wählen	Nessuna partita – scegli una squadra
+Platz ${row.pos} · ${row.points} Punkte	Posizione ${row.pos} · ${row.points} punti
+Endstand	Finale
+Nächste Spiele	Prossime partite
+Letzte Spiele	Ultime partite
+Tabelle	Classifica
+Kein Ort / lädt …	Nessuna località / caricamento …
+Regenradar Deutschland & nächste 24 Stunden	Radar pioggia Germania & prossime 24 ore
+Regenradar	Radar pioggia
+Nächste 24 Stunden	Prossime 24 ore
+Kein Ort eingestellt.	Nessuna località impostata.
+☔ Regen wahrscheinlich ab ca. %02d Uhr (${rainy.rain} %%)	☔ Pioggia probabile dalle %02d:00 circa (${rainy.rain} %%)
+☀ In den nächsten 12 Stunden bleibt es wohl trocken.	☀ Probabilmente asciutto per le prossime 12 ore.
+OK zum Anlegen	OK per aggiungere
+Heute!	Oggi!
+Tag	giorno
+Tage	giorni
+noch $d Tage	ancora $d giorni
+Leer – OK zum Schreiben	Vuota – OK per scrivere
+Messe …	Misurazione …
+OK für Speedtest	OK per speed test
+Verbindung, Speedtest & Geräte im Netz	Connessione, speed test & dispositivi
+Verbindung	Connessione
+Antwortzeit	latenza
+Speedtest starten	Avvia speed test
+Geräte suchen	Cerca dispositivi
+Messe Antwortzeit …	Misurazione latenza …
+Starte …	Avvio …
+Verbraucht: ca. ${r.mb} MB · Server: Cloudflare (nächster Standort)	Dati usati: circa ${r.mb} MB · Server: Cloudflare (sede più vicina)
+Hinweis: Mit aktivem VPN misst der Test die VPN-Verbindung, nicht deinen Anschluss.	Nota: con la VPN attiva il test misura la connessione VPN, non la tua linea.
+Suche Geräte im Netz (ca. 20–30 s) …	Scansione della rete (circa 20–30 s) …
+Gefundene Geräte (${devices.size})	Dispositivi trovati (${devices.size})
+Die Gerätesuche klopft typische Ports im eigenen Netz an und findet nicht jedes Gerät (z. B. Handys im Stromsparmodus). Der Speedtest misst Antwortzeit, Download (bis 10 s) und Upload (bis 8 s) über Cloudflare.	La ricerca dispositivi interroga le porte comuni e non trova ogni dispositivo (ad es. telefoni in risparmio energetico). Lo speed test misura latenza, download (fino a 10 s) e upload (fino a 8 s) tramite Cloudflare.
+NEWS	NOTIZIE
+Erscheinen in der Reihe „Infos“ – verschiebbar unter Reihen	Compaiono nella riga “Info” – spostabile in Righe
+Notiz (OK = speichern)	Nota (OK = salva)
+Name des Countdowns	Nome del conto alla rovescia
+EPG-URL(s), mit Leerzeichen getrennt (leer = Standard)	URL EPG, separati da spazi (vuoto = predefinito)
+Datum, z. B. 24.12.2026	Data, ad es. 2026-12-24
+Datum nicht erkannt – bitte TT.MM.JJJJ	Data non riconosciuta – usa AAAA-MM-GG
+Fußball-Widget	Widget calcio
+Liga	Campionato
+Tor-Alarm (Banner, auch in anderen Apps)	Allarme gol (banner, anche in altre app)
+Tor-Alarm testen	Prova allarme gol
+Für das Banner die Bedienungshilfe „Lumen Home-Taste“ einschalten (Einstellungen → System).	Per il banner attiva il servizio di accessibilità “Lumen tasto Home” (Impostazioni → Sistema).
+Verein	Squadra
+Vereine konnten nicht geladen werden.	Impossibile caricare le squadre.
+News-Ticker	Ticker notizie
+Laufzeile mit Schlagzeilen	Riga scorrevole con titoli
+Wetter groß	Meteo grande
+Wetter-Kachel mit Stundenwerten & Radar	Riquadro meteo con ore & radar
+Countdown-Widget	Widget conto alla rovescia
+Jährlich wiederholen (für neue Einträge)	Ripeti ogni anno (nuove voci)
+Neuer Countdown	Nuovo conto alla rovescia
+noch $it Tage	ancora $it giorni
+Gelöscht: 	Eliminato: 
+Notiz-Widget	Widget nota
+Notiz bearbeiten	Modifica nota
+„Jetzt im TV“-Widget	Widget “Ora in TV”
+Sender auswählen	Scegli canali
+EPG-Quelle (für Sky/Pay-TV eigene URL)	Fonte EPG (URL propria per Sky/pay TV)
+Standard (epgshare01)	predefinito (epgshare01)
+Sonnenauf-/-untergang & Mondphase	Alba/tramonto & fase lunare
+Heimnetz-Widget	Widget rete domestica
+Am Handy oder PC bearbeiten	Modifica dal telefono o PC
+Notiz & Countdowns im Browser bearbeiten	Modifica nota & conti alla rovescia nel browser
+läuft	attivo
+starten	avvia
+Konnte den Server nicht starten.	Impossibile avviare il server.
+Öffne im Browser (gleiches WLAN): 	Apri nel browser (stessa Wi-Fi): 
+Verein wählen	Scegli squadra
+Infos	Info
+Weiter ansehen	Continua a guardare
+Läuft gerade	In riproduzione
+Neu installiert	Installate di recente
+Jetzt passend	Adatto adesso
+Häufig genutzt	Usate spesso
+Widgets	Widget
+Eingänge	Ingressi
+Auto (App-Farbe)	Auto (colore app)
+Blau	Blu
+Grün	Verde
+Rot	Rosso
+Orange	Arancione
+Pink	Rosa
+Kacheln im 3D-Bogen	Riquadri nell'arco 3D
+Eigener Kachel-Stil	Stile riquadri personale
+Wie im Entwurf (Glas)	Come nel design (vetro)
+Hintergrund der Uhr in Apps	Sfondo dell'orologio nelle app
+Glas (farbig)	Vetro (colorato)
+Transparent	Trasparente
+Hintergrund-Farbe nach App	Colore sfondo in base all'app
+Aufsteigende Lichtpunkte	Punti luminosi ascendenti
+Spatial-Effekte (Spiegelung, Glanz)	Effetti Spatial (riflesso, brillio)
+Nur gewählte Reihe zeigen	Mostra solo la riga selezionata
+EEEE · d. MMMM	EEEE · d MMMM

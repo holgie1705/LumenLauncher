@@ -327,6 +327,10 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     private fun settingsFile() = File(app.getExternalFilesDir(null), "lumen-settings.json")
     fun exportSettings(): String = runCatching { settingsFile().also { it.writeText(store.export()) }.path }.getOrElse { "${t("Fehler", "Error")}: ${it.message}" }
     fun importSettings(): Boolean = settingsFile().let { it.exists() && store.import(it.readText()) }
+    /** WLAN-Übertragung: was gesendet wird (ohne Zugangsdaten) und wie Empfangenes übernommen wird. */
+    fun transferPayload(): String = store.export()
+    fun applyTransfer(json: String, takeWeather: Boolean): Boolean =
+        Transfer.merge(store.currentJson(), json, takeWeather)?.let { store.import(it) } ?: false
 
     fun fontFiles(): List<String> = repo.fontFiles()
     fun themeFiles(): List<File> = repo.themeFiles()

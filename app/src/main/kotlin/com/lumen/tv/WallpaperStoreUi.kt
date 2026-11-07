@@ -104,7 +104,7 @@ fun WallpaperStoreDialog(vm: HomeViewModel, onClose: () -> Unit) {
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         NeoSheet(Ico.BRUSH, t("Wallpaper-Galerie", "Wallpaper gallery"), t("Bing, NASA, Wikimedia & mehr", "Bing, NASA, Wikimedia & more"), width = 1120.dp) {
             Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

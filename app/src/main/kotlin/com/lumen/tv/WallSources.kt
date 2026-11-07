@@ -81,7 +81,7 @@ object WallSources {
     }
 
     private fun bing(): List<RemoteWall> {
-        val mkt = if (Lang.en) "en-US" else "de-DE"
+        val mkt = when (Lang.code) { "de" -> "de-DE"; "it" -> "it-IT"; "fr" -> "fr-FR"; "es" -> "es-ES"; else -> "en-US" }
         val txt = getText("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=8&mkt=$mkt") ?: return emptyList()
         val arr = JSONObject(txt).getJSONArray("images")
         return (0 until arr.length()).map { i ->

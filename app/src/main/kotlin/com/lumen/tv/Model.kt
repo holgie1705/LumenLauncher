@@ -44,7 +44,7 @@ enum class TileStyle(private val de: String, private val en: String) {
     val label: String get() = t(de, en)
 }
 enum class Layout(private val de: String, private val en: String) {
-    SHELVES("Reihen", "Shelves"), GRID("Raster", "Grid"), SIDEBAR("Seitenleiste", "Sidebar"), FREE("Frei", "Free");
+    SHELVES("Reihen", "Shelves"), GRID("Raster", "Grid"), SIDEBAR("Seitenleiste", "Sidebar"), FREE("Frei", "Free"), SPATIAL("Spatial (3D)", "Spatial (3D)");
     val label: String get() = t(de, en)
 }
 enum class Look(private val de: String, private val en: String) {
@@ -54,7 +54,8 @@ enum class Look(private val de: String, private val en: String) {
 enum class ActionType(private val de: String, private val en: String) {
     LUMEN("Lumen öffnen", "Open Lumen"), STANDBY("Standby", "Standby"), APP("App öffnen …", "Open app …"),
     INPUT("Eingang wechseln …", "Switch input …"), TIMER("Einschlaf-Timer +30 Min.", "Sleep timer +30 min"),
-    ASSIST("Sprachsuche", "Voice search"), KEYPAD("Ziffernblock ein/aus", "Number pad on/off");
+    ASSIST("Sprachsuche", "Voice search"), KEYPAD("Ziffernblock ein/aus", "Number pad on/off"),
+    SWITCH("Zur letzten App wechseln", "Switch to last app");
     val label: String get() = t(de, en)
 }
 
@@ -127,6 +128,7 @@ data class Prefs(
     val focusStyle: Int = 0,     // 0 Rahmen, 1 Neon, 2 Anheben, 3 Glas, 4 Unterstrich
     val menuTheme: Int = 0,      // Farbe von Einstellungen/Menüs/Radio (siehe MENU_THEMES)
     val miniOverlay: Boolean = true, // kleine Uhr + Wetter in anderen Apps
+    val miniGlass: Boolean = true,   // Spatial: Uhr-Pille mit Glas-Hintergrund + Farblinie (false = nur Schrift, transparent)
     val adbHost: String = "",                // Ziel-Box für den ADB-Ziffernblock (leer = eigene IP)
     val adbPort: Int = 5555,
     val keypadEnter: Boolean = true,         // nach der Zahl automatisch OK/Enter senden
@@ -184,7 +186,7 @@ data class Prefs(
     val barPos: Int = 0,         // Kopfzeile (Uhr, Wetter, Status): 0 = oben, 1 = unten
     val menuFont: String = "",   // eigene Schrift für Menüs/Kopfzeile, "" = wie Schriftart
     val menuSize: Int = 1,       // 0..3 -> 85/100/120/135 % Schriftgröße im Einstellungs-Menü
-    val lang: Int = 0,           // 0 = Deutsch, 1 = English, 2 = System
+    val lang: Int = 0,           // 0 = Deutsch, 1 = English, 2 = System, 3 = Italiano, 4 = Français, 5 = Español
     val langPicked: Boolean = false, // Erststart-Sprachauswahl schon erfolgt? (false = frische Installation -> Dialog zeigen)
     val dotOn: Boolean = false,  // VPN-Dot (Overlay) aktiv
     val dotSize: Int = 12,       // 8..20 dp
@@ -192,6 +194,19 @@ data class Prefs(
     val dotDuration: Int = 2,    // Sekunden sichtbar
     val dotPos: Int = 0,         // 0 oben rechts, 1 oben links, 2 unten links, 3 unten rechts
     val dotAuto: Boolean = true, // nach dem Booten automatisch starten
+    val spatialPos: Int = 2,           // Spatial: Lage der gewählten Reihe – 0 = oben, 1 = Mitte, 2 = unten
+    val spatialSingle: Boolean = true, // Spatial: nur die gewählte Reihe zeigen (tiefer im Bild), andere erst beim Wechseln
+    val spatialTint: Boolean = false,  // Spatial: Hintergrund färbt sich in der Farbe der gewählten App
+    val spatialDots: Boolean = false,  // Spatial: aufsteigende Lichtpunkte im Hintergrund
+    val spatialTiles: Int = 0,         // Spatial-Layout: 0 = Glas-Kacheln wie im Entwurf, 1 = eigener Kachel-Stil + Abstände
+    val spatialFx: Int = 1,            // Spatial-Layout: 0 = ruhig, 1 = volle Effekte (Spiegelung, Glanz, Partikel)
+    val spatialTried: Boolean = false, // Spatial einmal automatisch einschalten
+    val homeDouble: Boolean = false,   // zweimal Home kurz hintereinander = zur letzten App wechseln
+    val volOsd: Boolean = false,       // eigene Lautstärke-Anzeige statt Android-Balken (Bedienungshilfe)
+    val volNight: Boolean = false,     // Nachtmodus: Lautstärke begrenzen
+    val volNightMax: Int = 40,         // nachts höchstens … % (10..100)
+    val volNightFrom: Int = 22,        // ab … Uhr
+    val volNightTo: Int = 7,           // bis … Uhr
 )
 
 val TILE_SCALES = listOf(0.70f, 0.80f, 0.90f, 1.00f, 1.10f, 1.20f, 1.35f)
@@ -200,7 +215,7 @@ val TILE_GAPS = listOf(8, 14, 20, 26, 32)
 val Prefs.gapDp: Int get() = TILE_GAPS[tileGap.coerceIn(0, TILE_GAPS.lastIndex)]
 
 fun Prefs.toJson(): JSONObject = JSONObject().apply {
-    put("lookV", 2); put("focus", focusStyle); put("menuTheme", menuTheme); put("glass", tileGlass); put("freePos", JSONObject().also { j -> freePos.forEach { (k, v) -> j.put(k, JSONArray().put(v.first).put(v.second)) } }); put("iconPack", iconPack); put("mini", miniOverlay); put("miniPos", miniPos); put("phoneRemote", phoneRemote); put("remoteCode", remoteCode); put("adbHost", adbHost); put("adbPort", adbPort); put("keypadEnter", keypadEnter); put("keypadAutoSend", keypadAutoSend); put("bambuIp", bambuIp); put("bambuSn", bambuSn); put("bambuCode", bambuCode); put("bambuHttp", bambuHttp); put("bambuName", bambuName); put("bambuNotify", bambuNotify); put("autoBoost", autoBoost); put("autoBoostPct", autoBoostPct); put("exitKill", exitKill)
+    put("lookV", 2); put("focus", focusStyle); put("menuTheme", menuTheme); put("glass", tileGlass); put("freePos", JSONObject().also { j -> freePos.forEach { (k, v) -> j.put(k, JSONArray().put(v.first).put(v.second)) } }); put("iconPack", iconPack); put("mini", miniOverlay); put("miniGlass", miniGlass); put("miniPos", miniPos); put("phoneRemote", phoneRemote); put("remoteCode", remoteCode); put("adbHost", adbHost); put("adbPort", adbPort); put("keypadEnter", keypadEnter); put("keypadAutoSend", keypadAutoSend); put("bambuIp", bambuIp); put("bambuSn", bambuSn); put("bambuCode", bambuCode); put("bambuHttp", bambuHttp); put("bambuName", bambuName); put("bambuNotify", bambuNotify); put("autoBoost", autoBoost); put("autoBoostPct", autoBoostPct); put("exitKill", exitKill)
     put("look", look.name); put("tile", tile.name); put("layout", layout.name)
     put("clock", clockStyle); put("timeFmt", timeFormat); put("weather", weather)
     put("wName", weatherName); put("wLat", weatherLat); put("wLon", weatherLon); put("wAlerts", weatherAlerts)
@@ -218,6 +233,8 @@ fun Prefs.toJson(): JSONObject = JSONObject().apply {
     })
     put("heroMode", heroMode); put("tempF", tempF); put("barPos", barPos); put("menuFont", menuFont); put("menuSize", menuSize); put("lang", lang); put("langPicked", langPicked); put("dotOn", dotOn); put("dotSize", dotSize); put("dotInt", dotInterval)
     put("dotDur", dotDuration); put("dotPos", dotPos); put("dotAuto", dotAuto)
+    put("spatialFx", spatialFx); put("spatialTiles", spatialTiles); put("spatialTint", spatialTint); put("spatialSingle", spatialSingle); put("spatialPos", spatialPos); put("spatialDots", spatialDots); put("spatialTried", spatialTried)
+    put("homeDouble", homeDouble); put("volOsd", volOsd); put("volNight", volNight); put("volNightMax", volNightMax); put("volNightFrom", volNightFrom); put("volNightTo", volNightTo)
     put("hidden", JSONArray(hidden.toList()))
     put("boostExclude", JSONArray(boostExclude.toList())); put("quickItems", JSONArray(quickItems))
     put("widgets", widgets.toJson())
@@ -278,6 +295,7 @@ fun prefsFromJson(o: JSONObject): Prefs {
         freePos = o.optJSONObject("freePos")?.let { j -> j.keys().asSequence().mapNotNull { k -> j.optJSONArray(k)?.let { a -> k to (a.optInt(0) to a.optInt(1)) } }.toMap() } ?: emptyMap(),
         iconPack = o.optString("iconPack", ""),
         miniOverlay = o.optBoolean("mini", d.miniOverlay),
+        miniGlass = o.optBoolean("miniGlass", d.miniGlass),
         miniPos = o.optInt("miniPos", d.miniPos).coerceIn(0, 3),
         phoneRemote = o.optBoolean("phoneRemote", d.phoneRemote), remoteCode = o.optString("remoteCode", d.remoteCode),
         adbHost = o.optString("adbHost", d.adbHost), adbPort = o.optInt("adbPort", d.adbPort), keypadEnter = o.optBoolean("keypadEnter", d.keypadEnter), keypadAutoSend = o.optInt("keypadAutoSend", d.keypadAutoSend),
@@ -340,7 +358,7 @@ fun prefsFromJson(o: JSONObject): Prefs {
         barPos = o.optInt("barPos", d.barPos).coerceIn(0, 1),
         menuFont = o.optString("menuFont", ""),
         menuSize = o.optInt("menuSize", d.menuSize).coerceIn(0, 3),
-        lang = o.optInt("lang", d.lang).coerceIn(0, 2),
+        lang = o.optInt("lang", d.lang).coerceIn(0, 5),
         langPicked = o.optBoolean("langPicked", d.langPicked),
         dotOn = o.optBoolean("dotOn", d.dotOn),
         dotSize = o.optInt("dotSize", d.dotSize).coerceIn(8, 20),
@@ -348,6 +366,19 @@ fun prefsFromJson(o: JSONObject): Prefs {
         dotDuration = o.optInt("dotDur", d.dotDuration).coerceIn(1, 60),
         dotPos = o.optInt("dotPos", d.dotPos).coerceIn(0, 3),
         dotAuto = o.optBoolean("dotAuto", d.dotAuto),
+        spatialFx = o.optInt("spatialFx", d.spatialFx).coerceIn(0, 1),
+        spatialTiles = o.optInt("spatialTiles", d.spatialTiles).coerceIn(0, 1),
+        spatialTint = o.optBoolean("spatialTint", d.spatialTint),
+        spatialSingle = o.optBoolean("spatialSingle", d.spatialSingle),
+        spatialPos = o.optInt("spatialPos", d.spatialPos).coerceIn(0, 2),
+        spatialDots = o.optBoolean("spatialDots", d.spatialDots),
+        spatialTried = o.optBoolean("spatialTried", d.spatialTried),
+        homeDouble = o.optBoolean("homeDouble", d.homeDouble),
+        volOsd = o.optBoolean("volOsd", d.volOsd),
+        volNight = o.optBoolean("volNight", d.volNight),
+        volNightMax = o.optInt("volNightMax", d.volNightMax).coerceIn(10, 100),
+        volNightFrom = o.optInt("volNightFrom", d.volNightFrom).coerceIn(0, 23),
+        volNightTo = o.optInt("volNightTo", d.volNightTo).coerceIn(0, 23),
     )
 }
 

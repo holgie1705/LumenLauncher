@@ -116,7 +116,13 @@ internal object Http {
 @Immutable class FbRow(val pos: Int, val team: FbTeam, val played: Int, val diff: Int, val points: Int)
 @Immutable class FbData(val team: FbTeam?, val last: FbMatch?, val next: FbMatch?, val live: FbMatch?, val table: List<FbRow>, val upcoming: List<FbMatch>, val recent: List<FbMatch>)
 
-val LEAGUES = listOf("bl1" to "1. Bundesliga", "bl2" to "2. Bundesliga", "bl3" to "3. Liga")
+val LEAGUES = listOf(
+    "bl1" to "1. Bundesliga", "bl2" to "2. Bundesliga", "bl3" to "3. Liga",
+    "sdb:en1" to "England · Premier League", "sdb:en2" to "England · Championship",
+    "sdb:es1" to "Spanien · La Liga", "sdb:es2" to "Spanien · La Liga 2",
+    "sdb:it1" to "Italien · Serie A", "sdb:it2" to "Italien · Serie B",
+    "sdb:fr1" to "Frankreich · Ligue 1", "sdb:fr2" to "Frankreich · Ligue 2",
+)
 
 object Football {
     private const val API = "https://api.openligadb.de"
@@ -149,12 +155,14 @@ object Football {
     }.getOrNull()
 
     suspend fun teams(league: String): List<FbTeam> = withContext(Dispatchers.IO) {
+        if (SdbFootball.isSdb(league)) return@withContext SdbFootball.teams(league)
         val txt = Http.get("$API/getavailableteams/$league/${season()}") ?: return@withContext emptyList()
         runCatching { JSONArray(txt).let { a -> (0 until a.length()).map { team(a.getJSONObject(it)) } }.sortedBy { it.name } }.getOrDefault(emptyList())
     }
 
     /** Spiele und Tabelle für den Verein. Zwischengespeichert: 10 Minuten, während eines Spiels 1 Minute. */
     suspend fun load(cfg: WidgetCfg, force: Boolean = false): FbData? = withContext(Dispatchers.IO) {
+        if (SdbFootball.isSdb(cfg.league)) return@withContext SdbFootball.load(cfg, force)
         val key = "${cfg.league}|${cfg.teamId}|${cfg.teamName}"
         val c = cache
         if (!force && c != null && c.first == key) {

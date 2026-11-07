@@ -13,3 +13,17 @@ build-install.bat
 build-log.txt
 log-holen.bat
 crash-log.txt
+spatial-test/
+install-log.txt
+# private Hilfsdateien (Screenshots, Videos, Diagnosen) nie hochladen
+screen*.png
+volume-bild.png
+*.mp4
+diag-*.txt
+screenshot.bat
+video.bat
+box-diagnose.bat
+lautstaerke-diagnose.bat
+volume-fenster.bat
+uhr-diagnose.*
+auf-andere-box.bat

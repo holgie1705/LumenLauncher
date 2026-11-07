@@ -74,24 +74,74 @@ class SysInfo(
 }
 
 object SysTools {
+    /**
+     * Interner Speicher (gesamt, frei) in Bytes – wie in Androids „Einstellungen → Speicher".
+     * Nutzt StorageStatsManager (zählt reservierte Blöcke so wie das System), mit StatFs als Rückfall.
+     */
+    fun storageBytes(ctx: Context): Pair<Long, Long> {
+        if (Build.VERSION.SDK_INT >= 26) runCatching {
+            val ssm = ctx.getSystemService(android.app.usage.StorageStatsManager::class.java)
+            val uuid = android.os.storage.StorageManager.UUID_DEFAULT
+            val total = ssm.getTotalBytes(uuid); val free = ssm.getFreeBytes(uuid)
+            if (total > 0) return total to free
+        }
+        return runCatching { StatFs(Environment.getDataDirectory().path).let { it.totalBytes to it.availableBytes } }.getOrDefault(0L to 0L)
+    }
+
+    // ---------- Temperatur über ADB (Android-Temperaturdienst), falls die Thermal-Dateien gesperrt sind ----------
+    @Volatile private var adbTemp: Int? = null
+    @Volatile private var adbNext = 0L
+    @Volatile private var adbBusy = false
+
+    /** Letzter bekannter Wert; fragt im Hintergrund höchstens alle 15 s nach (nach Fehlschlag erst nach 2 Min.). */
+    private fun adbTemperature(ctx: Context): Int? {
+        val now = SystemClock.elapsedRealtime()
+        if (!adbBusy && now >= adbNext) {
+            adbBusy = true
+            val app = ctx.applicationContext
+            Thread {
+                val v = runCatching {
+                    val out = kotlinx.coroutines.runBlocking { AdbCtl.shell(app, loadPrefs(app), "dumpsys thermalservice") }.orEmpty()
+                    parseThermal(out)
+                }.getOrNull()
+                if (v != null) adbTemp = v
+                adbNext = SystemClock.elapsedRealtime() + if (v != null) 15_000L else 120_000L
+                adbBusy = false
+            }.apply { isDaemon = true }.start()
+        }
+        return adbTemp
+    }
+
+    /** Aus „dumpsys thermalservice": höchster CPU/SoC-Wert (mType=0) unter „Current temperatures from HAL", sonst „Cached". */
+    internal fun parseThermal(out: String): Int? {
+        fun section(head: String): String = out.substringAfter(head, "").substringBefore("Current cooling").substringBefore("Temperature static")
+        val re = Regex("""mValue=([0-9]+(?:\.[0-9]+)?),\s*mType=(\d+)""")
+        for (head in listOf("Current temperatures from HAL:", "Cached temperatures:")) {
+            val all = re.findAll(section(head)).map { it.groupValues[1].toDouble() to it.groupValues[2].toInt() }.toList()
+            val cpu = all.filter { it.second == 0 }.ifEmpty { all }.maxOfOrNull { it.first }
+            if (cpu != null && cpu in 5.0..130.0) return Math.round(cpu).toInt()
+        }
+        return null
+    }
+
     fun read(ctx: Context): SysInfo {
         val am = ctx.getSystemService(ActivityManager::class.java)
         val mi = ActivityManager.MemoryInfo().also { am.getMemoryInfo(it) }
-        val st = runCatching { StatFs(Environment.getDataDirectory().path) }.getOrNull()
+        val (storTotal, storFree) = storageBytes(ctx)
         // Temperatur: höchster plausibler Wert aus Thermal-Zonen bzw. hwmon (auf vielen Boxen von Android gesperrt)
         val paths = (0..15).map { "/sys/class/thermal/thermal_zone$it/temp" } + (0..15).map { "/sys/devices/virtual/thermal/thermal_zone$it/temp" } +
             (0..7).map { "/sys/class/hwmon/hwmon$it/temp1_input" } + listOf("/sys/devices/system/cpu/cpu0/cpufreq/cpu_temp", "/proc/mtktscpu/mtktscpu")
         val temp = paths.mapNotNull { p ->
             runCatching { File(p).readText().trim().split(Regex("\\s+")).first().toInt() }.getOrNull()
                 ?.let { if (it > 1000) it / 1000 else it }?.takeIf { it in 15..125 }
-        }.maxOrNull()
+        }.maxOrNull() ?: adbTemperature(ctx)
         // Ersatz ohne Gradzahl: offizieller Wärmestatus von Android (0 = normal … 6 = Abschaltung) und Reserve bis zur Drosselung
         val pm = ctx.getSystemService(android.os.PowerManager::class.java)
         val thermal = if (Build.VERSION.SDK_INT >= 29) runCatching { pm.currentThermalStatus }.getOrDefault(-1) else -1
         val head = if (Build.VERSION.SDK_INT >= 30) runCatching { pm.getThermalHeadroom(10) }.getOrNull()?.takeIf { !it.isNaN() && it >= 0f } else null
         val mhz = runCatching { File("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq").readText().trim().toInt() / 1000 }.getOrNull()
         val lumen = runCatching { am.getProcessMemoryInfo(intArrayOf(Process.myPid()))[0].totalPss / 1024 }.getOrDefault(0)
-        return SysInfo(mi.totalMem, mi.availMem, st?.totalBytes ?: 0, st?.availableBytes ?: 0, temp, thermal, head, Runtime.getRuntime().availableProcessors(), mhz, SystemClock.elapsedRealtime(), lumen)
+        return SysInfo(mi.totalMem, mi.availMem, storTotal, storFree, temp, thermal, head, Runtime.getRuntime().availableProcessors(), mhz, SystemClock.elapsedRealtime(), lumen)
     }
 
     /**
@@ -229,7 +279,7 @@ fun PerformanceDialog(vm: HomeViewModel, prefs: Prefs, apps: List<TvApp>, onClos
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         NeoSheet(Ico.GAUGE, t("Leistung", "Performance"), t("RAM, Speicher & System auf einen Blick", "RAM, storage & system at a glance"), width = 1000.dp) {
             LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 // ---------- Anzeigen ----------
@@ -397,7 +447,7 @@ private fun BoostExcludeDialog(vm: HomeViewModel, prefs: Prefs, apps: List<TvApp
     val sorted = remember(apps) { val prot = SysTools.protectedPkgs(ctx); apps.filter { it.pkg !in prot }.sortedBy { it.label.lowercase() } }
     val orphans = (prefs.boostExclude - sorted.map { it.pkg }.toSet())   // Ausnahmen ohne passende App (deinstalliert o. Ä.)
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         NeoSheet(Ico.LOCK, t("Ausnahmen", "Exceptions"), t("„An“ = diese App beendet der RAM-Boost nie · System-Apps sind immer geschützt", "“On” = the RAM boost never stops this app · system apps are always protected"), width = 720.dp) {
             LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 item { SheetSection(t("Ausgenommen", "Excepted") + " (${prefs.boostExclude.size})") }

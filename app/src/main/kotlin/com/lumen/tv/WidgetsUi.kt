@@ -68,7 +68,7 @@ import java.time.format.DateTimeFormatter
 internal val LocalWDims = androidx.compose.runtime.compositionLocalOf { 192.dp to 108.dp }
 
 internal fun dlgNoDim(view: android.view.View) {
-    (view.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+    (view.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
 }
 
 // ============================================================== Kachel-Rahmen
@@ -294,7 +294,7 @@ private fun WeatherBigDialog(prefs: Prefs, onClose: () -> Unit) {
                     val rainy = hours.take(12).firstOrNull { it.rain >= 50 }
                     Text(
                         if (hours.isEmpty()) t("Kein Ort eingestellt.", "No place set.")
-                        else if (rainy != null) t("☔ Regen wahrscheinlich ab ca. %02d Uhr (${rainy.rain} %%)".format(rainy.hour), "☔ Rain likely from about %02d:00 (${rainy.rain} %%)".format(rainy.hour))
+                        else if (rainy != null) t("☔ Regen wahrscheinlich ab ca. %02d Uhr (${rainy.rain} %%)", "☔ Rain likely from about %02d:00 (${rainy.rain} %%)").format(rainy.hour)
                         else t("☀ In den nächsten 12 Stunden bleibt es wohl trocken.", "☀ Probably dry for the next 12 hours."),
                         fontSize = 15.sp, color = Color.White,
                     )
@@ -548,6 +548,9 @@ fun WidgetSettingsDialog(vm: HomeViewModel, focus: String = "", onClose: () -> U
                     upd { it.copy(league = LEAGUES[(i + 1) % LEAGUES.size].first, teamId = 0) }
                 } }
                 item { SettingLine(t("Tor-Alarm (Banner, auch in anderen Apps)", "Goal alert (banner, also in other apps)"), if (w.goalAlert) t("An", "On") else t("Aus", "Off")) { upd { it.copy(goalAlert = !it.goalAlert) } } }
+                if (w.goalAlert) item { SettingLine(t("Tor-Alarm testen", "Test goal alert"), "") {
+                    if (!GoalWatch.test(w)) toast(t("Für das Banner die Bedienungshilfe „Lumen Home-Taste“ einschalten (Einstellungen → System).", "Turn on the “Lumen Home key” accessibility service for the banner (Settings → System)."))
+                } }
                 item { SettingLine(t("Verein", "Team"), w.teamName) { scope.launch { teamPick = Football.teams(w.league).ifEmpty { toast(t("Vereine konnten nicht geladen werden.", "Could not load teams.")); null } } } }
 
                 item { SheetSection("📰 " + t("News-Ticker", "News ticker")) }

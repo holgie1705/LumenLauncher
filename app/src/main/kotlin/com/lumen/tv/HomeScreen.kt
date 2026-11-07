@@ -87,6 +87,10 @@ fun HomeScreen(vm: HomeViewModel) {
     var menu by remember { mutableStateOf<MenuSpec?>(null) }
     var settingsOpen by remember { mutableStateOf(false) }
     var weatherOpen by remember { mutableStateOf(false) }
+    androidx.compose.runtime.SideEffect { spatialGlobal = true;   // neues Design (Menüs, Kopfzeile, Hintergrund) bei JEDEM Layout
+        spatialFxGlobal = prefs.spatialFx; spatialOwnGlobal = prefs.spatialTiles == 1; spatialTintGlobal = prefs.spatialTint; spatialSingleGlobal = prefs.spatialSingle; spatialPosGlobal = prefs.spatialPos; spatialDotsGlobal = prefs.spatialDots }
+    // Spatial beim ersten Start einmal einschalten (lässt sich unter Aussehen → Layout zurückstellen)
+    LaunchedEffect(prefs.spatialTried) { if (!prefs.spatialTried) vm.update { it.copy(layout = Layout.SPATIAL, spatialTried = true) } }
     androidx.compose.runtime.SideEffect { iconPackGlobal = prefs.iconPack; focusStyleGlobal = prefs.focusStyle; menuThemeGlobal = prefs.menuTheme; tileAlphaGlobal = listOf(1f, 0.75f, 0.5f, 0.3f)[prefs.tileGlass.coerceIn(0, 3)] }
     var radioOpen by remember { mutableStateOf(false) }
     var quickOpen by remember { mutableStateOf(false) }
@@ -280,75 +284,47 @@ fun HomeScreen(vm: HomeViewModel) {
         }
     ) {
         if (!idle) AmbientHost(hero, vm, prefs, wall)
+        if (!idle) SpatialBackdrop(hero, vm)
+        // Spatial: Startbildschirm tritt zurück, solange Einstellungen oder ein Menü offen sind
+        val back by androidx.compose.animation.core.animateFloatAsState(
+            if (settingsOpen || menu != null) 1f else 0f, tween(450), label = "back",
+        )
 
-        val barBottom = prefs.barPos == 1
-        val onClockClick = { if (prefs.weather > 0) { if (hasPlace) weatherOpen = true else placeOpen = true } }
-        val bar: @Composable () -> Unit = {
-            FontScope(prefs.menuFont) { TopBar(
-                prefs = prefs, status = status, sleepUntil = sleepUntil, weather = weather,
-                onWidget = onClockClick,
-                onSearch = { vm.assist() },
-                onTimer = { menu = timerMenu() },
-                onQuick = { quickOpen = true },
-                hasUpdate = update != null,
-                onSettings = { vm.requirePinIfLocked { settingsOpen = true } },
-                onAndroid = { openAndroidSettings(homeCtx) },
-                onRadio = { radioOpen = true },
-                onRestart = { menu = MenuSpec(t("Gerät neu starten?", "Restart device?"), listOf(
-                    MenuItemSpec(t("Ja, neu starten", "Yes, restart")) { closeMenu(); DeviceRestart.run(homeCtx) },
-                    MenuItemSpec(t("Abbrechen", "Cancel")) { closeMenu() },
-                )) },
-            ) }
-        }
-        Column(Modifier.fillMaxSize().padding(top = 24.dp, bottom = if (barBottom) 16.dp else 0.dp)) {
-            if (!barBottom) bar()
-            if (prefs.widgets.tickerPos == 1) NewsTicker(prefs.widgets, Modifier.padding(top = 6.dp))
-            when (prefs.layout) {
-                Layout.SHELVES -> if (prefs.rowsPos == 1) {
-                    Box(Modifier.weight(1f).fillMaxWidth()) {
-                        ShelfLayout(
-                            state.rows, lc, firstFocus, Modifier.fillMaxSize(),
-                            bottomAnchor = true, heroMode = prefs.heroMode,
-                        ) { m -> Hero(hero, vm, prefs.heroMode, false, m) }
+        Column(Modifier.fillMaxSize().graphicsLayer { val s = 1f - 0.05f * back; scaleX = s; scaleY = s; alpha = 1f - 0.3f * back }.padding(top = 22.dp)) {
+            FontScope(prefs.menuFont) { Column(Modifier.fillMaxSize()) {
+                SpatialHeader(
+                    hero, prefs, status, weather, sleepUntil, hasUpdate = update != null,
+                    onRadio = { radioOpen = true }, onSearch = { vm.assist() }, onTimer = { menu = timerMenu() },
+                    onQuick = { quickOpen = true }, onSettings = { vm.requirePinIfLocked { settingsOpen = true } },
+                    onAndroid = { openAndroidSettings(homeCtx) },
+                    onRestart = { menu = MenuSpec(t("Gerät neu starten?", "Restart device?"), listOf(
+                        MenuItemSpec(t("Ja, neu starten", "Yes, restart")) { closeMenu(); DeviceRestart.run(homeCtx) },
+                        MenuItemSpec(t("Abbrechen", "Cancel")) { closeMenu() },
+                    )) },
+                )
+                // Nur die Kachel-Anordnung hängt vom Layout ab – Kopfzeile, Menüs und Hintergrund bleiben im neuen Design.
+                when (prefs.layout) {
+                    Layout.SPATIAL -> SpatialLayout(state.rows, lc, firstFocus, Modifier.weight(1f))
+                    Layout.SHELVES -> if (prefs.rowsPos == 1) {
+                        Box(Modifier.weight(1f).fillMaxWidth()) { ShelfLayout(state.rows, lc, firstFocus, Modifier.fillMaxSize(), bottomAnchor = true) }
+                    } else {
+                        Spacer(Modifier.height(18.dp))
+                        ShelfLayout(state.rows, lc, firstFocus, Modifier.weight(1f))
                     }
-                } else {
-                    Spacer(Modifier.weight(0.1f))
-                    Hero(hero, vm, prefs.heroMode, false, Modifier.padding(horizontal = 14.dp))
-                    ShelfLayout(state.rows, lc, firstFocus, Modifier.weight(1f))
+                    Layout.GRID -> { Spacer(Modifier.height(12.dp)); GridLayout(state.rows, lc, firstFocus, Modifier.weight(1f)) }
+                    Layout.FREE -> FreeLayout(state.rows, lc, prefs.freePos, fcx, firstFocus, freeMoving, Modifier.weight(1f))
+                    Layout.SIDEBAR -> { Spacer(Modifier.height(12.dp)); SidebarLayout(state.rows, lc, firstFocus, Modifier.weight(1f)) }
                 }
-                Layout.GRID -> {
-                    Hero(hero, vm, prefs.heroMode, true, Modifier.padding(horizontal = 14.dp, vertical = 4.dp))
-                    GridLayout(state.rows, lc, firstFocus, Modifier.weight(1f))
-                }
-                Layout.FREE -> FreeLayout(state.rows, lc, prefs.freePos, fcx, firstFocus, freeMoving, Modifier.weight(1f))
-                Layout.SIDEBAR -> {
-                    Hero(hero, vm, prefs.heroMode, true, Modifier.padding(horizontal = 14.dp, vertical = 4.dp))
-                    SidebarLayout(state.rows, lc, firstFocus, Modifier.weight(1f))
-                }
-            }
-            if (prefs.widgets.tickerPos == 0) NewsTicker(prefs.widgets, Modifier.padding(top = 4.dp, bottom = 10.dp))
-            if (barBottom) bar()
+                if (prefs.widgets.tickerPos != 2 && prefs.widgets.ticker) NewsTicker(prefs.widgets, Modifier.padding(top = 4.dp, bottom = 10.dp))
+            } }
         }
 
         if (idle) { if (prefs.idleStyle == 2) NetScreensaver(wall, weather.value, prefs.weatherName, prefs.is24(homeCtx)) else IdleScreen(wall, prefs.idleStyle, prefs.is24(homeCtx)) }
         menu?.let { MenuDialog(it) { menu = null } }
         if (settingsOpen) SettingsDialog(vm, prefs, overrideOn, pst, appList, inputList) { settingsOpen = false }
-        // Uhr + Wetter in den unteren Ecken (über der Leiste, falls die unten liegt)
-        if (prefs.clockPos >= 2 && !idle) {
-            val right = prefs.clockPos == 3
-            Column(
-                Modifier.align(if (right) Alignment.BottomEnd else Alignment.BottomStart)
-                    .padding(start = 18.dp, end = 18.dp, bottom = if (barBottom) 118.dp else 18.dp),
-                horizontalAlignment = if (right) Alignment.End else Alignment.Start,
-            ) {
-                FontScope(prefs.menuFont) {
-                    if (prefs.npPos == 0) NowPlayingCard(prefs.radioOn, { radioOpen = true })
-                    ClockWeatherWidget(prefs, weather, onClockClick, right = right, bottom = true)
-                }
-            }
-        }
-        if (prefs.npPos != 0 && !idle) {
+        if (!idle) {
             val (al, pad) = when (prefs.npPos) {
+                0 -> Alignment.TopStart to Modifier.padding(start = 26.dp, top = 190.dp)
                 1 -> Alignment.TopCenter to Modifier.padding(top = 84.dp)
                 2 -> Alignment.TopEnd to Modifier.padding(top = 118.dp, end = 24.dp)
                 3 -> Alignment.Center to Modifier
@@ -384,67 +360,7 @@ fun HomeScreen(vm: HomeViewModel) {
     }
 }
 
-@Composable
-private fun TopBar(
-    prefs: Prefs, status: State<StatusInfo?>, sleepUntil: State<Long>, weather: State<WeatherInfo?>,
-    onWidget: () -> Unit, onSearch: () -> Unit, onTimer: () -> Unit, onSettings: () -> Unit, onAndroid: () -> Unit,
-    onRadio: () -> Unit, onRestart: () -> Unit, onQuick: () -> Unit = {}, hasUpdate: Boolean = false,
-) {
-    val now by produceState(System.currentTimeMillis()) { while (true) { value = System.currentTimeMillis(); delay(30_000) } }
-    Row(
-        Modifier.fillMaxWidth().padding(start = 6.dp, end = SIDE_PAD),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top,
-    ) {
-        Column {
-            if (prefs.clockPos == 0) {
-                ClockWeatherWidget(prefs, weather, onWidget)
-                if (prefs.npPos == 0) NowPlayingCard(prefs.radioOn, onRadio)
-            }
-        }
-        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                val radioNow by Radio.now.collectAsState()
-                if (prefs.radioOn) IconPill(Ico.RADIO, radioNow?.name ?: "Radio", active = radioNow != null, onClick = onRadio)
-                IconPill(Ico.SEARCH, t("Suche", "Search"), onClick = onSearch)
-                IconPill(Ico.TIMER, "Timer", onClick = onTimer)
-                IconPill(Ico.GRID, t("Schnellmenü", "Quick menu"), onClick = onQuick)
-                IconPill(Ico.GEAR, if (hasUpdate) t("Einstellungen · Update!", "Settings · update!") else t("Einstellungen", "Settings"), active = hasUpdate, onClick = onSettings)
-                IconPill(Ico.PHONE, "Android", onClick = onAndroid)
-                if (prefs.restartBtn) IconPill(Ico.RESTART, t("Neustart", "Restart"), onClick = onRestart)
-            }
-            val left = ((sleepUntil.value - now) / 60_000L).toInt()
-            StatusBar(if (prefs.showStatus) status.value else null, if (sleepUntil.value > 0 && left >= 0) left + 1 else 0)
-            if (prefs.clockPos == 1) {
-                ClockWeatherWidget(prefs, weather, onWidget, right = true)
-                if (prefs.npPos == 0) NowPlayingCard(prefs.radioOn, onRadio)
-            }
-        }
-    }
-}
 
-@Composable
-private fun Hero(hero: State<HeroInfo?>, vm: HomeViewModel, mode: Int, compact: Boolean, modifier: Modifier) {
-    if (mode == 0) { Spacer(modifier.height(8.dp)); return }
-    val small = mode == 1
-    AnimatedContent(
-        targetState = hero.value,
-        modifier = modifier.heightIn(min = if (small) 48.dp else if (compact) 64.dp else 92.dp),
-        transitionSpec = { (fadeIn(tween(220, delayMillis = 130)) + slideInVertically(tween(220, delayMillis = 130)) { it / 8 }) togetherWith fadeOut(tween(120)) },  // erst alter Name raus, dann neuer rein: nie zwei Namen übereinander
-        label = "hero",
-    ) { h ->
-        Column {
-            Text(
-                h?.title.orEmpty(), fontSize = if (small) 26.sp else if (compact) 34.sp else 50.sp, fontWeight = FontWeight.W300,
-                letterSpacing = (-1).sp, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis,
-            )
-            if (h != null) {
-                val sub = if (h.app != null) "" else h.extra
-                if (sub.isNotEmpty()) Text(sub, fontSize = if (small) 13.sp else if (compact) 14.sp else 16.sp, color = Color.White.copy(alpha = 0.6f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
-    }
-}
 
 /** Standby-Anzeige: schwarz mit wandernder Uhr, optional mit langsam zoomendem Foto (Ken Burns). */
 @Composable

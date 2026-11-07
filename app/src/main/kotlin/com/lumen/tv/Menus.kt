@@ -57,7 +57,7 @@ fun MenuDialog(spec: MenuSpec, onDismiss: () -> Unit) {
     var armed by remember(spec) { mutableStateOf(false) }
     LaunchedEffect(spec) { delay(900); armed = true }
     Dialog(onDismissRequest = onDismiss) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0.15f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0.15f)
         LaunchedEffect(spec) { delay(80); runCatching { first.requestFocus() } }
         Column(
             Modifier.width(420.dp)
@@ -166,11 +166,14 @@ fun SettingsDialog(
     var webMgrOpen by remember { mutableStateOf(false) }
     var storeOpen by remember { mutableStateOf(false) }
     var perfOpen by remember { mutableStateOf(false) }
+    var filesOpen by remember { mutableStateOf(false) }
     var widgetsOpen by remember { mutableStateOf(false) }
     var updOpen by remember { mutableStateOf(false) }
     var learnOpen by remember { mutableStateOf(false) }
     var keypadOpen by remember { mutableStateOf(false) }
     var bambuOpen by remember { mutableStateOf(false) }
+    var sendOpen by remember { mutableStateOf(false) }
+    var receiveOpen by remember { mutableStateOf(false) }
     var favPickOpen by remember { mutableStateOf(false) }
     var wizardOpen by remember { mutableStateOf(false) }
     var page by remember { mutableStateOf<String?>(null) }
@@ -244,6 +247,7 @@ fun SettingsDialog(
         "power" -> t("Standby & Energie", "Standby & power")
         "rows" -> t("Reihen", "Rows")
         "remote" -> t("Fernbedienung", "Remote control")
+        "tools" -> t("Werkzeuge", "Tools")
         "kids" -> t("Kindersicherung", "Parental controls")
         "system" -> "System"
         else -> "Lumen Launcher"
@@ -253,6 +257,7 @@ fun SettingsDialog(
         "power" -> t("Bildschirmschoner, Timer & Standby", "Screensaver, timer & standby")
         "rows" -> t("Reihen ein-/ausblenden & sortieren", "Show, hide & sort rows")
         "remote" -> t("Tasten & Shortcuts", "Keys & shortcuts")
+        "tools" -> t("Dateien, Leistung, Widgets & Drucker", "Files, performance, widgets & printer")
         "kids" -> t("Sperrzeiten, PIN & Kindermodus", "Lock times, PIN & kids mode")
         "system" -> t("Launcher, Dienste & Sicherung", "Launcher, services & backup")
         else -> ""
@@ -265,26 +270,14 @@ fun SettingsDialog(
         FontScope(prefs.menuFont) {
         CompositionLocalProvider(LocalDensity provides Density(dens.density, dens.fontScale * sizeF)) {
         // Kein Systemabdunkeln hinter dem Fenster: der Startbildschirm bleibt sichtbar.
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         // Nur ein sanfter Verlauf hinter dem Panel statt eines schwarzen Vollbild-Schleiers.
-        Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.Black.copy(alpha = 0.45f), Color.Transparent), endX = 1400f))) {
-            // Schwebendes Glas-Panel mit runden Ecken und feinem Rand
-            Column(
-                Modifier.padding(start = 20.dp, top = 20.dp, bottom = 20.dp).width(500.dp).fillMaxHeight()
-                    .clip(RoundedCornerShape(30.dp)).background(NeoPanelBrush)
-                    .border(1.dp, NeoLine, RoundedCornerShape(30.dp)),
-            ) {
-                PanelHeader(title, subtitle, when (page) { "look" -> Ico.BRUSH; "power" -> Ico.POWER; "rows" -> Ico.LIST; "remote" -> Ico.REMOTE; "kids" -> Ico.LOCK; else -> Ico.GEAR }, if (page == null) "v$APP_VERSION" else "")
-                LazyColumn(
-                    Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(0.dp),
-                ) {
+        val pageItems: androidx.compose.foundation.lazy.LazyListScope.() -> Unit = {
                     if (page == null) {
                         Updater.available.value?.let { u ->
                             item { TileRow({ m -> PanelTile(Ico.DOWNLOAD, t("Update verfügbar", "Update available"), "Lumen ${u.version} – " + t("jetzt installieren", "install now"), m) { updOpen = true } }) }
                         }
-                        // Kachel-Raster: je zwei große farbige Kacheln pro Zeile
+                        // Aufgeräumtes Kachel-Raster: nur die Hauptkategorien, Werkzeuge gebündelt
                         item {
                             TileRow(
                                 { m -> PanelTile(Ico.BRUSH, t("Aussehen", "Appearance"), t("Layout, Farben, Schrift", "Layout, colors, font"), m.focusRequester(first)) { page = "look" } },
@@ -299,48 +292,23 @@ fun SettingsDialog(
                         }
                         item {
                             TileRow(
+                                { m -> PanelTile(Ico.GAUGE, t("Werkzeuge", "Tools"), t("Dateien, Leistung, Widgets, Drucker", "Files, performance, widgets, printer"), m) { page = "tools" } },
                                 { m -> PanelTile(Ico.LOCK, t("Kindersicherung", "Parental"), t("PIN & Sperrzeiten", "PIN & lock times"), m) { page = "kids" } },
+                            )
+                        }
+                        item {
+                            TileRow(
                                 { m -> PanelTile(Ico.GEAR, "System", t("Launcher & Dienste", "Launcher & services"), m) { page = "system" } },
-                            )
-                        }
-                        item {
-                            TileRow(
-                                { m -> PanelTile(Ico.DOT, "VPN-Dot", onOff(prefs.dotOn), m) { vpnOpen = true } },
-                                { m -> PanelTile(Ico.GLOBE, "Web-Widgets", "${prefs.webWidgets.size} " + t("aktiv", "active"), m) { webMgrOpen = true } },
-                            )
-                        }
-                        item {
-                            TileRow(
-                                { m -> PanelTile(Ico.GAUGE, t("Leistung", "Performance"), t("RAM, Speicher, Boost", "RAM, storage, boost"), m) { perfOpen = true } },
-                                { m -> PanelTile(Ico.GLOBE, t("Sprache", "Language"), listOf("Deutsch", "English", "System")[prefs.lang], m) { vm.update { it.copy(lang = (it.lang + 1) % 3) } } },
-                            )
-                        }
-                        item {
-                            TileRow(
-                                { m -> PanelTile(Ico.TIMER, t("Info-Widgets", "Info widgets"), t("Fußball, News, Countdown …", "Football, news, countdown …"), m) { widgetsOpen = true } },
                                 { m -> PanelTile(Ico.INFO, "Info", "Version $APP_VERSION", m) { infoOpen = true } },
-                            )
-                        }
-                        item { PanelSection("Android") }
-                        item {
-                            TileRow(
-                                { m -> PanelTile(Ico.PHONE, t("Einstellungen", "Settings"), "Android", m, small = true) { openSystem(Settings.ACTION_SETTINGS) } },
-                                { m -> PanelTile(Ico.WIFI, t("Netzwerk", "Network"), "WLAN / LAN", m, small = true) { openSystem(Settings.ACTION_WIFI_SETTINGS) } },
-                            )
-                        }
-                        item {
-                            TileRow(
-                                { m -> PanelTile(Ico.SOUND, t("Ton", "Sound"), "Audio", m, small = true) { openSystem(Settings.ACTION_SOUND_SETTINGS) } },
-                                { m -> PanelTile(Ico.GRID, "Apps", t("verwalten", "manage"), m, small = true) { openSystem(Settings.ACTION_APPLICATION_SETTINGS) } },
                             )
                         }
                     } else {
                         item { PanelRow(Ico.BACK, t("Zurück", "Back"), "", Modifier.focusRequester(first)) { page = null } }
                         when (page) {
                             "look" -> {
-                                item { SettingLine(t("Text zur App (Titel & Info)", "App text (title & info)"), listOf(t("Aus", "Off"), t("Klein", "Small"), t("Groß", "Large"))[prefs.heroMode]) { vm.update { it.copy(heroMode = (it.heroMode + 1) % 3) } } }
-                                item { SettingLine(t("Position der Kacheln", "Tile position"), if (prefs.rowsPos == 0) t("Oben", "Top") else t("Unten", "Bottom")) { vm.update { it.copy(rowsPos = 1 - it.rowsPos) } } }
-                                item { SettingLine(t("Position der Kopfzeile", "Top bar position"), if (prefs.barPos == 0) t("Oben", "Top") else t("Unten", "Bottom")) { vm.update { it.copy(barPos = 1 - it.barPos) } } }
+                                if (prefs.layout == Layout.SPATIAL) {
+                                    item { SettingLine(t("Position der Kacheln", "Tile position"), listOf(t("Oben", "Top"), t("Mitte", "Center"), t("Unten", "Bottom"))[prefs.spatialPos.coerceIn(0, 2)]) { vm.update { it.copy(spatialPos = (it.spatialPos + 1) % 3) } } }
+                                } else item { SettingLine(t("Position der Kacheln", "Tile position"), if (prefs.rowsPos == 0) t("Oben", "Top") else t("Unten", "Bottom")) { vm.update { it.copy(rowsPos = 1 - it.rowsPos) } } }
                         item { SettingLine(t("Icon-Pack", "Icon pack"), vm.iconPacks().firstOrNull { it.first == prefs.iconPack }?.second ?: t("Standard", "Default")) {
                             val packs = vm.iconPacks()
                             sub = MenuSpec(
@@ -357,41 +325,36 @@ fun SettingsDialog(
                                 } })
                             }
                         }
+                        if (prefs.miniOverlay) {
+                            item { SettingLine(t("Hintergrund der Uhr in Apps", "Clock background in apps"), if (prefs.miniGlass) t("Glas (farbig)", "Glass (colored)") else t("Transparent", "Transparent")) { vm.update { it.copy(miniGlass = !it.miniGlass) } } }
+                        }
                         item { SettingLine(t("Kachel-Transparenz", "Tile transparency"), listOf("0 %", "25 %", "50 %", "70 %")[prefs.tileGlass.coerceIn(0, 3)]) { vm.update { it.copy(tileGlass = (it.tileGlass + 1) % 4) } } }
                         item { SettingLine(t("Fokus-Stil der Kacheln", "Tile focus style"), focusStyleName(prefs.focusStyle)) { vm.update { it.copy(focusStyle = (it.focusStyle + 1) % 5) } } }
                         item { SettingLine(t("Animierter Hintergrund", "Animated background"), animBgName(prefs.animBg)) { vm.update { it.copy(animBg = (it.animBg + 1) % 11) } } }
                         item { SettingLine(t("Saisonale Themes (Halloween, Weihnachten, Silvester, Ostern)", "Seasonal themes (Halloween, Christmas, New Year, Easter)"), onOff(prefs.seasonal)) { vm.update { it.copy(seasonal = !it.seasonal) } } }
                         item { SettingLine(t("Hintergrund nach Tageszeit & Wetter", "Background by time & weather"), onOff(prefs.wxBg)) { vm.update { it.copy(wxBg = !it.wxBg) } } }
-                        item { SettingLine(t("Farbe der Menüs", "Menu color"), MENU_THEMES[prefs.menuTheme.coerceIn(0, MENU_THEMES.lastIndex)].label) { vm.update { it.copy(menuTheme = (it.menuTheme + 1) % MENU_THEMES.size) } } }
                         item { SettingLine("Look", prefs.look.label) { vm.update { it.copy(look = it.look.next()) } } }
                         item { SettingLine(t("Akzentfarbe", "Accent color"), accentName(prefs.accent)) { vm.update { it.copy(accent = (it.accent + 1) % ACCENTS.size) } } }
                         item { SettingLine(t("Kachel-Stil", "Tile style"), prefs.tile.label) { vm.update { it.copy(tile = it.tile.next()) } } }
                         item { SettingLine(t("Kachel-Größe", "Tile size"), "${(TILE_SCALES[prefs.tileScale.coerceIn(0, 6)] * 100).toInt()} %") { vm.update { it.copy(tileScale = (it.tileScale + 1) % TILE_SCALES.size) } } }
                         item { SettingLine(t("Abstände", "Spacing"), "${TILE_GAPS[prefs.tileGap.coerceIn(0, 4)]} dp") { vm.update { it.copy(tileGap = (it.tileGap + 1) % TILE_GAPS.size) } } }
                         item { SettingLine("Layout", prefs.layout.label) { vm.update { it.copy(layout = it.layout.next()) } } }
+                        if (prefs.layout == Layout.SPATIAL) {
+                            item { SettingLine(t("Kacheln im 3D-Bogen", "Tiles in the 3D arc"), if (prefs.spatialTiles == 1) t("Eigener Kachel-Stil", "Own tile style") else t("Wie im Entwurf (Glas)", "As designed (glass)")) { vm.update { it.copy(spatialTiles = 1 - it.spatialTiles) } } }
+                            item { SettingLine(t("Nur gewählte Reihe zeigen", "Show only the selected row"), if (prefs.spatialSingle) t("An", "On") else t("Aus", "Off")) { vm.update { it.copy(spatialSingle = !it.spatialSingle) } } }
+                            item { SettingLine(t("Spatial-Effekte (Spiegelung, Glanz)", "Spatial effects (reflection, shine)"), if (prefs.spatialFx == 1) t("Voll", "Full") else t("Ruhig", "Calm")) { vm.update { it.copy(spatialFx = 1 - it.spatialFx) } } }
+                        }
+                        item { SettingLine(t("Hintergrund-Farbe nach App", "Background color follows app"), if (prefs.spatialTint) t("An", "On") else t("Aus", "Off")) { vm.update { it.copy(spatialTint = !it.spatialTint) } } }
+                        item { SettingLine(t("Aufsteigende Lichtpunkte", "Rising light dots"), if (prefs.spatialDots) t("An", "On") else t("Aus", "Off")) { vm.update { it.copy(spatialDots = !it.spatialDots) } } }
                         if (prefs.layout == Layout.FREE) {
                             item { Hint(t("Frei: zeigt deine Favoriten (sonst die erste App-Reihe). Lange auf eine Kachel drücken → „Frei verschieben“.", "Free: shows your favorites (otherwise the first app row). Long-press a tile → “Move freely”.")) }
                             item { SettingLine(t("Freie Anordnung zurücksetzen", "Reset free arrangement"), "") { vm.freeReset(); note = t("Zurückgesetzt.", "Reset.") } }
-                        }
-                        item { SettingLine(t("Uhr-Stil", "Clock style"), clockStyleName(prefs.clockStyle)) { vm.update { it.copy(clockStyle = (it.clockStyle + 1) % 6) } } }
-                        item {
-                            val cpNames = listOf(t("Oben links", "Top left"), t("Oben rechts", "Top right"), t("Unten links", "Bottom left"), t("Unten rechts", "Bottom right"))
-                            SettingLine(t("Uhr & Wetter Position", "Clock & weather position"), cpNames[prefs.clockPos.coerceIn(0, 3)]) {
-                                sub = MenuSpec(t("Uhr & Wetter Position", "Clock & weather position"), cpNames.mapIndexed { i, n -> MenuItemSpec(n) { vm.update { it.copy(clockPos = i) }; sub = null } })
-                            }
                         }
                         item { SettingLine(t("Zeitformat", "Time format"), listOf(t("24 Stunden", "24 hours"), "System", t("12 Stunden (AM/PM)", "12 hours (AM/PM)"))[prefs.timeFormat]) { vm.update { it.copy(timeFormat = (it.timeFormat + 1) % 3) } } }
                         item { SettingLine(t("Wetter", "Weather"), listOf(t("Aus", "Off"), t("Kompakt", "Compact"), t("Mit Vorschau", "With forecast"))[prefs.weather]) { vm.update { it.copy(weather = (it.weather + 1) % 3) } } }
                         item { SettingLine(t("Wetter-Ort", "Weather place"), prefs.weatherName.ifEmpty { t("nicht gesetzt", "not set") }) { placeOpen = true } }
                         item { SettingLine(t("Unwetterwarnungen (DWD)", "Severe weather alerts (DWD)"), onOff(prefs.weatherAlerts)) { vm.update { it.copy(weatherAlerts = !it.weatherAlerts) } } }
                         item { SettingLine(t("Temperatur-Einheit", "Temperature unit"), if (prefs.tempF) "°F / mph" else "°C / km/h") { vm.update { it.copy(tempF = !it.tempF) } } }
-                        item {
-                            SettingLine(t("Schriftart", "Font"), fontLabel(prefs.font)) {
-                                val opts = mutableListOf("ui" to fontLabel("ui"), "outfit" to fontLabel("outfit"), "jakarta" to fontLabel("jakarta"), "manrope" to fontLabel("manrope"), "sora" to fontLabel("sora"), "system" to fontLabel("system"), "serif" to fontLabel("serif"), "mono" to fontLabel("mono"), "condensed" to fontLabel("condensed"))
-                                vm.fontFiles().forEach { opts += "file:$it" to it }
-                                sub = MenuSpec(t("Schriftart", "Font"), opts.map { (k, l) -> MenuItemSpec(l) { vm.update { p -> p.copy(font = k) }; sub = null } })
-                            }
-                        }
                         item { SettingLine(t("Hintergrund abdunkeln", "Dim background"), "${prefs.dim * 25} %") { vm.update { it.copy(dim = (it.dim + 1) % 4) } } }
                         item { SettingLine(t("Hintergrund-Unschärfe", "Background blur"), listOf(t("Aus", "Off"), t("Leicht", "Light"), t("Mittel", "Medium"), t("Stark", "Strong"))[prefs.blur]) { vm.update { it.copy(blur = (it.blur + 1) % 4) } } }
                         item { SettingLine(t("Wallpaper-Wechsel", "Wallpaper change"), minutes(prefs.slideshowMin)) { vm.update { it.copy(slideshowMin = SLIDE_OPTIONS.after(it.slideshowMin)) } } }
@@ -420,15 +383,7 @@ fun SettingsDialog(
                                 else sub = MenuSpec(t("Theme laden", "Load theme"), files.map { f -> MenuItemSpec(f.nameWithoutExtension) { note = if (vm.applyTheme(f)) t("Theme geladen.", "Theme loaded.") else t("Theme ungültig.", "Invalid theme."); sub = null } })
                             }
                         }
-                        item {
-                            SettingLine(t("Menü-Schrift", "Menu font"), if (prefs.menuFont.isEmpty()) t("wie Schriftart", "same as font") else fontLabel(prefs.menuFont)) {
-                                val opts = mutableListOf("" to t("wie Schriftart", "same as font"), "ui" to fontLabel("ui"), "outfit" to fontLabel("outfit"), "jakarta" to fontLabel("jakarta"), "manrope" to fontLabel("manrope"), "sora" to fontLabel("sora"), "system" to fontLabel("system"), "serif" to fontLabel("serif"), "mono" to fontLabel("mono"), "condensed" to fontLabel("condensed"))
-                                vm.fontFiles().forEach { opts += "file:$it" to it }
-                                sub = MenuSpec(t("Menü-Schrift", "Menu font"), opts.map { (k, l) -> MenuItemSpec(l) { vm.update { p -> p.copy(menuFont = k) }; sub = null } })
-                            }
-                        }
                         item { SettingLine(t("Menü-Schriftgröße", "Menu text size"), listOf(t("Klein", "Small"), t("Normal", "Normal"), t("Groß", "Large"), t("Sehr groß", "Extra large"))[prefs.menuSize.coerceIn(0, 3)]) { vm.update { it.copy(menuSize = (it.menuSize + 1) % 4) } } }
-                        item { Hint(t("Eigene Schriften (ttf/otf) kopierst du nach /Android/data/com.lumen.tv/files/fonts/ – danach erscheinen sie in der Schriftart-Auswahl. Die Menü-Schrift gilt für dieses Menü und die Kopfzeile.", "Copy your own fonts (ttf/otf) to /Android/data/com.lumen.tv/files/fonts/ – they then appear in the font list. The menu font applies to this menu and the top bar.")) }
                             }
                             "power" -> {
                         item { SettingLine(t("Bildschirmschoner nach", "Screensaver after"), minutes(prefs.idleMin)) { vm.update { it.copy(idleMin = IDLE_OPTIONS.after(it.idleMin)) } } }
@@ -475,6 +430,15 @@ fun SettingsDialog(
                         }
                         if (prefs.phoneRemote && prefs.remoteCode.isNotEmpty()) item { PhoneRemoteInfo(prefs.remoteCode, OverrideService.instance != null) }
                         if (prefs.phoneRemote) item { SettingLine(t("Neuen Code erzeugen (alte Handys abmelden)", "New code (sign out old phones)"), prefs.remoteCode) { vm.update { it.copy(remoteCode = (1000..9999).random().toString()) } } }
+                        item { SettingLine(t("Zweimal Home: zur letzten App wechseln", "Press Home twice: switch to last app"), onOff(prefs.homeDouble)) { vm.update { it.copy(homeDouble = !it.homeDouble) } } }
+                        item { SettingLine(t("Eigene Lautstärke-Anzeige", "Custom volume display"), onOff(prefs.volOsd)) { vm.update { it.copy(volOsd = !it.volOsd) } } }
+                        item { SettingLine(t("Nachtmodus: Lautstärke begrenzen", "Night mode: limit volume"), onOff(prefs.volNight)) { vm.update { it.copy(volNight = !it.volNight) } } }
+                        if (prefs.volNight) {
+                            item { SettingLine(t("Nachts höchstens", "At night at most"), "${prefs.volNightMax} %") { vm.update { it.copy(volNightMax = if (it.volNightMax >= 80) 20 else it.volNightMax + 10) } } }
+                            item { SettingLine(t("Nachtmodus von", "Night mode from"), t("${prefs.volNightFrom} Uhr", "${prefs.volNightFrom}:00")) { vm.update { it.copy(volNightFrom = listOf(20, 21, 22, 23, 0).let { l -> l[(l.indexOf(it.volNightFrom) + 1) % l.size] }) } } }
+                            item { SettingLine(t("Nachtmodus bis", "Night mode until"), t("${prefs.volNightTo} Uhr", "${prefs.volNightTo}:00")) { vm.update { it.copy(volNightTo = listOf(5, 6, 7, 8, 9).let { l -> l[(l.indexOf(it.volNightTo) + 1) % l.size] }) } } }
+                        }
+                        if (prefs.homeDouble || prefs.volOsd || prefs.volNight) item { Hint(t("Braucht die Bedienungshilfe „Lumen Home-Taste“. Lautstärke: Auf vielen Boxen verarbeitet Android die Tasten selbst – dann erscheint die Neon-Anzeige zusätzlich zum Android-Balken, ausblenden lässt der sich nicht.", "Needs the “Lumen Home key” accessibility service. Volume: on many boxes Android handles the keys itself – then the neon display appears in addition to the Android bar, which can't be hidden.")) }
                         item { SettingLine("🎯 " + t("Taste anlernen – einfach auf der Fernbedienung drücken", "Learn a button – just press it on the remote"), "") { learnOpen = true } }
                         item { SettingLine(t("Neue Tastenbelegung aus Liste …", "New key assignment from list …"), "") { pickKey() } }
                         item {
@@ -494,6 +458,21 @@ fun SettingsDialog(
                             }
                         }
                         item { Hint(t("Shortcuts brauchen die Bedienungshilfe (siehe System). Belegte Tasten verlieren ihre normale Funktion.", "Shortcuts need the accessibility service (see System). Assigned keys lose their normal function.")) }
+                            }
+                            "tools" -> {
+                        item { SettingLine(t("Dateimanager", "File manager"), t("Dateien, APKs", "Files, APKs")) { filesOpen = true } }
+                        item { SettingLine(t("Leistung", "Performance"), t("RAM, Speicher, Boost", "RAM, storage, boost")) { perfOpen = true } }
+                        item { SettingLine(t("Info-Widgets", "Info widgets"), t("Fußball, News …", "Football, news …")) { widgetsOpen = true } }
+                        item { SettingLine("Web-Widgets", "${prefs.webWidgets.size} " + t("aktiv", "active")) { webMgrOpen = true } }
+                        item { SettingLine("VPN-Dot", onOff(prefs.dotOn)) { vpnOpen = true } }
+                        item { SettingLine(t("3D-Drucker (Bambu)", "3D printer (Bambu)"), t("Kamerastatus", "camera status")) { bambuOpen = true } }
+                        item { SettingLine(t("Ziffernblock (ADB)", "Number pad (ADB)"), t("Zahlen am TV", "numbers on TV")) { keypadOpen = true } }
+                        item { SettingLine(t("Sprache", "Language"), Lang.name(prefs.lang)) { vm.update { it.copy(lang = Lang.next(it.lang)) } } }
+                        item { PanelSection("Android") }
+                        item { SettingLine(t("Einstellungen", "Settings"), "Android") { openSystem(Settings.ACTION_SETTINGS) } }
+                        item { SettingLine(t("Netzwerk", "Network"), "WLAN / LAN") { openSystem(Settings.ACTION_WIFI_SETTINGS) } }
+                        item { SettingLine(t("Ton", "Sound"), "Audio") { openSystem(Settings.ACTION_SOUND_SETTINGS) } }
+                        item { SettingLine("Apps", t("verwalten", "manage")) { openSystem(Settings.ACTION_APPLICATION_SETTINGS) } }
                             }
                             "kids" -> {
                         item { SettingLine(t("Sperrzeit", "Lock schedule"), onOff(pst.on)) { vm.toggleParental() } }
@@ -517,14 +496,14 @@ fun SettingsDialog(
                         item { SettingLine(t("Stock-Launcher überschreiben", "Override stock launcher"), onOff(overrideOn)) { vm.setOverride(!overrideOn) } }
                         item { SettingLine(t("Bedienungshilfe „Lumen Home-Taste“", "Accessibility service “Lumen Home key”"), if (a11y) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_ACCESSIBILITY_SETTINGS) } }
                         item { SettingLine(t("Zugriff auf laufende Medien (Reihe „Läuft gerade“)", "Access to playing media (row “Now playing”)"), if (notif) t("aktiv", "active") else t("öffnen", "open")) { openSystem(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS) } }
-                        item { SettingLine(t("Ziffernblock (ADB) – Zahlen am TV eingeben", "Number pad (ADB) – enter numbers on TV"), "") { keypadOpen = true } }
-                        item { SettingLine(t("3D-Drucker (Bambu) – Kamerastatus", "3D printer (Bambu) – camera status"), "") { bambuOpen = true } }
                         item { SettingLine(t("Stock-Launcher einfrieren (Root)", "Freeze stock launcher (root)"), "") { vm.freezeStock(true) { ok -> note = if (ok) t("Stock-Launcher eingefroren.", "Stock launcher frozen.") else t("Fehlgeschlagen (kein Root?).", "Failed (no root?).") } } }
                         item { SettingLine(t("Stock-Launcher wieder aktivieren (Root)", "Re-enable stock launcher (root)"), "") { vm.freezeStock(false) { ok -> note = if (ok) t("Stock-Launcher aktiviert.", "Stock launcher enabled.") else t("Fehlgeschlagen (kein Root?).", "Failed (no root?).") } } }
                         item { SettingLine(t("Nach Updates suchen", "Check for updates"), "v$APP_VERSION") {
                             scope.launch { val u = Updater.check(force = true); if (u != null) updOpen = true else note = t("Lumen ist aktuell.", "Lumen is up to date.") }
                         } }
                         item { SettingLine(t("Einrichtungs-Assistent erneut starten", "Run setup assistant again"), "") { wizardOpen = true } }
+                        item { SettingLine(t("Einstellungen an andere Box senden (WLAN)", "Send settings to another box (Wi-Fi)"), "") { sendOpen = true } }
+                        item { SettingLine(t("Einstellungen von anderer Box empfangen", "Receive settings from another box"), "") { receiveOpen = true } }
                         item { SettingLine(t("Einstellungen exportieren", "Export settings"), "") { note = t("Gespeichert", "Saved") + ": " + vm.exportSettings() } }
                         item { SettingLine(t("Einstellungen importieren", "Import settings"), "") { note = if (vm.importSettings()) t("Importiert.", "Imported.") else t("Keine gültige lumen-settings.json gefunden.", "No valid lumen-settings.json found.") } }
                         item { Hint(t("Ordner (unter /Android/data/com.lumen.tv/files/): wallpapers (Bild, GIF, Video), fonts (ttf/otf), themes (json).", "Folders (under /Android/data/com.lumen.tv/files/): wallpapers (image, GIF, video), fonts (ttf/otf), themes (json).")) }
@@ -533,6 +512,28 @@ fun SettingsDialog(
                     }
                     if (note.isNotEmpty()) item { Text(note, fontSize = 13.sp, color = Color.White.copy(alpha = 0.8f), modifier = Modifier.padding(start = 28.dp, top = 10.dp)) }
                 }
+        Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.Black.copy(alpha = if (spatialGlobal) 0.0f else 0.45f), Color.Transparent), endX = 1400f))) {
+            if (spatialGlobal) {
+                // Spatial: Glas-Panel rechts mit Kategorien; ein geöffneter Bereich klappt nach links auf
+                SpatialSettingsShell(
+                    page = page, onPage = { page = it }, first = first, title = title,
+                    hasUpdate = Updater.available.value != null, onUpdate = { updOpen = true }, onInfo = { infoOpen = true },
+                    items = pageItems,
+                )
+            } else
+            // Schwebendes Glas-Panel mit runden Ecken und feinem Rand
+            Column(
+                Modifier.padding(start = 20.dp, top = 20.dp, bottom = 20.dp).width(500.dp).fillMaxHeight()
+                    .clip(RoundedCornerShape(30.dp)).background(NeoPanelBrush)
+                    .border(1.dp, NeoLine, RoundedCornerShape(30.dp)),
+            ) {
+                PanelHeader(title, subtitle, when (page) { "look" -> Ico.BRUSH; "power" -> Ico.POWER; "rows" -> Ico.LIST; "remote" -> Ico.REMOTE; "tools" -> Ico.GAUGE; "kids" -> Ico.LOCK; else -> Ico.GEAR }, if (page == null) "v$APP_VERSION" else "")
+                LazyColumn(
+                    Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    content = pageItems,
+                )
             }
             sub?.let { MenuDialog(it) { sub = null } }
             if (placeOpen) PlaceDialog(vm) { placeOpen = false }
@@ -541,12 +542,15 @@ fun SettingsDialog(
             if (webMgrOpen) WebWidgetsDialog(vm, prefs) { webMgrOpen = false }
             if (storeOpen) WallpaperStoreDialog(vm) { storeOpen = false }
             if (perfOpen) PerformanceDialog(vm, prefs, apps) { perfOpen = false }
+            if (filesOpen) FileManagerDialog { filesOpen = false }
             if (widgetsOpen) WidgetSettingsDialog(vm) { widgetsOpen = false }
             if (updOpen) Updater.available.value?.let { u -> UpdateDialog(u) { updOpen = false } }
             if (wizardOpen) SetupWizard(vm, apps) { wizardOpen = false }
             if (learnOpen) KeyLearnDialog(onKey = { code -> learnOpen = false; pickPress(code) }, onCancel = { learnOpen = false })
             if (keypadOpen) KeypadSettingsDialog(vm) { keypadOpen = false }
             if (bambuOpen) BambuSettingsDialog(vm) { bambuOpen = false }
+            if (sendOpen) SendSettingsDialog(vm) { sendOpen = false }
+            if (receiveOpen) ReceiveSettingsDialog(vm) { receiveOpen = false }
             if (favPickOpen) FavAppsDialog(vm, prefs, apps) { favPickOpen = false }
         }
         }

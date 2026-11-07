@@ -49,7 +49,7 @@ fun KeypadSettingsDialog(vm: HomeViewModel, onClose: () -> Unit) {
     LaunchedEffect(editing) { if (editing) { delay(80); runCatching { field.requestFocus() } } }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         NeoSheet(Ico.REMOTE, t("Ziffernblock (ADB)", "Number pad (ADB)"), t("Zahlen auf dem TV eingeben – auch ohne Nummerntasten auf der Fernbedienung", "Enter numbers on the TV – even without number keys on the remote"), width = 860.dp) {
             if (editing) {
                 Text(t("IP der Box (leer = diese Box selbst)", "Box IP (empty = this box itself)"), fontSize = 14.sp, color = NeoCyan)

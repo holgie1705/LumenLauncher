@@ -1,0 +1,851 @@
+Verbunden mit $host ✓	Connecté à $host ✓
+Antwort: $it	Réponse : $it
+Keine Verbindung zu $host. ADB-Netzwerk an der Box aktiv? Schlüssel bestätigt?	Pas de connexion à $host. ADB réseau activé ? Clé confirmée ?
+Sternenhimmel	Ciel étoilé
+Polarlicht	Aurore boréale
+Farbfluss	Flux de couleurs
+Regen	Pluie
+Schnee	Neige
+Weihnachten	Noël
+Silvester	Saint-Sylvestre
+Ostern	Pâques
+Aus	Désactivé
+Deaktiviert: $pkg (rückgängig: pm enable $pkg)	Désactivé : $pkg (annuler : pm enable $pkg)
+Kein Root. Befehl gespeichert (debloat.bat) – am PC ausführen: $dis	Pas de root. Commande enregistrée (debloat.bat) – à lancer sur le PC : $dis
+Keine Antwort (TLS?) – prüfe Code/Modus	Pas de réponse (TLS ?) – vérifie code/mode
+Zugangscode falsch?	Code d'accès incorrect ?
+Timeout – erreichbar?	Délai dépassé – joignable ?
+Druckt	Impression
+Pause	En pause
+Fertig	Terminé
+Fehler	Erreur
+Vorbereiten	Préparation
+Bereit	Prêt
+Bridge nicht erreichbar	Bridge injoignable
+⚠ Fehler	⚠ Erreur
+verbinde …	connexion …
+Düse	Buse
+Bett	Plateau
+Kammer	Chambre
+Schicht	Couche
+Fertig um	Terminé à
+Tempo	Vitesse
+Lüfter	Ventilateur
+Luftfeuchte	Humidité
+Licht	Lumière
+an	activé
+aus	désactivé
+Extern 	Ext. 
+3D-Drucker (Bambu)	Imprimante 3D (Bambu)
+Live-Status über das lokale Netzwerk (MQTT) – ganz ohne Cloud	Statut en direct via le réseau local (MQTT) – sans cloud
+Modell / Name	Modèle / nom
+Bridge-URL (empfohlen)	URL du bridge (recommandé)
+— oder direkt: Drucker-IP	— ou en direct : IP de l'imprimante
+Seriennummer	Numéro de série
+Access Code	Code d'accès
+Benachrichtigung bei Druck fertig/Fehler	Notification en fin d'impression/erreur
+nur mit Bridge-URL	uniquement avec URL du bridge
+An	Activé
+So geht's:	Comment ça marche :
+Empfohlen (auch im Cloud-Modus): die Status-Bridge. Trag oben die Bridge-URL ein, z. B. http://192.168.0.189:8099/status – dann holt Lumen alle Werte von dort. Alternativ direkt vom Drucker per IP + Seriennummer + Access Code – das funktioniert aber nur im „Nur LAN"-Modus. Der Status erscheint über dem Kamerabild, wenn du die Kamera-Kachel groß öffnest.	Recommandé (même en mode cloud) : le bridge de statut. Saisis l'URL du bridge ci-dessus, p. ex. http://192.168.0.189:8099/status – Lumen y lit toutes les valeurs. Sinon directement depuis l'imprimante via IP + numéro de série + code d'accès – mais uniquement en mode « LAN uniquement ». Le statut s'affiche sur l'image de la caméra quand tu ouvres la tuile en grand.
+Favoriten-Apps	Apps favorites
+App antippen = zu Favoriten hinzufügen oder entfernen. Sie erscheinen in der Favoriten-Reihe.	Sélectionne une app pour l'ajouter ou la retirer des favoris. Elles apparaissent dans la rangée Favoris.
+Suche	Rechercher
+★ Favorit	★ Favori
++ hinzufügen	+ ajouter
+Interner Speicher	Stockage interne
+Downloads	Téléchargements
+SD-Karte / USB	Carte SD / USB
+Lumen-Ordner	Dossier Lumen
+Erst 'Apps aus dieser Quelle zulassen' aktivieren.	Active d'abord « Autoriser les apps de cette source ».
+Installation fehlgeschlagen.	Échec de l'installation.
+Keine App zum Öffnen gefunden.	Aucune app trouvée pour l'ouvrir.
+Öffnen	Ouvrir
+APK installieren	Installer l'APK
+Öffnen mit …	Ouvrir avec …
+Kopieren	Copier
+Ausschneiden	Couper
+Umbenennen	Renommer
+Löschen	Supprimer
+'${f.name}' löschen?	Supprimer « ${f.name} » ?
+Ja, löschen	Oui, supprimer
+Abbrechen	Annuler
+Dateimanager	Gestionnaire de fichiers
+Vollzugriff auf alle Dateien erlauben	Autoriser l'accès à tous les fichiers
+öffnen	ouvrir
+Hoch	Haut
+Ordner	Dossier
+Aktualisieren	Actualiser
+Einfügen	Coller
+Ordner ist leer.	Le dossier est vide.
+Schließen	Fermer
+Einträge	éléments
+APK	APK
+Neue Reihe	Nouvelle rangée
+Zu Reihe hinzufügen	Ajouter à la rangée
+Frei verschieben (Pfeiltasten)	Déplacer librement (flèches)
+Position zurücksetzen	Réinitialiser la position
+Aus Favoriten entfernen	Retirer des favoris
+Zu Favoriten hinzufügen	Ajouter aux favoris
+Verschieben (Pfeiltasten)	Déplacer (flèches)
+Aus Reihe entfernen	Retirer de la rangée
+Zu Reihe hinzufügen …	Ajouter à la rangée …
+Als Autostart-App festlegen	Définir comme app au démarrage
+Sperrzeit aufheben	Retirer de la plage de blocage
+In Sperrzeit sperren	Bloquer pendant la plage horaire
+Kindersicherung	Contrôle parental
+Für Kinder entfernen	Retirer pour les enfants
+Für Kinder freigeben	Autoriser pour les enfants
+Beenden erzwingen	Forcer l'arrêt
+Dafür die Bedienungshilfe „Lumen Home-Taste“ einschalten.	Active pour cela le service d'accessibilité « Lumen touche Home ».
+Beende ${app.label} …	Arrêt de ${app.label} …
+${app.label} beendet.	${app.label} arrêtée.
+${app.label} lief nicht im Hintergrund (oder nicht möglich).	${app.label} ne tournait pas (ou impossible).
+App-Info	Infos sur l'app
+App deaktivieren (Root/ADB)	Désactiver l'app (root/ADB)
+Ausblenden	Masquer
+Deinstallieren	Désinstaller
+Einschlaf-Timer	Minuterie de veille
+Min.	min
+Groß öffnen	Ouvrir en grand
+Widget entfernen	Retirer le widget
+Abspielen / Stopp	Lecture / stop
+Gerät neu starten?	Redémarrer l'appareil ?
+Ja, neu starten	Oui, redémarrer
+Mit den Pfeiltasten verschieben · OK = fertig	Déplacer avec les flèches · OK = terminé
+Schnellmenü	Menu rapide
+Einstellungen · Update!	Paramètres · mise à jour !
+Einstellungen	Paramètres
+Neustart	Redémarrer
+Gesperrt	Verrouillé
+Neue PIN festlegen	Définir un nouveau PIN
+Auf diesem Gerät gibt es keine App zum Öffnen. Adresse: 	Aucune app sur cet appareil ne peut l'ouvrir. Adresse : 
+Über Lumen Launcher	À propos de Lumen Launcher
+Entwickler	Développeur
+Kontakt & Links	Contact & liens
+E-Mail	E-mail
+Kaffee spendieren	Offre-moi un café
+Rechtliches	Mentions légales
+Datenschutz & Online-Dienste	Confidentialité & services en ligne
+Lumen hat keine Konten, keine Werbung und keine Analyse. Online-Dienste werden nur von den Funktionen angefragt, die du selbst einschaltest – z. B. Wetter (Open-Meteo), Fußball (OpenLigaDB, ESPN), Radio und Wallpaper-Galerie sowie ipapi.co für das Land der öffentlichen IP im VPN-Dot-Menü. Alle Einstellungen bleiben auf dem Gerät.	Lumen n'a ni compte, ni publicité, ni analyse. Les services en ligne ne sont contactés que par les fonctions que tu actives toi-même – p. ex. météo (Open-Meteo), football (OpenLigaDB, ESPN), radio et galerie de fonds d'écran, ainsi que ipapi.co pour le pays de ton IP publique dans le menu VPN-Dot. Tous les réglages restent sur l'appareil.
+Haftungsausschluss	Clause de non-responsabilité
+Lumen Launcher ist ein privates, kostenloses Hobbyprojekt und wird ohne jede Gewährleistung bereitgestellt, so „wie er ist“. Die Nutzung erfolgt auf eigene Gefahr. Soweit gesetzlich zulässig, übernimmt der Entwickler keine Haftung für Schäden, Datenverlust, Fehlfunktionen oder sonstige Folgen der Nutzung. Unberührt bleibt die Haftung für Vorsatz und grobe Fahrlässigkeit, für Schäden an Leben, Körper und Gesundheit sowie nach zwingenden gesetzlichen Vorschriften.\n\nFunktionen wie Root-/ADB-Deaktivierung von Apps, Neustart greifen in dein Gerät ein; nutze sie nur, wenn du die Folgen kennst. Für Inhalte Dritter (Radiostreams, Webseiten in Web-Widgets, heruntergeladene Dateien, Wallpaper) ist allein der Nutzer verantwortlich, ebenso für die Einhaltung von Urheberrecht und Nutzungsbedingungen. Die Kindersicherung ist eine Hilfe und kein garantierter Schutz.\n\nLumen Launcher steht in keiner Verbindung zu Google, Amazon, AFTVnews, Projectivy, Netflix, Disney+, ESPN oder anderen genannten Marken; alle Namen und Marken gehören ihren jeweiligen Inhabern.	Lumen Launcher est un projet amateur privé et gratuit, fourni sans aucune garantie, « tel quel ». Tu l'utilises à tes propres risques. Dans les limites autorisées par la loi, le développeur décline toute responsabilité pour les dommages, pertes de données, dysfonctionnements ou autres conséquences de l'utilisation. La responsabilité pour faute intentionnelle et négligence grave, pour atteinte à la vie, au corps ou à la santé, ainsi qu'en vertu de dispositions légales impératives reste inchangée.\n\nDes fonctions comme la désactivation d'apps via root/ADB ou le redémarrage agissent sur ton appareil ; ne les utilise que si tu en connais les conséquences. L'utilisateur est seul responsable des contenus tiers (flux radio, pages web dans les widgets web, fichiers téléchargés, fonds d'écran) ainsi que du respect du droit d'auteur et des conditions d'utilisation. Le contrôle parental est une aide, pas une protection garantie.\n\nLumen Launcher n'est affilié ni à Google, Amazon, AFTVnews, Projectivy, Netflix, Disney+, ESPN ni à aucune autre marque citée ; tous les noms et marques appartiennent à leurs propriétaires respectifs.
+Schneller, schlanker Launcher für Android TV	Launcher rapide et léger pour Android TV
+Ohne Konten · ohne Werbung · ohne Tracking	Sans compte · sans pub · sans pistage
+Version	Version
+Speicher	Mémoire
+Entwickler von Lumen und VPN-Dot	Développeur de Lumen et VPN-Dot
+Anzeigen	Afficher
+Verbinde …	Connexion …
+Eingang konnte nicht geöffnet werden.	Impossible d'ouvrir l'entrée.
+Verbindung getrennt.	Déconnecté.
+Puffert …	Mise en mémoire tampon …
+Kein Signal am Eingang „	Aucun signal sur l'entrée « 
+Zurück = schließen	Retour = fermer
+Ziffernblock (ADB)	Pavé numérique (ADB)
+Zahlen auf dem TV eingeben – auch ohne Nummerntasten auf der Fernbedienung	Saisir des chiffres sur la TV – même sans touches numériques sur la télécommande
+IP der Box (leer = diese Box selbst)	IP du boîtier (vide = ce boîtier)
+Ziel-IP	IP cible
+diese Box	ce boîtier
+Nach der Zahl automatisch OK senden	Envoyer OK après le numéro
+Automatisch senden (ohne OK)	Envoyer automatiquement (sans OK)
+Verbindung testen	Tester la connexion
+Teste …	Test en cours …
+1. An der Box "ADB über Netzwerk/Debugging" einschalten (Entwickleroptionen).\n2. Oben "Verbindung testen" – beim ersten Mal fragt die Box, ob sie Lumen erlauben soll → "Immer erlauben".\n3. Unter Fernbedienung eine Taste anlernen und ihr die Aktion "Ziffernblock ein/aus" geben.\n4. In einer App (z. B. waipu) die Taste drücken, Zahl mit den Pfeiltasten wählen, OK = senden. Zurück schließt. Mit "Automatisch senden" geht's auch ohne OK – einfach kurz warten.	1. Sur le boîtier, active « ADB via le réseau/débogage » (options pour les développeurs).\n2. Ci-dessus, « Tester la connexion » – la première fois, le boîtier demande s'il faut autoriser Lumen → « Toujours autoriser ».\n3. Dans Télécommande, apprends une touche et attribue-lui l'action « Pavé numérique activé/désactivé ».\n4. Dans une app (p. ex. waipu), appuie sur cette touche, choisis les chiffres avec les flèches, OK = envoyer. Retour ferme. Avec « Envoyer automatiquement », ça marche aussi sans OK – attends simplement un instant.
+Eingang	Entrée
+Radio · OK zum Abspielen, lang drücken für Optionen	Radio · OK pour écouter, appui long pour les options
+Widget · OK öffnet groß, lang drücken für Optionen	Widget · OK ouvre en grand, appui long pour les options
+Radiosender suchen	Rechercher des stations radio
+Tausende Sender, z. B. SWR3, SR1 – OK zum Suchen	Des milliers de stations – OK pour chercher
+Falsche PIN	PIN incorrect
+PINs stimmen nicht überein	Les PIN ne correspondent pas
+Neue PIN eingeben	Saisir un nouveau PIN
+PIN wiederholen	Répéter le PIN
+Std.	h
+Lumen ist bereits Standard-Launcher.	Lumen est déjà le launcher par défaut.
+App wählen	Choisir une app
+Keine Eingänge gefunden	Aucune entrée trouvée
+Zurück	Retour
+Eingang wählen	Choisir l'entrée
+Aktion	Action
+Kurzer Druck	Appui court
+Langer Druck	Appui long
+Taste wählen	Choisir une touche
+Aussehen	Apparence
+Standby & Energie	Veille & énergie
+Reihen	Rangées
+Fernbedienung	Télécommande
+Werkzeuge	Outils
+Layout, Kacheln, Farben & Schrift	Disposition, tuiles, couleurs & police
+Bildschirmschoner, Timer & Standby	Économiseur, minuterie & veille
+Reihen ein-/ausblenden & sortieren	Afficher, masquer & trier les rangées
+Tasten & Shortcuts	Touches & raccourcis
+Dateien, Leistung, Widgets & Drucker	Fichiers, performances, widgets & imprimante
+Sperrzeiten, PIN & Kindermodus	Plages de blocage, PIN & mode enfants
+Launcher, Dienste & Sicherung	Launcher, services & sauvegarde
+Update verfügbar	Mise à jour disponible
+jetzt installieren	installer maintenant
+Layout, Farben, Schrift	Disposition, couleurs, police
+Ein-/ausblenden, sortieren	Afficher, masquer, trier
+Standby	Veille
+Schoner, Timer, Energie	Économiseur, minuterie, énergie
+Dateien, Leistung, Widgets, Drucker	Fichiers, performances, widgets, imprimante
+PIN & Sperrzeiten	PIN & plages de blocage
+Launcher & Dienste	Launcher & services
+Text zur App (Titel & Info)	Texte de l'app (titre & infos)
+Klein	Petit
+Groß	Grand
+Position der Kacheln	Position des tuiles
+Oben	En haut
+Unten	En bas
+Position der Kopfzeile	Position de la barre du haut
+Icon-Pack	Pack d'icônes
+Standard	Par défaut
+Standard (App-Icons)	Par défaut (icônes des apps)
+Keine Icon-Packs installiert	Aucun pack d'icônes installé
+Oben links	En haut à gauche
+Oben rechts	En haut à droite
+Unten links	En bas à gauche
+Unten rechts	En bas à droite
+Uhr & Wetter in Apps	Horloge & météo dans les apps
+Kachel-Transparenz	Transparence des tuiles
+Fokus-Stil der Kacheln	Style de focus des tuiles
+Animierter Hintergrund	Fond animé
+Saisonale Themes (Halloween, Weihnachten, Silvester, Ostern)	Thèmes saisonniers (Halloween, Noël, Nouvel An, Pâques)
+Hintergrund nach Tageszeit & Wetter	Fond selon l'heure & la météo
+Farbe der Menüs	Couleur des menus
+Akzentfarbe	Couleur d'accent
+Kachel-Stil	Style des tuiles
+Kachel-Größe	Taille des tuiles
+Abstände	Espacement
+Spatial-Effekte (Spiegelung, Glanz, Lichtpunkte)	Effets Spatial (reflet, brillance, particules)
+Voll	Complet
+Ruhig	Calme
+Frei: zeigt deine Favoriten (sonst die erste App-Reihe). Lange auf eine Kachel drücken → „Frei verschieben“.	Libre : affiche tes favoris (sinon la première rangée d'apps). Appui long sur une tuile → « Déplacer librement ».
+Freie Anordnung zurücksetzen	Réinitialiser la disposition libre
+Zurückgesetzt.	Réinitialisé.
+Uhr-Stil	Style d'horloge
+Uhr & Wetter Position	Position horloge & météo
+Zeitformat	Format de l'heure
+24 Stunden	24 heures
+12 Stunden (AM/PM)	12 heures (AM/PM)
+Wetter	Météo
+Kompakt	Compact
+Mit Vorschau	Avec prévisions
+Wetter-Ort	Lieu météo
+nicht gesetzt	non défini
+Unwetterwarnungen (DWD)	Alertes météo (DWD)
+Temperatur-Einheit	Unité de température
+Schriftart	Police
+Hintergrund abdunkeln	Assombrir le fond
+Hintergrund-Unschärfe	Flou du fond
+Leicht	Léger
+Mittel	Moyen
+Stark	Fort
+Wallpaper-Wechsel	Changement de fond
+Wallpaper herunterladen (Galerie)	Télécharger des fonds (galerie)
+Wallpaper-Ordner neu einlesen	Relire le dossier des fonds
+Wallpaper neu geladen.	Fonds rechargés.
+Statusleiste	Barre d'état
+Neustart-Knopf in der Kopfzeile	Bouton redémarrer dans la barre du haut
+Radio-Reihe auf Startseite	Rangée radio sur l'accueil
+Unter der Uhr	Sous l'horloge
+Oben Mitte	En haut au centre
+Mitte	Centre
+Unten Mitte	En bas au centre
+Radio-Anzeige Position	Position de l'affichage radio
+Radio-Player	Lecteur radio
+Alle Apps sortieren nach	Trier toutes les apps par
+Zuletzt genutzt	Utilisées récemment
+Häufigkeit	Fréquence
+Eigene Reihenfolge	Ordre personnalisé
+Aktuelles Aussehen als Theme speichern	Enregistrer l'apparence actuelle comme thème
+Gespeichert	Enregistré
+Theme laden	Charger un thème
+Keine Themes in /Android/data/com.lumen.tv/files/themes/ gefunden.	Aucun thème trouvé dans /Android/data/com.lumen.tv/files/themes/.
+Theme geladen.	Thème chargé.
+Theme ungültig.	Thème non valide.
+Menü-Schrift	Police des menus
+wie Schriftart	comme la police
+Menü-Schriftgröße	Taille du texte des menus
+Normal	Normal
+Sehr groß	Très grand
+Eigene Schriften (ttf/otf) kopierst du nach /Android/data/com.lumen.tv/files/fonts/ – danach erscheinen sie in der Schriftart-Auswahl. Die Menü-Schrift gilt für dieses Menü und die Kopfzeile.	Copie tes propres polices (ttf/otf) dans /Android/data/com.lumen.tv/files/fonts/ – elles apparaissent ensuite dans la liste des polices. La police des menus s'applique à ce menu et à la barre du haut.
+Bildschirmschoner nach	Économiseur après
+Bildschirmschoner	Économiseur d'écran
+Uhr (OLED-schonend)	Horloge (adapté OLED)
+Eigene Fotos	Mes photos
+Galerie aus dem Netz + Uhr & Wetter	Galerie web + horloge & météo
+Auto-Standby des TV nach	Veille auto de la TV après
+Auto-Standby und Einschlaf-Timer brauchen die Bedienungshilfe. Läuft Ton, wird nicht abgeschaltet. Ob der TV dabei wirklich in Standby geht, hängt vom Gerät ab.	La veille auto et la minuterie de veille nécessitent le service d'accessibilité. Rien n'est éteint pendant la lecture audio. Que la TV passe vraiment en veille dépend de l'appareil.
+Runter	Bas
+Favoriten-Apps wählen …	Choisir les apps favorites …
+Favoriten-Apps wählst du oben direkt aus der Liste – oder per langem Druck auf eine App auf dem Startbildschirm. Eigene Reihen legst du per langem Druck auf eine App an.	Choisis les apps favorites dans la liste ci-dessus – ou par appui long sur une app de l'écran d'accueil. Crée tes propres rangées par appui long sur une app.
+Weiter ansehen: Zugriff erlauben	Reprendre : autoriser l'accès
+erteilt	accordé
+anfragen	demander
+Zugriff ist schon erteilt – Liste wird neu geladen.	Accès déjà accordé – rechargement de la liste.
+Anfrage nicht möglich. Per ADB: pm grant com.lumen.tv android.permission.READ_TV_LISTINGS	Demande impossible. Via ADB : pm grant com.lumen.tv android.permission.READ_TV_LISTINGS
+„Weiter ansehen“ zeigt nur etwas, wenn Android TV Einträge dafür freigibt. Auf manchen Boxen darf nur der System-Launcher diese Liste lesen, dann bleibt die Reihe leer und wird ausgeblendet.	« Reprendre » n'affiche quelque chose que si Android TV partage les entrées. Sur certains boîtiers, seul le launcher système peut lire cette liste ; la rangée reste alors vide et est masquée.
+ · lang	 · long
+ · kurz	 · court
+Handy als Fernbedienung	Téléphone comme télécommande
+Neuen Code erzeugen (alte Handys abmelden)	Nouveau code (déconnecter les anciens téléphones)
+Zweimal Home: zur letzten App wechseln	Deux fois Home : revenir à la dernière app
+Eigene Lautstärke-Anzeige	Affichage du volume personnalisé
+Nachtmodus: Lautstärke begrenzen	Mode nuit : limiter le volume
+Nachts höchstens	La nuit au maximum
+Nachtmodus von	Mode nuit à partir de
+${prefs.volNightFrom} Uhr	${prefs.volNightFrom} h
+Nachtmodus bis	Mode nuit jusqu'à
+${prefs.volNightTo} Uhr	${prefs.volNightTo} h
+Braucht die Bedienungshilfe „Lumen Home-Taste“. Lautstärke: Auf vielen Boxen verarbeitet Android die Tasten selbst – dann erscheint die Neon-Anzeige zusätzlich zum Android-Balken, ausblenden lässt der sich nicht.	Nécessite le service d'accessibilité « Lumen touche Home ». Volume : sur beaucoup de boîtiers, Android gère lui-même les touches – l'affichage néon apparaît alors en plus de la barre Android, qui ne peut pas être masquée.
+Taste anlernen – einfach auf der Fernbedienung drücken	Apprendre une touche – appuie dessus sur la télécommande
+Neue Tastenbelegung aus Liste …	Nouvelle attribution de touche depuis la liste …
+Erkannt: 	Détecté : 
+Fernbedienung: 	Télécommande : 
+Sondertasten: 	Touches spéciales : 
+keine gemeldet – „Taste anlernen“ nutzen	aucune signalée – utilise « Apprendre une touche »
+Empfohlene Belegung für die Farbtasten übernehmen	Appliquer l'attribution recommandée des touches de couleur
+Übernommen: Rot = Lumen, Grün = Schlaftimer, Gelb = Standby, Blau = Sprachsuche.	Appliqué : rouge = Lumen, vert = minuterie de veille, jaune = veille, bleu = recherche vocale.
+Shortcuts brauchen die Bedienungshilfe (siehe System). Belegte Tasten verlieren ihre normale Funktion.	Les raccourcis nécessitent le service d'accessibilité (voir Système). Les touches attribuées perdent leur fonction normale.
+Dateien, APKs	Fichiers, APK
+Leistung	Performances
+RAM, Speicher, Boost	RAM, stockage, boost
+Info-Widgets	Widgets d'infos
+Fußball, News …	Football, actus …
+aktiv	actif
+Kamerastatus	statut caméra
+Zahlen am TV	chiffres sur la TV
+Sprache	Langue
+Netzwerk	Réseau
+Ton	Son
+verwalten	gérer
+Sperrzeit	Plage de blocage
+Gesperrt von	Bloqué de
+Gesperrt bis	Bloqué jusqu'à
+Kindermodus (nur freigegebene Apps)	Mode enfants (apps autorisées uniquement)
+PIN ändern	Changer le PIN
+gesetzt	défini
+Apps sperrst du oder gibst sie für Kinder frei per langem Druck auf die App. Durchgesetzt wird das auch außerhalb von Lumen – dafür muss die Bedienungshilfe aktiv sein.	Bloque des apps ou autorise-les pour les enfants par appui long sur l'app. Cela s'applique aussi hors de Lumen – le service d'accessibilité doit être actif.
+Ausgeblendete Apps wieder anzeigen	Réafficher les apps masquées
+Lumen beim Systemstart öffnen	Ouvrir Lumen au démarrage du système
+Autostart-App (beim Start von Lumen)	App au démarrage (au lancement de Lumen)
+Autostart-App	App au démarrage
+Aus (keine App)	Désactivé (aucune app)
+Als Standard-Launcher festlegen	Définir comme launcher par défaut
+Stock-Launcher überschreiben	Remplacer le launcher d'origine
+Bedienungshilfe „Lumen Home-Taste“	Service d'accessibilité « Lumen touche Home »
+Zugriff auf laufende Medien (Reihe „Läuft gerade“)	Accès aux médias en cours (rangée « En cours de lecture »)
+Stock-Launcher einfrieren (Root)	Geler le launcher d'origine (root)
+Stock-Launcher eingefroren.	Launcher d'origine gelé.
+Fehlgeschlagen (kein Root?).	Échec (pas de root ?).
+Stock-Launcher wieder aktivieren (Root)	Réactiver le launcher d'origine (root)
+Stock-Launcher aktiviert.	Launcher d'origine activé.
+Nach Updates suchen	Rechercher des mises à jour
+Lumen ist aktuell.	Lumen est à jour.
+Einrichtungs-Assistent erneut starten	Relancer l'assistant de configuration
+Einstellungen an andere Box senden (WLAN)	Envoyer les réglages vers un autre boîtier (Wi-Fi)
+Einstellungen von anderer Box empfangen	Recevoir les réglages d'un autre boîtier
+Einstellungen exportieren	Exporter les réglages
+Einstellungen importieren	Importer les réglages
+Importiert.	Importé.
+Keine gültige lumen-settings.json gefunden.	Aucun lumen-settings.json valide trouvé.
+Ordner (unter /Android/data/com.lumen.tv/files/): wallpapers (Bild, GIF, Video), fonts (ttf/otf), themes (json).	Dossiers (sous /Android/data/com.lumen.tv/files/) : wallpapers (image, GIF, vidéo), fonts (ttf/otf), themes (json).
+Rote Taste	Touche rouge
+Grüne Taste	Touche verte
+Gelbe Taste	Touche jaune
+Blaue Taste	Touche bleue
+Menü	Menu
+TV-Eingang	Entrée TV
+Lesezeichen	Signet
+Kanal +	Chaîne +
+Kanal –	Chaîne –
+Taste $code	Touche $code
+Favoriten	Favoris
+Streaming	Streaming
+Spiele	Jeux
+Musik	Musique
+Tools	Outils
+Kinder	Enfants
+Banner	Bannière
+Breit	Large
+Icons	Icônes
+Rund	Rond
+Poster (hoch)	Affiche (verticale)
+Karte	Carte
+Raster	Grille
+Seitenleiste	Barre latérale
+Frei	Libre
+Spatial (3D)	Spatial (3D)
+Wallpaper pur	Fond d'écran seul
+Aurora	Aurore
+Glas	Verre
+Midnight	Minuit
+OLED-Schwarz	Noir OLED
+Lumen öffnen	Ouvrir Lumen
+App öffnen …	Ouvrir une app …
+Eingang wechseln …	Changer d'entrée …
+Einschlaf-Timer +30 Min.	Minuterie de veille +30 min
+Sprachsuche	Recherche vocale
+Ziffernblock ein/aus	Pavé numérique activé/désactivé
+Zur letzten App wechseln	Revenir à la dernière app
+STUMM	MUET
+Gegentor	But encaissé
+Kein Eingabefeld am TV gefunden – erst ein Textfeld auswählen.	Aucun champ de texte sur la TV – sélectionnes-en d'abord un.
+Dieses Feld nimmt keinen Text an.	Ce champ n'accepte pas de texte.
+App nicht gefunden.	App introuvable.
+Unbekannte Aktion	Action inconnue
+sendet in ${left / 1000 + 1}s · OK sofort · Zurück bricht ab	envoi dans ${left / 1000 + 1}s · OK maintenant · Retour annule
+Pfeiltasten wählen · OK übernimmt · Zurück schließt	Flèches pour choisir · OK valide · Retour ferme
+Konnte die Zahl nicht senden – ADB-Netzwerk/Einstellungen prüfen.	Impossible d'envoyer le numéro – vérifie le réseau ADB/les réglages.
+Keine App zum Wechseln.	Aucune app vers laquelle basculer.
+Noch keine andere App geöffnet.	Aucune autre app ouverte pour l'instant.
+Standby abgebrochen	Veille annulée
+Einschlaf-Timer: +30 Minuten	Minuterie de veille : +30 minutes
+Druck	Impression
+✅ Druck fertig	✅ Impression terminée
+⚠️ Druckfehler	⚠️ Erreur d'impression
+Drucker	Imprimante
+Standby in 60 Sekunden – beliebige Taste zum Abbrechen	Veille dans 60 secondes – appuie sur une touche pour annuler
+Diese Unterseite gibt es auf dieser Box nicht – ich habe die Android-Einstellungen geöffnet.	Cette page n'existe pas sur ce boîtier – j'ai ouvert les paramètres Android.
+Android-Einstellungen geöffnet.	Paramètres Android ouverts.
+Die Android-Einstellungen konnten nicht geöffnet werden.	Impossible d'ouvrir les paramètres Android.
+RAM-Boost läuft …	RAM boost en cours …
+⚡ Hintergrund von $n Apps geleert · $mb MB frei geworden	⚡ Arrière-plan de $n apps vidé · $mb Mo libérés
+⚡ Hintergrund von $n Apps geleert · es lief kaum etwas im Hintergrund	⚡ Arrière-plan de $n apps vidé · presque rien ne tournait
+Räume auf …	Nettoyage …
+🧹 Caches aller Apps geleert (Root) · Lumen: $own MB	🧹 Caches de toutes les apps vidés (root) · Lumen : $own Mo
+🧹 Lumen-Cache geleert ($own MB). Für alle Apps am PC: adb shell pm trim-caches 999G	🧹 Cache de Lumen vidé ($own Mo). Pour toutes les apps depuis le PC : adb shell pm trim-caches 999G
+RAM, Speicher & System auf einen Blick	RAM, stockage & système en un coup d'œil
+Arbeitsspeicher	Mémoire vive
+${gb(info.ramAvail)} GB frei	${gb(info.ramAvail)} Go libres
+${gb(info.storFree)} GB frei	${gb(info.storFree)} Go libres
+normal	normal
+leicht warm	légèrement chaud
+warm	chaud
+heiß – drosselt	très chaud – bride
+kritisch!	critique !
+unbekannt	inconnu
+Temperatur	Température
+alles kühl	tout est frais
+heiß!	chaud !
+Wärme	Chaleur
+bis zur Drosselung	avant bridage
+Wärmestatus von Android	État thermique Android
+RAM-Boost	RAM boost
+Beendet sofort alle Hintergrund-Apps · ${prefs.boostExclude.size} Ausnahmen	Arrête aussitôt toutes les apps en arrière-plan · ${prefs.boostExclude.size} exceptions
+Aufräumen	Nettoyer
+Caches & Restdaten löschen	Supprimer caches & résidus
+Auto-Boost beim Zurück ins Menü	Auto-boost au retour au menu
+An · ab ${prefs.autoBoostPct}% RAM-Last	Activé · dès ${prefs.autoBoostPct}% de RAM utilisée
+RAM-Schwelle für Auto-Boost	Seuil RAM pour l'auto-boost
+App beim Verlassen räumen	Libérer l'app en quittant
+Ausnahmen für den RAM-Boost	Exceptions du RAM boost
+${prefs.boostExclude.size} Apps ausgenommen	${prefs.boostExclude.size} apps exclues
+Android-Speicherverwaltung öffnen	Ouvrir la gestion du stockage Android
+System	Système
+Gerät	Appareil
+Kerne	cœurs
+Bildschirm	Écran
+Läuft seit	Allumé depuis
+Lumen braucht	Lumen utilise
+Geschützt sind immer: Launcher, Tastatur, Bedienungshilfen, VPN-Apps, Lumen selbst, deine Ausnahmen und gerade spielende Apps. Alles andere – auch vorinstallierte Apps wie Netflix oder waipu – wird im Hintergrund beendet. „Beenden erzwingen“ gibt es nicht ohne Root; Android startet Apps bei Bedarf selbst wieder. Caches anderer Apps lassen sich ohne Root nur per adb vom PC leeren.	Toujours protégés : launchers, clavier, services d'accessibilité, apps VPN, Lumen lui-même, tes exceptions et les apps en lecture. Tout le reste — y compris les apps préinstallées comme Netflix ou waipu — est arrêté en arrière-plan. « Forcer l'arrêt » n'est pas possible sans root ; Android relance les apps si nécessaire. Les caches des autres apps ne peuvent être vidés qu'avec root ou via adb depuis un PC.
+Ausnahmen	Exceptions
+„An“ = diese App beendet der RAM-Boost nie · System-Apps sind immer geschützt	« Activé » = le RAM boost n'arrête jamais cette app · les apps système sont toujours protégées
+Ausgenommen	Exclue
+Alle Apps	Toutes les apps
+Mit dem Handy scannen (gleiches WLAN)	Scanner avec le téléphone (même Wi-Fi)
+Steuerkreuz, Lautstärke, Text eintippen und Apps starten – vom Handy aus.	Croix directionnelle, volume, saisie de texte et lancement d'apps – depuis le téléphone.
+Startet, sobald die Bedienungshilfe „Lumen Home-Taste“ aktiv ist.	Démarre dès que le service d'accessibilité « Lumen touche Home » est actif.
+Diese Folge lässt sich gerade nicht abspielen.	Cet épisode ne peut pas être lu pour l'instant.
+Stopp	Stop
+Lade Folgen …	Chargement des épisodes …
+Keine Folgen gefunden.	Aucun épisode trouvé.
+Suche …	Recherche …
+Nichts gefunden.	Aucun résultat.
+Suchen, abonnieren, weiterhören	Rechercher, s'abonner, reprendre
+Nichts aktiv	Rien en cours
+Wähle rechts eine Folge.	Choisis un épisode à droite.
+Abonniert	Abonnements
+Noch keine – rechts suchen und mit ★ abonnieren.	Aucun pour l'instant – cherche à droite et abonne-toi avec ★.
+Podcast suchen …	Rechercher un podcast …
+Abonnieren	S'abonner
+weiter bei ${it / 60}:${"%02d".format(it % 60)}	reprendre à ${it / 60}:${"%02d".format(it % 60)}
+App nicht gefunden	App introuvable
+Leiser	Volume −
+Lauter	Volume +
+Schlaftimer	Minuterie de veille
+jetzt	maintenant
+belegt	utilisé
+⚡ Hintergrund von $n Apps geleert · $mb MB frei	⚡ $n apps vidées · $mb Mo libérés
+⚡ Hintergrund von $n Apps geleert	⚡ Arrière-plan de $n apps vidé
+Geräte	appareils
+Details	détails
+App öffnen	Ouvrir l'app
+Anpassen	Personnaliser
+Kacheln wählen	choisir les tuiles
+Schnellmenü anpassen	Personnaliser le menu rapide
+Aktionen und Apps für das Schnellmenü wählen	Choisir les actions et apps du menu rapide
+Aktionen	Actions
+Apps	Apps
+installiert	installé
+Keine Beschreibung.	Aucune description.
+Lade herunter … $pct %	Téléchargement … $pct %
+Jetzt installieren	Installer maintenant
+Fehler: 	Erreur : 
+Später	Plus tard
+Beim ersten Mal fragt Android, ob Lumen Apps installieren darf – einmal erlauben. Einstellungen bleiben erhalten.	La première fois, Android demande si Lumen peut installer des apps – autorise-le une fois. Tes réglages sont conservés.
+Willkommen bei Lumen Launcher	Bienvenue dans Lumen Launcher
+In fünf kurzen Schritten ist alles eingerichtet. Du kannst alles später in den Einstellungen ändern.	Cinq petites étapes et c'est prêt. Tu peux tout modifier plus tard dans les paramètres.
+Wo bist du?	Où es-tu ?
+Für Wetter und Bildschirmschoner.	Pour la météo et l'économiseur d'écran.
+Ort	Lieu
+auswählen	choisir
+Deine Lieblings-Apps	Tes apps préférées
+Sie erscheinen ganz oben in der Reihe „Favoriten“.	Elles apparaissent dans la rangée « Favoris ».
+Dein Look	Ton style
+Fokus-Stil	Style de focus
+Uhr	Horloge
+Fertig! 🎉	C'est prêt ! 🎉
+Tipp: Lange auf eine Kachel drücken öffnet Optionen. Info-Widgets (Fußball, News, Countdown …) schaltest du unter Einstellungen → Info-Widgets ein. Damit Lumen immer startet: Home-Taste drücken und Lumen Launcher als „Immer“ wählen.	Astuce : un appui long sur une tuile ouvre les options. Active les widgets d'infos (football, actus, compte à rebours …) dans Paramètres → Widgets d'infos. Pour que Lumen démarre toujours : appuie sur Home et choisis Lumen Launcher « Toujours ».
+Los geht's	C'est parti
+Weiter ›	Suivant ›
+Überspringen	Passer
+Dieser Sender lässt sich gerade nicht abspielen.	Cette station ne peut pas être lue pour l'instant.
+Radio	Radio
+Lade beliebte deutsche Sender …	Chargement des stations allemandes populaires …
+Nichts gefunden – oder der Senderdienst ist gerade nicht erreichbar.	Aucun résultat – ou le service des stations est injoignable.
+Lade …	Chargement …
+Keine Sender gefunden.	Aucune station trouvée.
+Aus Favoriten entfernt: 	Retirée des favoris : 
+Gespeichert: 	Enregistrée : 
+Live-Sender aus aller Welt	Stations en direct du monde entier
+Gerade läuft nichts	Rien en cours
+Wähle rechts einen Sender.	Choisis une station à droite.
+Favorit	Favori
+Speichern	Enregistrer
+Timer	Minuterie
+Verlauf	Historique
+OK spielt einen Sender ab – auch weiter, wenn du eine andere App öffnest.\nLange drücken = als Favorit speichern oder entfernen.	OK lance une station – elle continue même quand tu ouvres une autre app.\nAppui long = enregistrer ou retirer des favoris.
+Beliebt	Populaires
+Sender suchen …	Rechercher des stations …
+Nachrichten	Actualités
+Dance/Elektro	Dance/Électro
+Klassik	Classique
+Welt	Monde
+Noch keine Favoriten – wähle „Beliebt“ oder suche einen Sender und drück lange zum Speichern.	Pas encore de favoris – choisis « Populaires » ou cherche et fais un appui long pour enregistrer.
+Deine gespeicherten Sender	Tes stations enregistrées
+Ergebnisse für „$query“	Résultats pour « $query »
+Beliebte Sender	Stations populaires
+Zuletzt gehört – OK sucht den Titel auf YouTube	Écoutés récemment – OK cherche le titre sur YouTube
+Drück jetzt die Taste	Appuie maintenant sur la touche
+Lumen erkennt die Taste auf deiner Fernbedienung automatisch. Pfeiltasten und OK bleiben frei. Zurück bricht ab.	Lumen détecte automatiquement la touche de ta télécommande. Les flèches et OK restent libres. Retour annule.
+Neustart wird ausgelöst …	Redémarrage …
+Neustart nicht möglich: Bedienungshilfe „Lumen“ aktivieren (Einstellungen → System) oder Gerät rooten.	Redémarrage impossible : active le service d'accessibilité Lumen (Paramètres → Système) ou roote l'appareil.
+EEEE, d. MMMM	EEEE d MMMM
+OK startet · lange drücken für Optionen	OK ouvre · appui long pour les options
+WLAN	Wi-Fi
+kein VPN	pas de VPN
+frei	libres
+EINSTELLUNGEN	PARAMÈTRES
+Schmal	Condensé
+Läuft	En lecture
+Pausiert	En pause
+Auf der Ziel-Box abgelehnt.	Refusé sur le boîtier cible.
+Die Ziel-Box ist gerade beschäftigt.	Le boîtier cible est occupé.
+Keine Verbindung. Ist auf der Ziel-Box „Einstellungen empfangen“ geöffnet?	Pas de connexion. « Recevoir les réglages » est-il ouvert sur le boîtier cible ?
+Einstellungen empfangen	Recevoir les réglages
+Diese Box	Ce boîtier
+Empfang konnte nicht gestartet werden (Port ${Transfer.PORT} belegt?). Dialog schließen und erneut öffnen.	Impossible de démarrer la réception (port ${Transfer.PORT} occupé ?). Ferme et rouvre la fenêtre.
+Einstellungen von „${i.from}“ übernehmen?	Appliquer les réglages de « ${i.from} » ?
+Layout, Reihen, Favoriten, Widgets, Radio, Podcasts, Farben und Schrift werden ersetzt. PIN, Kindersicherung, VPN-Dot, Drucker und Fernbedienungs-Code dieser Box bleiben unverändert.	La disposition, les rangées, favoris, widgets, radio, podcasts, couleurs et police seront remplacés. Le PIN, le contrôle parental, le VPN-Dot, l'imprimante et le code de télécommande de ce boîtier restent inchangés.
+Wetter-Ort übernehmen	Reprendre le lieu météo
+Übernehmen	Appliquer
+✓ Einstellungen von „${i.from}“ übernommen.	✓ Réglages de « ${i.from} » appliqués.
+Die Sicherung war ungültig.	La sauvegarde n'était pas valide.
+Ablehnen	Refuser
+Bereit – warte auf eine andere Lumen-Box …	Prêt – en attente d'un autre boîtier Lumen …
+Auf der anderen Box: Einstellungen → System → „Einstellungen senden“ und dort „$name“ wählen. Wird diese Box nicht gefunden, dort die IP $ip eingeben.	Sur l'autre boîtier : Paramètres → Système → « Envoyer les réglages » et choisis « $name ». Si ce boîtier n'est pas trouvé, saisis-y l'IP $ip.
+Gesendet an „$label“ – bitte dort mit OK bestätigen …	Envoyé à « $label » – confirme là-bas avec OK …
+✓ „$label“ hat die Einstellungen übernommen.	✓ « $label » a appliqué les réglages.
+Einstellungen senden	Envoyer les réglages
+An eine andere Lumen-Box im WLAN	Vers un autre boîtier Lumen sur ton Wi-Fi
+Auf der Ziel-Box zuerst Einstellungen → System → „Einstellungen empfangen“ öffnen.	Sur le boîtier cible, ouvre d'abord Paramètres → Système → « Recevoir les réglages ».
+Gefundene Boxen	Boîtiers trouvés
+Keine Box gefunden. „Erneut suchen“ oder die IP eingeben.	Aucun boîtier trouvé. « Rechercher à nouveau » ou saisis l'IP.
+Erneut suchen	Rechercher à nouveau
+IP-Adresse eingeben	Saisir l'adresse IP
+Übertragen werden Layout, Reihen, Favoriten, Widgets, Radio, Podcasts, Farben und Schrift. Nicht übertragen: PIN, Kindersicherung, VPN-Dot, Drucker, Fernbedienungs-Code. Wallpaper-Dateien bleiben auf der jeweiligen Box.	Transférés : disposition, rangées, favoris, widgets, radio, podcasts, couleurs et police. Non transférés : PIN, contrôle parental, VPN-Dot, imprimante, code de télécommande. Les fichiers de fonds d'écran restent sur chaque boîtier.
+Neon-Leuchten	Lueur néon
+Anheben (3D)	Soulèvement (3D)
+Unterstrich	Soulignement
+Rahmen	Cadre
+Nachtblau	Bleu nuit
+Graphit	Graphite
+Mokka & Weiß	Moka & blanc
+Violett	Violet
+Smaragd	Émeraude
+Bordeaux	Bordeaux
+Mitternacht	Minuit
+Aus dem Wallpaper	Depuis le fond d'écran
+VPN-Statusanzeige läuft	Indicateur d'état VPN actif
+Sek.	s
+Zeigt dir in jeder App, ob dein VPN läuft	Indique dans chaque app si ton VPN est actif
+VPN verbunden	VPN connecté
+Kein VPN	Pas de VPN
+Land wird ermittelt …	Détermination du pays …
+Land nicht ermittelbar	Pays indéterminable
+Der Punkt ist ausgeschaltet.	Le point est désactivé.
+Berechtigung fehlt – siehe rechts.	Autorisation manquante – voir à droite.
+Grün = VPN aktiv · Rot = kein VPN	Vert = VPN actif · Rouge = pas de VPN
+Allgemein	Général
+VPN-Dot aktiv	VPN-Dot actif
+Autostart nach dem Booten	Démarrage auto après le boot
+Über anderen Apps einblenden	Afficher par-dessus les autres apps
+Darstellung	Apparence
+Punktgröße	Taille du point
+Position	Position
+Blinkintervall	Intervalle de clignotement
+Anzeigedauer	Durée d'affichage
+Punkt testen	Tester le point
+Das Land wird über die öffentliche IP (ipapi.co) ermittelt – nur solange dieses Menü offen und ein VPN aktiv ist. GPS wird nicht benutzt.	Le pays est déterminé via l'IP publique (ipapi.co) – uniquement tant que ce menu est ouvert et qu'un VPN est actif. Le GPS n'est pas utilisé.
+Foto	Photo
+Bing Tagesbild	Image du jour Bing
+Wikimedia (Qualitätsbilder)	Wikimedia (images de qualité)
+NASA (Weltall)	NASA (espace)
+Fotos (Unsplash)	Photos (Unsplash)
+Natur	Nature
+Weltall & Sterne	Espace & étoiles
+Städte & Architektur	Villes & architecture
+Minimalistisch	Minimaliste
+Abstrakt & Muster	Abstrait & motifs
+Dunkel & Neon	Sombre & néon
+Tiere	Animaux
+Autos & Technik	Voitures & tech
+Fantasy & Digital Art	Fantasy & art numérique
+Jahreszeiten	Saisons
+picsum_$id	https://picsum.photos/id/$id/320/180
+Keine Bilder geladen – ist der TV online? Quelle kurz nicht erreichbar? Probier eine andere Quelle.	Aucune image chargée – la TV est-elle en ligne ? Source momentanément injoignable ? Essaie une autre source.
+Lade herunter …	Téléchargement …
+Gespeichert – wird jetzt als Wallpaper verwendet (Wechsel siehe Wallpaper-Wechsel).	Enregistrée – fait maintenant partie de tes fonds (voir changement de fond).
+Download fehlgeschlagen.	Échec du téléchargement.
+Entferne …	Suppression …
+Entfernt – wird nicht mehr als Wallpaper genutzt.	Retirée – n'est plus utilisée comme fond.
+Konnte nicht entfernt werden.	Impossible de la retirer.
+Wallpaper-Galerie	Galerie de fonds d'écran
+Bing, NASA, Wikimedia & mehr	Bing, NASA, Wikimedia & plus
+Lade Bilder …	Chargement des images …
+✓ aktiv · OK = entfernen  ·  	✓ actif · OK = retirer  ·  
+OK = hinzufügen  ·  	OK = ajouter  ·  
+‹ Zurück	‹ Retour
+OK fügt ein Bild hinzu – bei einem Bild mit ✓ nimmt OK es wieder heraus. Bilder gehören ihren Urhebern (Lizenz siehe Zeile oben) – gedacht für den privaten Gebrauch auf diesem TV.	OK ajoute une image – sur une image marquée ✓, OK la retire. Les images appartiennent à leurs auteurs (licence indiquée ci-dessus) – destinées à un usage privé sur cette TV.
+Heute	Aujourd'hui
+Deutschland	Allemagne
+München	Munich
+Köln	Cologne
+Nürnberg	Nuremberg
+Wien	Vienne
+Österreich	Autriche
+Zürich	Zurich
+Schweiz	Suisse
+Klar	Dégagé
+Überwiegend klar	Plutôt dégagé
+Teils bewölkt	Partiellement nuageux
+Bedeckt	Couvert
+Nebel	Brouillard
+Nieselregen	Bruine
+Gefrierender Nieselregen	Bruine verglaçante
+Leichter Regen	Pluie légère
+Starker Regen	Forte pluie
+Gefrierender Regen	Pluie verglaçante
+Schneefall	Chute de neige
+Schneegriesel	Neige en grains
+Regenschauer	Averses de pluie
+Schneeschauer	Averses de neige
+Gewitter	Orage
+Gewitter mit Hagel	Orage avec grêle
+Wetter einrichten	Configurer la météo
+Wetter lädt …	Chargement de la météo …
+gefühlt	ressenti
+Sonnenaufgang	Lever du soleil
+Sonnenuntergang	Coucher du soleil
+Ort ändern	Changer de lieu
+Beliebte Städte – oder oben einen Ort eintippen.	Villes populaires – ou saisis un lieu ci-dessus.
+Ort für das Wetter	Lieu pour la météo
+Suchen	Rechercher
+Beliebte Städte	Villes populaires
+Analog	Analogique
+Flip-Uhr	Horloge à palettes
+Wortuhr	Horloge en mots
+Digital	Numérique
+wie Apps	comme les apps
+nie	jamais
+alle $min Min.	toutes les $min min
+Bitte zuerst eine Adresse eingeben.	Saisis d'abord une adresse.
+Gespeichert.	Enregistré.
+Hinzugefügt – die Reihe „Widgets“ steht auf dem Startbildschirm.	Ajouté – la rangée « Widgets » est sur l'écran d'accueil.
+Webseiten als Live-Kacheln	Pages web en tuiles en direct
+Jede Webadresse wird als Kachel in der Reihe „Widgets“ live angezeigt (z. B. Home Assistant, Grafana, Wetterradar, Börsenticker). Auch Kamera-Streams gehen: eine rtsp://-Adresse (z. B. 3D-Drucker über go2rtc) oder ein .m3u8-Stream wird direkt als Video abgespielt. OK auf der Kachel öffnet sie groß. Jedes Widget braucht Arbeitsspeicher – wenige reichen.	Toute adresse web s'affiche en direct comme tuile dans la rangée « Widgets » (p. ex. Home Assistant, Grafana, radar météo, cours de bourse). Les flux de caméra fonctionnent aussi : une adresse rtsp:// (p. ex. imprimante 3D via go2rtc) ou un flux .m3u8 est lu directement en vidéo. OK sur la tuile l'ouvre en grand. Chaque widget utilise de la mémoire – quelques-uns suffisent.
+Name (optional)	Nom (facultatif)
+Adresse	Adresse
+Hinzufügen	Ajouter
+[aus] 	[désactivé] 
+Bearbeiten (Name/Adresse)	Modifier (nom/adresse)
+Aktualisieren: 	Actualiser : 
+(umschalten)	(basculer)
+Größe: 	Taille : 
+Einblenden	Afficher
+Entfernen	Retirer
+Download fehlgeschlagen (	Échec du téléchargement (
+Top – mehrere 4K-Streams gleichzeitig möglich	Excellent – plusieurs flux 4K en même temps
+Sehr gut – 4K-Streaming läuft flüssig	Très bon – streaming 4K fluide
+Gut – Full-HD problemlos, 4K grenzwertig	Bon – Full HD sans souci, 4K limite
+Reicht für HD	Suffisant pour la HD
+Knapp – nur SD-Qualität flüssig	Juste – seule la SD est fluide
+Neumond	Nouvelle lune
+Zunehmende Sichel	Premier croissant
+Erstes Viertel	Premier quartier
+Zunehmender Mond	Gibbeuse croissante
+Vollmond	Pleine lune
+Abnehmender Mond	Gibbeuse décroissante
+Letztes Viertel	Dernier quartier
+Abnehmende Sichel	Dernier croissant
+Sonne & Mond	Soleil & lune
+Ort im Wetter einstellen	Définis un lieu dans la météo
+Dein Ort	Ton lieu
+Sonne heute	Soleil aujourd'hui
+Tageslänge	Durée du jour
+Goldene Stunde	Heure dorée
+Morgen	Demain
+Keine Daten – Ort im Wetter einstellen.	Aucune donnée – définis un lieu dans la météo.
+Mond	Lune
+Beleuchtet	Éclairée
+Nächster Vollmond	Prochaine pleine lune
+Nächster Neumond	Prochaine nouvelle lune
+Keine passenden Sender in der Programmdatei	Aucune chaîne correspondante dans le fichier du guide
+Jetzt im TV	En ce moment à la TV
+Lade Programm …	Chargement du guide …
+Kein Programm – OK für Details	Pas de guide – OK pour les détails
+Danach 	Ensuite 
+TV-Programm	Guide TV
+Jetzt & gleich · OK öffnet waipu.tv	Maintenant & ensuite · OK ouvre waipu.tv
+Lade Programm … (beim ersten Mal bis zu einer Minute)	Chargement du guide … (la première fois jusqu'à une minute)
+Kein Programm gefunden.	Aucun guide trouvé.
+Erneut laden	Recharger
+waipu.tv ist nicht installiert.	waipu.tv n'est pas installé.
+Keine Daten	Aucune donnée
+noch 	encore 
+ Min.	 min
+Programmdaten: epgshare01 (XMLTV). Sender wählst du unter Info-Widgets.	Données du guide : epgshare01 (XMLTV). Choisis les chaînes dans Widgets d'infos.
+Gegner	Adversaire
+Probe-Alarm	Alerte de test
+Gegentor: 	But encaissé : 
+Fußball	Football
+OK für Spielplan & Tabelle	OK pour calendrier & classement
+OK für Regenradar & Stundenwerte	OK pour radar de pluie & heures
+OK zum Bearbeiten	OK pour modifier
+Notiz	Note
+OK zum Bearbeiten – auch am Handy	OK pour modifier – aussi sur le téléphone
+Heimnetz	Réseau domestique
+OK für Speedtest & Gerätesuche	OK pour test de débit & recherche d'appareils
+OK für das Programm aller Sender	OK pour le guide complet
+OK für Details	OK pour les détails
+EE dd.MM. · HH:mm	EE dd/MM · HH:mm
+Lade Spiele …	Chargement des matchs …
+Keine Spiele – Verein wählen	Aucun match – choisis une équipe
+Platz ${row.pos} · ${row.points} Punkte	Rang ${row.pos} · ${row.points} pts
+Endstand	Score final
+Nächste Spiele	Prochains matchs
+Letzte Spiele	Derniers matchs
+Tabelle	Classement
+Kein Ort / lädt …	Aucun lieu / chargement …
+Regenradar Deutschland & nächste 24 Stunden	Radar de pluie Allemagne & prochaines 24 heures
+Regenradar	Radar de pluie
+Nächste 24 Stunden	Prochaines 24 heures
+Kein Ort eingestellt.	Aucun lieu défini.
+☔ Regen wahrscheinlich ab ca. %02d Uhr (${rainy.rain} %%)	☔ Pluie probable vers %02d h (${rainy.rain} %%)
+☀ In den nächsten 12 Stunden bleibt es wohl trocken.	☀ Probablement sec pour les 12 prochaines heures.
+OK zum Anlegen	OK pour ajouter
+Heute!	Aujourd'hui !
+Tag	jour
+Tage	jours
+noch $d Tage	encore $d jours
+Leer – OK zum Schreiben	Vide – OK pour écrire
+Messe …	Mesure …
+OK für Speedtest	OK pour test de débit
+Verbindung, Speedtest & Geräte im Netz	Connexion, test de débit & appareils
+Verbindung	Connexion
+Antwortzeit	latence
+Speedtest starten	Lancer le test de débit
+Geräte suchen	Rechercher des appareils
+Messe Antwortzeit …	Mesure de la latence …
+Starte …	Démarrage …
+Verbraucht: ca. ${r.mb} MB · Server: Cloudflare (nächster Standort)	Données utilisées : env. ${r.mb} Mo · Serveur : Cloudflare (site le plus proche)
+Hinweis: Mit aktivem VPN misst der Test die VPN-Verbindung, nicht deinen Anschluss.	Remarque : avec un VPN actif, le test mesure la connexion VPN, pas ta ligne.
+Suche Geräte im Netz (ca. 20–30 s) …	Analyse du réseau (env. 20–30 s) …
+Gefundene Geräte (${devices.size})	Appareils trouvés (${devices.size})
+Die Gerätesuche klopft typische Ports im eigenen Netz an und findet nicht jedes Gerät (z. B. Handys im Stromsparmodus). Der Speedtest misst Antwortzeit, Download (bis 10 s) und Upload (bis 8 s) über Cloudflare.	La recherche d'appareils sonde les ports courants et ne trouve pas tous les appareils (p. ex. téléphones en veille). Le test de débit mesure la latence, le téléchargement (jusqu'à 10 s) et l'envoi (jusqu'à 8 s) via Cloudflare.
+NEWS	ACTUS
+Erscheinen in der Reihe „Infos“ – verschiebbar unter Reihen	Apparaissent dans la rangée « Infos » – déplaçable dans Rangées
+Notiz (OK = speichern)	Note (OK = enregistrer)
+Name des Countdowns	Nom du compte à rebours
+EPG-URL(s), mit Leerzeichen getrennt (leer = Standard)	URL EPG, séparées par des espaces (vide = par défaut)
+Datum, z. B. 24.12.2026	Date, p. ex. 2026-12-24
+Datum nicht erkannt – bitte TT.MM.JJJJ	Date non reconnue – utilise AAAA-MM-JJ
+Fußball-Widget	Widget football
+Liga	Championnat
+Tor-Alarm (Banner, auch in anderen Apps)	Alerte but (bannière, aussi dans les autres apps)
+Tor-Alarm testen	Tester l'alerte but
+Für das Banner die Bedienungshilfe „Lumen Home-Taste“ einschalten (Einstellungen → System).	Pour la bannière, active le service d'accessibilité « Lumen touche Home » (Paramètres → Système).
+Verein	Équipe
+Vereine konnten nicht geladen werden.	Impossible de charger les équipes.
+News-Ticker	Fil d'actus
+Laufzeile mit Schlagzeilen	Bandeau défilant de titres
+Wetter groß	Météo grande
+Wetter-Kachel mit Stundenwerten & Radar	Tuile météo avec heures & radar
+Countdown-Widget	Widget compte à rebours
+Jährlich wiederholen (für neue Einträge)	Répéter chaque année (nouvelles entrées)
+Neuer Countdown	Nouveau compte à rebours
+noch $it Tage	encore $it jours
+Gelöscht: 	Supprimé : 
+Notiz-Widget	Widget note
+Notiz bearbeiten	Modifier la note
+„Jetzt im TV“-Widget	Widget « En ce moment à la TV »
+Sender auswählen	Choisir les chaînes
+EPG-Quelle (für Sky/Pay-TV eigene URL)	Source EPG (URL perso pour Sky/TV payante)
+Standard (epgshare01)	par défaut (epgshare01)
+Sonnenauf-/-untergang & Mondphase	Lever/coucher du soleil & phase lunaire
+Heimnetz-Widget	Widget réseau domestique
+Am Handy oder PC bearbeiten	Modifier sur téléphone ou PC
+Notiz & Countdowns im Browser bearbeiten	Modifier la note & les comptes à rebours dans le navigateur
+läuft	en cours
+starten	démarrer
+Konnte den Server nicht starten.	Impossible de démarrer le serveur.
+Öffne im Browser (gleiches WLAN): 	Ouvre dans le navigateur (même Wi-Fi) : 
+Verein wählen	Choisir l'équipe
+Infos	Infos
+Weiter ansehen	Reprendre
+Läuft gerade	En cours de lecture
+Neu installiert	Installées récemment
+Jetzt passend	Pour maintenant
+Häufig genutzt	Souvent utilisées
+Widgets	Widgets
+Eingänge	Entrées
+Auto (App-Farbe)	Auto (couleur de l'app)
+Blau	Bleu
+Grün	Vert
+Rot	Rouge
+Orange	Orange
+Pink	Rose
+Kacheln im 3D-Bogen	Tuiles dans l'arc 3D
+Eigener Kachel-Stil	Style de tuiles perso
+Wie im Entwurf (Glas)	Comme le design (verre)
+Hintergrund der Uhr in Apps	Fond de l'horloge dans les apps
+Glas (farbig)	Verre (coloré)
+Transparent	Transparent
+Hintergrund-Farbe nach App	Couleur du fond selon l'app
+Aufsteigende Lichtpunkte	Points lumineux ascendants
+Spatial-Effekte (Spiegelung, Glanz)	Effets Spatial (reflet, brillance)
+Nur gewählte Reihe zeigen	Afficher seulement la rangée choisie
+EEEE · d. MMMM	EEEE · d MMMM

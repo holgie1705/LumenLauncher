@@ -70,7 +70,7 @@ fun VpnDotDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
         VpnDot.sync(ctx, prefs)
     }
     // Land der öffentlichen IP nur abfragen, solange ein VPN aktiv ist
-    LaunchedEffect(vpn, Lang.en) {
+    LaunchedEffect(vpn, Lang.code) {
         if (!vpn) { country = null; lookupDone = false; return@LaunchedEffect }
         lookupDone = false
         country = VpnDot.country()
@@ -86,7 +86,7 @@ fun VpnDotDialog(vm: HomeViewModel, prefs: Prefs, onClose: () -> Unit) {
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.also { spatialBlur(it) }?.setDimAmount(0f)
         NeoSheet(Ico.DOT, "VPN-Dot", t("Zeigt dir in jeder App, ob dein VPN läuft", "Shows in every app whether your VPN is on")) {
             Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                 // ---------- Links: großer Status ----------

@@ -32,7 +32,7 @@ val ACCENTS: List<Pair<String, Color?>> = listOf(
 )
 
 private val ACCENT_EN = listOf("Auto (app color)", "Blue", "Violet", "Green", "Red", "Orange", "Pink")
-fun accentName(i: Int): String = if (Lang.en) ACCENT_EN[i.coerceIn(0, ACCENT_EN.lastIndex)] else ACCENTS[i.coerceIn(0, ACCENTS.lastIndex)].first
+fun accentName(i: Int): String = t(ACCENTS[i.coerceIn(0, ACCENTS.lastIndex)].first, ACCENT_EN[i.coerceIn(0, ACCENT_EN.lastIndex)])
 
 /** Mitgelieferte Standardschrift (Bai Jamjuree, SIL Open Font License) – eckig-rund, nah am Projectivy-Look. */
 val LumenSans = FontFamily(
@@ -51,6 +51,11 @@ private val OutfitFamily by lazy { variableFamily(R.font.outfit) }
 private val JakartaFamily by lazy { variableFamily(R.font.jakarta) }
 private val ManropeFamily by lazy { variableFamily(R.font.manrope) }
 private val SoraFamily by lazy { variableFamily(R.font.sora) }
+/** Spatial-Look: Plus Jakarta Sans mit allen Stärken 200–800 (dünne Uhr wie im Entwurf). */
+@OptIn(ExperimentalTextApi::class)
+val SpatialFontFamily by lazy {
+    FontFamily(listOf(200, 300, 400, 500, 600, 700, 800).map { w -> Font(R.font.jakarta, FontWeight(w), variationSettings = FontVariation.Settings(FontVariation.weight(w))) })
+}
 
 fun fontFamilyFor(ctx: Context, key: String): FontFamily = when {
     key == "outfit" -> OutfitFamily
@@ -84,7 +89,7 @@ fun fontLabel(key: String): String = when {
 @Composable
 fun LumenTheme(font: String, content: @Composable () -> Unit) {
     val ctx = LocalContext.current
-    val family = remember(font) { fontFamilyFor(ctx, font) }
+    val family = if (spatialGlobal) SpatialFontFamily else remember(font) { fontFamilyFor(ctx, font) }
     MaterialTheme(colorScheme = darkColorScheme(background = Ink, surface = Ink)) {
         CompositionLocalProvider(
             LocalTextStyle provides LocalTextStyle.current.merge(TextStyle(fontFamily = family)),
@@ -96,6 +101,10 @@ fun LumenTheme(font: String, content: @Composable () -> Unit) {
 /** Wendet eine eigene Schrift nur auf einen Teilbereich an (z. B. Menüs / Kopfzeile). Leer = unverändert. */
 @Composable
 fun FontScope(key: String, content: @Composable () -> Unit) {
+    if (spatialGlobal) {
+        CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.merge(TextStyle(fontFamily = SpatialFontFamily)), content = content)
+        return
+    }
     if (key.isEmpty()) { content(); return }
     val ctx = LocalContext.current
     val family = remember(key) { fontFamilyFor(ctx, key) }
